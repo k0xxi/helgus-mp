@@ -87,6 +87,20 @@ const CONDITIONS: { value: ProductCondition; label: string; description: string 
   { value: 'akzeptabel', label: 'Akzeptabel', description: 'Deutliche Gebrauchsspuren' }
 ]
 
+const COUNTRIES: { code: string; name: string; zipPattern: RegExp; zipPlaceholder: string; zipMaxLength: number }[] = [
+  { code: 'DE', name: 'Deutschland', zipPattern: /^\d{5}$/, zipPlaceholder: 'z.B. 80331', zipMaxLength: 5 },
+  { code: 'AT', name: 'Österreich', zipPattern: /^\d{4}$/, zipPlaceholder: 'z.B. 1010', zipMaxLength: 4 },
+  { code: 'CH', name: 'Schweiz', zipPattern: /^\d{4}$/, zipPlaceholder: 'z.B. 8001', zipMaxLength: 4 },
+  { code: 'LI', name: 'Liechtenstein', zipPattern: /^\d{4}$/, zipPlaceholder: 'z.B. 9490', zipMaxLength: 4 },
+  { code: 'LU', name: 'Luxemburg', zipPattern: /^\d{4}$/, zipPlaceholder: 'z.B. 1234', zipMaxLength: 4 },
+  { code: 'BE', name: 'Belgien', zipPattern: /^\d{4}$/, zipPlaceholder: 'z.B. 1000', zipMaxLength: 4 },
+  { code: 'NL', name: 'Niederlande', zipPattern: /^\d{4}\s?[A-Z]{2}$/i, zipPlaceholder: 'z.B. 1011 AB', zipMaxLength: 7 },
+  { code: 'FR', name: 'Frankreich', zipPattern: /^\d{5}$/, zipPlaceholder: 'z.B. 75001', zipMaxLength: 5 },
+  { code: 'IT', name: 'Italien', zipPattern: /^\d{5}$/, zipPlaceholder: 'z.B. 00100', zipMaxLength: 5 },
+  { code: 'PL', name: 'Polen', zipPattern: /^\d{2}-\d{3}$/, zipPlaceholder: 'z.B. 00-001', zipMaxLength: 6 },
+  { code: 'CZ', name: 'Tschechien', zipPattern: /^\d{3}\s?\d{2}$/, zipPlaceholder: 'z.B. 110 00', zipMaxLength: 6 }
+]
+
 const defaultFormData: ListingFormData = {
   title: '',
   description: '',
@@ -95,7 +109,7 @@ const defaultFormData: ListingFormData = {
   price: 0,
   negotiable: false,
   images: [],
-  location: { zip: '', city: '' },
+  location: { zip: '', city: '', country: 'AT' },
   condition: 'gut',
   shippingAvailable: false
 }
@@ -138,8 +152,14 @@ export function ListingForm({
     }
 
     if (stepNumber === 3) {
+      if (!formData.location.country) newErrors.location = 'Land ist erforderlich'
       if (!formData.location.zip.trim()) newErrors.location = 'PLZ ist erforderlich'
-      if (!/^\d{5}$/.test(formData.location.zip)) newErrors.location = 'Ungültige PLZ (5 Ziffern)'
+      else {
+        const country = COUNTRIES.find(c => c.code === formData.location.country)
+        if (country && !country.zipPattern.test(formData.location.zip.trim())) {
+          newErrors.location = `Ungültige PLZ für ${country.name}`
+        }
+      }
       if (!formData.location.city.trim()) newErrors.location = 'Ort ist erforderlich'
     }
 
@@ -443,6 +463,24 @@ export function ListingForm({
                     <MapPinIcon className="w-6 h-6 text-red-600 dark:text-red-400" />
                   </div>
                   <div className="flex-1 space-y-4">
+                    {/* Country Selection */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        Land *
+                      </label>
+                      <select
+                        value={formData.location.country || 'AT'}
+                        onChange={(e) => updateFormData({
+                          location: { ...formData.location, country: e.target.value, zip: '' }
+                        })}
+                        className="w-full px-4 py-3 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-colors"
+                      >
+                        {COUNTRIES.map(country => (
+                          <option key={country.code} value={country.code}>{country.name}</option>
+                        ))}
+                      </select>
+                    </div>
+
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
@@ -454,8 +492,8 @@ export function ListingForm({
                           onChange={(e) => updateFormData({
                             location: { ...formData.location, zip: e.target.value }
                           })}
-                          placeholder="z.B. 80331"
-                          maxLength={5}
+                          placeholder={COUNTRIES.find(c => c.code === formData.location.country)?.zipPlaceholder || 'PLZ eingeben'}
+                          maxLength={COUNTRIES.find(c => c.code === formData.location.country)?.zipMaxLength || 10}
                           className={`w-full px-4 py-3 bg-white dark:bg-slate-700 border rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-colors ${
                             errors.location ? 'border-red-500' : 'border-slate-200 dark:border-slate-600'
                           }`}
@@ -471,7 +509,7 @@ export function ListingForm({
                           onChange={(e) => updateFormData({
                             location: { ...formData.location, city: e.target.value }
                           })}
-                          placeholder="z.B. München"
+                          placeholder="z.B. Wien"
                           className={`w-full px-4 py-3 bg-white dark:bg-slate-700 border rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-colors ${
                             errors.location ? 'border-red-500' : 'border-slate-200 dark:border-slate-600'
                           }`}
@@ -479,6 +517,10 @@ export function ListingForm({
                       </div>
                     </div>
                     {errors.location && <p className="text-sm text-red-500">{errors.location}</p>}
+
+                    <p className="text-xs text-slate-400 dark:text-slate-500">
+                      Die Koordinaten werden automatisch aus PLZ und Ort ermittelt (via OpenStreetMap).
+                    </p>
                   </div>
                 </div>
               </div>

@@ -5,6 +5,9 @@
 export interface Location {
   zip: string
   city: string
+  country?: string // ISO 3166-1 alpha-2 (DE, AT, CH, etc.)
+  latitude?: number
+  longitude?: number
 }
 
 export interface Seller {

@@ -68,12 +68,12 @@ export function parseProductOverview(md: string): ProductOverview | null {
     const nameMatch = md.match(/^#\s+(.+)$/m)
     const name = nameMatch?.[1]?.trim() || 'Product Overview'
 
-    // Extract description - content between ## Description and next ##
-    const descMatch = md.match(/## Description\s*\n+([\s\S]*?)(?=\n## |\n#[^#]|$)/)
+    // Extract description - content between ## Description/Beschreibung and next ##
+    const descMatch = md.match(/## (?:Description|Beschreibung)\s*\n+([\s\S]*?)(?=\n## |\n#[^#]|$)/)
     const description = descMatch?.[1]?.trim() || ''
 
-    // Extract problems - ### Problem N: Title pattern
-    const problemsSection = md.match(/## Problems & Solutions\s*\n+([\s\S]*?)(?=\n## |\n#[^#]|$)/)
+    // Extract problems - ### Problem N: Title pattern (supports both English and German)
+    const problemsSection = md.match(/## (?:Problems & Solutions|Probleme & Lösungen)\s*\n+([\s\S]*?)(?=\n## |\n#[^#]|$)/)
     const problems: Problem[] = []
 
     if (problemsSection?.[1]) {
@@ -86,8 +86,8 @@ export function parseProductOverview(md: string): ProductOverview | null {
       }
     }
 
-    // Extract features - bullet list after ## Key Features
-    const featuresSection = md.match(/## Key Features\s*\n+([\s\S]*?)(?=\n## |\n#[^#]|$)/)
+    // Extract features - bullet list after ## Key Features/Hauptfunktionen
+    const featuresSection = md.match(/## (?:Key Features|Hauptfunktionen)\s*\n+([\s\S]*?)(?=\n## |\n#[^#]|$)/)
     const features: string[] = []
 
     if (featuresSection?.[1]) {

@@ -1,0 +1,160 @@
+{
+  "_meta": {
+    "models": {
+      "currentUser": "Der aktuell eingeloggte Nutzer mit allen Profildaten, Einstellungen und Verifizierungsstatus.",
+      "publicProfiles": "Öffentliche Profile anderer Nutzer, wie sie auf der Plattform angezeigt werden.",
+      "userListings": "Aktive Anzeigen eines Nutzers, die auf seinem öffentlichen Profil angezeigt werden.",
+      "connectedAccounts": "Social-Login-Konten (Google, Apple), die mit dem Nutzerkonto verbunden sind."
+    },
+    "relationships": [
+      "Ein User kann mehrere Listings (Anzeigen) haben",
+      "Ein User kann mehrere ConnectedAccounts haben",
+      "PublicProfiles zeigen eine vereinfachte Ansicht eines Users mit seinen Listings"
+    ]
+  },
+  "currentUser": {
+    "id": "user-001",
+    "email": "maria.huber@example.at",
+    "name": "Maria Huber",
+    "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop",
+    "bio": "Leidenschaftliche Sammlerin von Vintage-Möbeln und Mid-Century Design. Räume gerne auf und verkaufe Dinge, die ich nicht mehr brauche.",
+    "phone": "+43 664 123 4567",
+    "address": {
+      "street": "Mariahilfer Straße",
+      "houseNumber": "45/3",
+      "zip": "1060",
+      "city": "Wien",
+      "country": "AT"
+    },
+    "memberSince": "2023-03-15",
+    "isVerified": true,
+    "verificationDate": "2023-04-02",
+    "notificationSettings": {
+      "emailMessages": true,
+      "emailOffers": true,
+      "emailListingUpdates": false,
+      "pushEnabled": true,
+      "newsletter": false
+    },
+    "sellerVerification": {
+      "fullName": "Maria Elisabeth Huber",
+      "address": {
+        "street": "Mariahilfer Straße",
+        "houseNumber": "45/3",
+        "zip": "1060",
+        "city": "Wien",
+        "country": "AT"
+      },
+      "bankAccount": {
+        "accountHolder": "Maria Elisabeth Huber",
+        "iban": "AT89 3704 0044 0532 0130 00",
+        "bic": "RLNWATWW"
+      },
+      "acceptedTerms": true,
+      "verifiedAt": "2023-04-02"
+    }
+  },
+  "connectedAccounts": [
+    {
+      "id": "conn-001",
+      "provider": "google",
+      "email": "maria.huber@gmail.com",
+      "connectedAt": "2023-03-15"
+    }
+  ],
+  "publicProfiles": [
+    {
+      "id": "user-002",
+      "name": "Thomas Berger",
+      "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop",
+      "bio": "Technik-Enthusiast und Hobbybastler. Verkaufe gut erhaltene Elektronik und Gadgets.",
+      "city": "Graz",
+      "country": "AT",
+      "memberSince": "2022-11-08",
+      "isVerified": true,
+      "listingsCount": 12,
+      "responseTime": "Antwortet meist innerhalb von 2 Stunden"
+    },
+    {
+      "id": "user-003",
+      "name": "Lisa M.",
+      "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop",
+      "bio": "",
+      "city": "Salzburg",
+      "country": "AT",
+      "memberSince": "2024-01-20",
+      "isVerified": false,
+      "listingsCount": 3,
+      "responseTime": null
+    }
+  ],
+  "userListings": [
+    {
+      "id": "prod-201",
+      "title": "Sony PlayStation 5 mit 2 Controllern",
+      "price": 420,
+      "image": "https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=400&h=300&fit=crop",
+      "location": { "city": "Graz", "country": "AT" },
+      "condition": "sehr-gut",
+      "createdAt": "2024-01-10"
+    },
+    {
+      "id": "prod-202",
+      "title": "MacBook Pro 14\" M2 Pro",
+      "price": 1850,
+      "image": "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400&h=300&fit=crop",
+      "location": { "city": "Graz", "country": "AT" },
+      "condition": "wie-neu",
+      "createdAt": "2024-01-08"
+    },
+    {
+      "id": "prod-203",
+      "title": "Nintendo Switch OLED",
+      "price": 280,
+      "image": "https://images.unsplash.com/photo-1578303512597-81e6cc155b3e?w=400&h=300&fit=crop",
+      "location": { "city": "Graz", "country": "AT" },
+      "condition": "gut",
+      "createdAt": "2024-01-05"
+    },
+    {
+      "id": "prod-204",
+      "title": "Sony WH-1000XM5 Kopfhörer",
+      "price": 220,
+      "image": "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=400&h=300&fit=crop",
+      "location": { "city": "Graz", "country": "AT" },
+      "condition": "sehr-gut",
+      "createdAt": "2023-12-28"
+    },
+    {
+      "id": "prod-205",
+      "title": "iPad Air 5. Generation 256GB",
+      "price": 550,
+      "image": "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=400&h=300&fit=crop",
+      "location": { "city": "Graz", "country": "AT" },
+      "condition": "wie-neu",
+      "createdAt": "2023-12-20"
+    },
+    {
+      "id": "prod-206",
+      "title": "Logitech MX Master 3S Maus",
+      "price": 75,
+      "image": "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=400&h=300&fit=crop",
+      "location": { "city": "Graz", "country": "AT" },
+      "condition": "neu",
+      "createdAt": "2023-12-15"
+    }
+  ],
+  "countries": [
+    { "code": "AT", "name": "Österreich" },
+    { "code": "DE", "name": "Deutschland" },
+    { "code": "CH", "name": "Schweiz" },
+    { "code": "LI", "name": "Liechtenstein" },
+    { "code": "LU", "name": "Luxemburg" },
+    { "code": "BE", "name": "Belgien" },
+    { "code": "NL", "name": "Niederlande" },
+    { "code": "FR", "name": "Frankreich" },
+    { "code": "IT", "name": "Italien" },
+    { "code": "PL", "name": "Polen" },
+    { "code": "CZ", "name": "Tschechien" }
+  ]
+}

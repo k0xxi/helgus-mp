@@ -72,8 +72,11 @@
       "subcategory": "smartphones",
       "condition": "wie-neu",
       "location": {
-        "zip": "80331",
-        "city": "München"
+        "zip": "1010",
+        "city": "Wien",
+        "country": "AT",
+        "latitude": 48.2082,
+        "longitude": 16.3738
       },
       "shippingAvailable": true,
       "status": "aktiv",
@@ -96,8 +99,11 @@
       "subcategory": "regale",
       "condition": "gut",
       "location": {
-        "zip": "80331",
-        "city": "München"
+        "zip": "1010",
+        "city": "Wien",
+        "country": "AT",
+        "latitude": 48.2082,
+        "longitude": 16.3738
       },
       "shippingAvailable": false,
       "status": "aktiv",
@@ -121,8 +127,11 @@
       "subcategory": "kopfhoerer",
       "condition": "sehr-gut",
       "location": {
-        "zip": "80331",
-        "city": "München"
+        "zip": "1010",
+        "city": "Wien",
+        "country": "AT",
+        "latitude": 48.2082,
+        "longitude": 16.3738
       },
       "shippingAvailable": true,
       "status": "aktiv",
@@ -145,8 +154,11 @@
       "subcategory": "fahrraeder",
       "condition": "gut",
       "location": {
-        "zip": "80331",
-        "city": "München"
+        "zip": "1010",
+        "city": "Wien",
+        "country": "AT",
+        "latitude": 48.2082,
+        "longitude": 16.3738
       },
       "shippingAvailable": false,
       "status": "verkauft",
@@ -171,8 +183,11 @@
       "subcategory": "gaming",
       "condition": "sehr-gut",
       "location": {
-        "zip": "80331",
-        "city": "München"
+        "zip": "1010",
+        "city": "Wien",
+        "country": "AT",
+        "latitude": 48.2082,
+        "longitude": 16.3738
       },
       "shippingAvailable": true,
       "status": "pausiert",
@@ -195,8 +210,11 @@
       "subcategory": "sessel",
       "condition": "gut",
       "location": {
-        "zip": "80331",
-        "city": "München"
+        "zip": "1010",
+        "city": "Wien",
+        "country": "AT",
+        "latitude": 48.2082,
+        "longitude": 16.3738
       },
       "shippingAvailable": false,
       "status": "aktiv",
