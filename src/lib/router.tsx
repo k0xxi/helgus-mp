@@ -8,6 +8,36 @@ import { ScreenDesignPage, ScreenDesignFullscreen } from '@/components/ScreenDes
 import { ShellDesignPage, ShellDesignFullscreen } from '@/components/ShellDesignPage'
 import { ExportPage } from '@/components/ExportPage'
 
+// Marketplace imports
+import { AuthProvider } from '@/marketplace/context/AuthContext'
+import { MarketplaceLayout } from '@/marketplace/layout/MarketplaceLayout'
+import {
+  HomePage as MarketplaceHomePage,
+  SearchPage,
+  AuthPage,
+  AuthCallbackPage,
+  PasswordResetPage,
+  FavoritesPage,
+  MessagesPage,
+  ProfilePage,
+  ProfileSettingsPage,
+  SellerVerificationPage,
+  PublicProfilePage,
+  ChangePasswordPage,
+  SellPage,
+  NotificationsPage,
+  ProductPage as MarketplaceProductPage,
+} from '@/marketplace/pages'
+
+// Wrapper to provide AuthContext to marketplace routes
+function MarketplaceWrapper() {
+  return (
+    <AuthProvider>
+      <MarketplaceLayout />
+    </AuthProvider>
+  )
+}
+
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -48,5 +78,72 @@ export const router = createBrowserRouter([
   {
     path: '/export',
     element: <ExportPage />,
+  },
+  // Marketplace routes
+  {
+    path: '/marketplace',
+    element: <MarketplaceWrapper />,
+    children: [
+      {
+        index: true,
+        element: <MarketplaceHomePage />,
+      },
+      {
+        path: 'search',
+        element: <SearchPage />,
+      },
+      {
+        path: 'auth',
+        element: <AuthPage />,
+      },
+      {
+        path: 'auth/callback',
+        element: <AuthCallbackPage />,
+      },
+      {
+        path: 'auth/reset-password',
+        element: <PasswordResetPage />,
+      },
+      {
+        path: 'favorites',
+        element: <FavoritesPage />,
+      },
+      {
+        path: 'messages',
+        element: <MessagesPage />,
+      },
+      {
+        path: 'profile',
+        element: <ProfilePage />,
+      },
+      {
+        path: 'profile/settings',
+        element: <ProfileSettingsPage />,
+      },
+      {
+        path: 'profile/verification',
+        element: <SellerVerificationPage />,
+      },
+      {
+        path: 'profile/change-password',
+        element: <ChangePasswordPage />,
+      },
+      {
+        path: 'user/:userId',
+        element: <PublicProfilePage />,
+      },
+      {
+        path: 'sell',
+        element: <SellPage />,
+      },
+      {
+        path: 'notifications',
+        element: <NotificationsPage />,
+      },
+      {
+        path: 'product/:productId',
+        element: <MarketplaceProductPage />,
+      },
+    ],
   },
 ])

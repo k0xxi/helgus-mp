@@ -166,6 +166,36 @@
   }
 }
 
+/*
+  HELGUS Marketplace Theme
+  Red primary, Blue accents, Slate neutrals
+*/
+.marketplace-theme {
+  /* Light mode marketplace colors */
+  --mp-primary: theme(colors.red.600);
+  --mp-primary-hover: theme(colors.red.700);
+  --mp-primary-light: theme(colors.red.50);
+  --mp-secondary: theme(colors.blue.600);
+  --mp-secondary-hover: theme(colors.blue.700);
+  --mp-secondary-light: theme(colors.blue.50);
+  --mp-success: theme(colors.green.600);
+  --mp-warning: theme(colors.amber.500);
+  --mp-error: theme(colors.red.600);
+}
+
+.dark .marketplace-theme {
+  /* Dark mode marketplace colors */
+  --mp-primary: theme(colors.red.500);
+  --mp-primary-hover: theme(colors.red.400);
+  --mp-primary-light: theme(colors.red.900 / 0.2);
+  --mp-secondary: theme(colors.blue.400);
+  --mp-secondary-hover: theme(colors.blue.300);
+  --mp-secondary-light: theme(colors.blue.900 / 0.2);
+  --mp-success: theme(colors.green.400);
+  --mp-warning: theme(colors.amber.400);
+  --mp-error: theme(colors.red.400);
+}
+
 /* Subtle page fade-in animation */
 @layer utilities {
   .animate-fade-in {
