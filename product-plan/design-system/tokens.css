@@ -1,0 +1,138 @@
+/*
+ * HELGUS Marktplatz Design Tokens
+ *
+ * This file documents the design tokens used throughout the application.
+ * With Tailwind CSS v4, these are applied via utility classes directly.
+ */
+
+/* =============================================================================
+   COLOR PALETTE
+   Using Tailwind's built-in color utilities
+   ============================================================================= */
+
+/*
+ * Primary: red
+ * - Main CTA buttons
+ * - Active states
+ * - Logo accent
+ *
+ * Usage:
+ *   bg-red-600 hover:bg-red-700
+ *   dark:bg-red-500 dark:hover:bg-red-600
+ *   text-red-600 dark:text-red-500
+ */
+
+/*
+ * Secondary: blue
+ * - Secondary actions
+ * - Links
+ * - Counter-offers
+ * - Verified badges
+ *
+ * Usage:
+ *   bg-blue-600 hover:bg-blue-700
+ *   text-blue-600 dark:text-blue-400
+ */
+
+/*
+ * Neutral: slate
+ * - Backgrounds
+ * - Borders
+ * - Text
+ *
+ * Light mode:
+ *   bg-slate-50 (page background)
+ *   bg-white (cards)
+ *   border-slate-200 (borders)
+ *   text-slate-900 (headings)
+ *   text-slate-600 (body)
+ *   text-slate-400 (muted)
+ *
+ * Dark mode:
+ *   dark:bg-slate-900 (page background)
+ *   dark:bg-slate-800 (cards)
+ *   dark:border-slate-700 (borders)
+ *   dark:text-white (headings)
+ *   dark:text-slate-300 (body)
+ *   dark:text-slate-500 (muted)
+ */
+
+/* =============================================================================
+   TYPOGRAPHY
+   Google Fonts: DM Sans, Inter, IBM Plex Mono
+   ============================================================================= */
+
+/*
+ * Headings: DM Sans
+ * Usage: font-['DM_Sans']
+ *
+ * Weights: 400, 500, 600, 700
+ */
+
+/*
+ * Body: Inter
+ * Usage: font-['Inter']
+ *
+ * Weights: 400, 500, 600
+ */
+
+/*
+ * Monospace: IBM Plex Mono
+ * Usage: font-['IBM_Plex_Mono']
+ *
+ * Weights: 400, 500
+ */
+
+/* =============================================================================
+   FONT LOADING
+   Add to your HTML <head>
+   ============================================================================= */
+
+/*
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+*/
+
+/* =============================================================================
+   SPACING & LAYOUT
+   ============================================================================= */
+
+/*
+ * Content max-width: max-w-7xl (1280px)
+ * Card padding: p-4 to p-6
+ * Grid gaps: gap-4 to gap-8
+ * Section padding: py-8 to py-12
+ */
+
+/* =============================================================================
+   BORDER RADIUS
+   ============================================================================= */
+
+/*
+ * Small elements: rounded-lg (8px)
+ * Cards: rounded-xl (12px) or rounded-2xl (16px)
+ * Modals: rounded-2xl or rounded-3xl
+ * Pills/badges: rounded-full
+ */
+
+/* =============================================================================
+   SHADOWS
+   ============================================================================= */
+
+/*
+ * Cards at rest: shadow-sm or none
+ * Cards on hover: shadow-md or shadow-lg
+ * Modals: shadow-xl
+ * Dropdowns: shadow-lg
+ */
+
+/* =============================================================================
+   TRANSITIONS
+   ============================================================================= */
+
+/*
+ * Default: transition-colors (for hover states)
+ * Transforms: transition-all duration-200
+ * Modals: fade-in, slide-in-from-top
+ */

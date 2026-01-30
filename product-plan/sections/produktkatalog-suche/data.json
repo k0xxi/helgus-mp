@@ -1,0 +1,441 @@
+{
+  "_meta": {
+    "models": {
+      "products": "Artikel die auf dem HELGUS Marktplatz zum Verkauf angeboten werden. Jedes Produkt hat einen Verkäufer, Preis, Zustand und Lieferoptionen.",
+      "categories": "Organisationsstruktur für Produkte. Jede Hauptkategorie enthält mehrere Unterkategorien zur besseren Navigation.",
+      "seller": "Der Benutzer, der das Produkt verkauft. Enthält Namen und Standortinformationen."
+    },
+    "relationships": [
+      "Jedes Product gehört zu einem Seller (Verkäufer)",
+      "Jedes Product ist einer Category und Subcategory zugeordnet",
+      "Products können von Usern favorisiert werden (isFavorited)",
+      "Eigene Products (isOwn) können bearbeitet und gelöscht werden"
+    ]
+  },
+  "products": [
+    {
+      "id": "prod-001",
+      "title": "iPhone 13 Pro 256GB Graphit",
+      "description": "iPhone 13 Pro in einwandfreiem Zustand. Kaum benutzt, immer mit Hülle und Panzerglas verwendet. Inklusive Originalverpackung, Ladekabel und Netzteil. Batterie bei 98% Gesundheit. Keine Kratzer oder Gebrauchsspuren.",
+      "price": 750,
+      "images": [
+        "https://images.unsplash.com/photo-1632661674596-df8be070a5c5?w=800",
+        "https://images.unsplash.com/photo-1611472173362-3f53dbd65d80?w=800"
+      ],
+      "condition": "wie-neu",
+      "deliveryOptions": ["abholung", "versand"],
+      "location": {
+        "zip": "1010",
+        "city": "Wien"
+      },
+      "seller": {
+        "id": "user-001",
+        "name": "Thomas Müller",
+        "rating": 4.8
+      },
+      "category": "Elektronik & Technik",
+      "subcategory": "Smartphones & Tablets",
+      "createdAt": "2024-01-28T10:30:00Z",
+      "phoneContactAvailable": true,
+      "isFavorited": true,
+      "isOwn": false
+    },
+    {
+      "id": "prod-002",
+      "title": "Vintage Lederjacke Braun Gr. M",
+      "description": "Wunderschöne Vintage-Lederjacke aus echtem Leder in Braun. Größe M, perfekt für Herbst und Winter. Zeitloses Design mit tollem Vintage-Look.",
+      "price": 85,
+      "images": [
+        "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=800"
+      ],
+      "condition": "sehr-gut",
+      "deliveryOptions": ["abholung", "versand"],
+      "location": {
+        "zip": "5020",
+        "city": "Salzburg"
+      },
+      "seller": {
+        "id": "user-002",
+        "name": "Lisa Schmidt",
+        "rating": 4.9
+      },
+      "category": "Mode & Accessoires",
+      "subcategory": "Herrenbekleidung",
+      "createdAt": "2024-01-27T15:20:00Z",
+      "phoneContactAvailable": false,
+      "isFavorited": false,
+      "isOwn": true
+    },
+    {
+      "id": "prod-003",
+      "title": "Designer 3-Sitzer Sofa Hellgrau",
+      "description": "Modernes Designer-Sofa in hellgrau. Sehr bequem, perfekter Zustand. Nur 6 Monate alt, Verkauf wegen Umzug. Maße: 220cm x 90cm x 85cm. Abholung bevorzugt, bei Bedarf kann gegen Aufpreis geliefert werden.",
+      "price": 450,
+      "images": [
+        "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800",
+        "https://images.unsplash.com/photo-1540574163026-643ea20ade25?w=800"
+      ],
+      "condition": "wie-neu",
+      "deliveryOptions": ["abholung"],
+      "location": {
+        "zip": "4020",
+        "city": "Linz"
+      },
+      "seller": {
+        "id": "user-003",
+        "name": "Michael Weber",
+        "rating": 5.0
+      },
+      "category": "Wohnen & Leben",
+      "subcategory": "Möbel",
+      "createdAt": "2024-01-26T09:45:00Z",
+      "phoneContactAvailable": true,
+      "isFavorited": true,
+      "isOwn": false
+    },
+    {
+      "id": "prod-004",
+      "title": "Mountainbike 29 Zoll Hardtail",
+      "description": "Gut erhaltenes Mountainbike mit 29 Zoll Rädern. 21-Gang Shimano Schaltung, Scheibenbremsen vorne und hinten. Ideal für Touren und leichtes Gelände. Regelmäßig gewartet, einige Gebrauchsspuren am Rahmen.",
+      "price": 280,
+      "images": [
+        "https://images.unsplash.com/photo-1576435728678-68d0fbf94e91?w=800"
+      ],
+      "condition": "gut",
+      "deliveryOptions": ["abholung"],
+      "location": {
+        "zip": "6020",
+        "city": "Innsbruck"
+      },
+      "seller": {
+        "id": "user-004",
+        "name": "Stefan Hofer",
+        "rating": 4.6
+      },
+      "category": "Sport & Outdoor",
+      "subcategory": "Fahrräder",
+      "createdAt": "2024-01-25T14:10:00Z",
+      "phoneContactAvailable": true,
+      "isFavorited": false,
+      "isOwn": false
+    },
+    {
+      "id": "prod-005",
+      "title": "Yamaha Akustikgitarre FG800",
+      "description": "Yamaha FG800 Akustikgitarre in hervorragendem Zustand. Perfekt für Anfänger und Fortgeschrittene. Inklusive gepolsterter Tasche und Stimmgerät. Toller Klang, keine Beschädigungen.",
+      "price": 190,
+      "images": [
+        "https://images.unsplash.com/photo-1510915228340-29c85a43dcfe?w=800"
+      ],
+      "condition": "wie-neu",
+      "deliveryOptions": ["abholung", "versand"],
+      "location": {
+        "zip": "8010",
+        "city": "Graz"
+      },
+      "seller": {
+        "id": "user-005",
+        "name": "Anna Berger",
+        "rating": 4.7
+      },
+      "category": "Hobbys & Unterhaltung",
+      "subcategory": "Musikinstrumente",
+      "createdAt": "2024-01-29T08:15:00Z",
+      "phoneContactAvailable": false,
+      "isFavorited": false,
+      "isOwn": false
+    },
+    {
+      "id": "prod-006",
+      "title": "Kinderwagen Bugaboo Cameleon",
+      "description": "Top Kinderwagen von Bugaboo in sehr gutem Zustand. Wenig benutzt, da zweites Kind nie gekommen ist. Inklusive Regenschutz und Sonnenverdeck. Leicht zusammenklappbar.",
+      "price": 320,
+      "images": [
+        "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=800"
+      ],
+      "condition": "sehr-gut",
+      "deliveryOptions": ["abholung", "versand"],
+      "location": {
+        "zip": "3100",
+        "city": "St. Pölten"
+      },
+      "seller": {
+        "id": "user-006",
+        "name": "Julia Maier",
+        "rating": 4.9
+      },
+      "category": "Baby & Kinder",
+      "subcategory": "Kinderwagen",
+      "createdAt": "2024-01-24T11:30:00Z",
+      "phoneContactAvailable": true,
+      "isFavorited": true,
+      "isOwn": false
+    },
+    {
+      "id": "prod-007",
+      "title": "Benzin-Rasenmäher 46cm Schnittbreite",
+      "description": "Robuster Benzinrasenmäher mit 46cm Schnittbreite. Funktioniert einwandfrei, Motor läuft rund. Gebraucht aber technisch in Ordnung. Ideal für mittelgroße Gärten bis 500m².",
+      "price": 120,
+      "images": [
+        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800"
+      ],
+      "condition": "gut",
+      "deliveryOptions": ["abholung"],
+      "location": {
+        "zip": "2340",
+        "city": "Mödling"
+      },
+      "seller": {
+        "id": "user-007",
+        "name": "Franz Gruber",
+        "rating": 4.5
+      },
+      "category": "Garten & Werkzeug",
+      "subcategory": "Rasenmäher",
+      "createdAt": "2024-01-23T16:45:00Z",
+      "phoneContactAvailable": true,
+      "isFavorited": false,
+      "isOwn": true
+    },
+    {
+      "id": "prod-008",
+      "title": "Aquarium Komplettset 120L mit Zubehör",
+      "description": "Neues Aquarium 120 Liter mit komplettem Zubehör: Filter, Heizung, Beleuchtung, Kies, Dekoration. Originalverpackt, nie benutzt. Wurde als Geschenk gekommen, aber kein Platz dafür.",
+      "price": 180,
+      "images": [
+        "https://images.unsplash.com/photo-1520990689-83e6eb00022f?w=800"
+      ],
+      "condition": "neu",
+      "deliveryOptions": ["abholung"],
+      "location": {
+        "zip": "9020",
+        "city": "Klagenfurt"
+      },
+      "seller": {
+        "id": "user-008",
+        "name": "Peter Haas",
+        "rating": 4.8
+      },
+      "category": "Haustiere & Tiere",
+      "subcategory": "Aquarium",
+      "createdAt": "2024-01-29T12:00:00Z",
+      "phoneContactAvailable": false,
+      "isFavorited": false,
+      "isOwn": false
+    },
+    {
+      "id": "prod-009",
+      "title": "Ergonomischer Bürostuhl schwarz",
+      "description": "Hochwertiger ergonomischer Bürostuhl in schwarz. Verstellbare Armlehnen, Lordosenstütze, Wippfunktion. Wie neu, kaum benutzt da Home Office aufgegeben. NP war 280€.",
+      "price": 140,
+      "images": [
+        "https://images.unsplash.com/photo-1580480055273-228ff5388ef8?w=800"
+      ],
+      "condition": "wie-neu",
+      "deliveryOptions": ["abholung", "versand"],
+      "location": {
+        "zip": "1030",
+        "city": "Wien"
+      },
+      "seller": {
+        "id": "user-009",
+        "name": "Sarah Koch",
+        "rating": 5.0
+      },
+      "category": "Büro & Business",
+      "subcategory": "Büromöbel",
+      "createdAt": "2024-01-22T10:20:00Z",
+      "phoneContactAvailable": true,
+      "isFavorited": false,
+      "isOwn": false
+    },
+    {
+      "id": "prod-010",
+      "title": "LED Kosmetikspiegel mit Beleuchtung",
+      "description": "Moderner LED Kosmetikspiegel mit dimmbarer Beleuchtung. 3 Farbtemperaturen einstellbar. Neu und originalverpackt. Perfekt für Make-up und Hautpflege.",
+      "price": 35,
+      "images": [
+        "https://images.unsplash.com/photo-1598300056393-4aac492f4344?w=800"
+      ],
+      "condition": "neu",
+      "deliveryOptions": ["abholung", "versand"],
+      "location": {
+        "zip": "4040",
+        "city": "Linz"
+      },
+      "seller": {
+        "id": "user-010",
+        "name": "Maria Huber",
+        "rating": 4.7
+      },
+      "category": "Beauty & Gesundheit",
+      "subcategory": "Beauty-Geräte",
+      "createdAt": "2024-01-29T09:30:00Z",
+      "phoneContactAvailable": false,
+      "isFavorited": false,
+      "isOwn": false
+    }
+  ],
+  "categories": [
+    {
+      "id": "cat-001",
+      "name": "Elektronik & Technik",
+      "subcategories": [
+        "Smartphones & Tablets",
+        "Laptops & Computer",
+        "Gaming",
+        "Audio & Kopfhörer",
+        "Kameras",
+        "Smart Home",
+        "Wearables",
+        "Zubehör",
+        "TV & Video",
+        "Netzwerk"
+      ]
+    },
+    {
+      "id": "cat-002",
+      "name": "Mode & Accessoires",
+      "subcategories": [
+        "Damenbekleidung",
+        "Herrenbekleidung",
+        "Schuhe",
+        "Taschen",
+        "Uhren & Schmuck",
+        "Brillen",
+        "Hüte & Mützen",
+        "Gürtel & Geldbörsen",
+        "Kinderkleidung",
+        "Vintage"
+      ]
+    },
+    {
+      "id": "cat-003",
+      "name": "Wohnen & Leben",
+      "subcategories": [
+        "Möbel",
+        "Küche & Haushalt",
+        "Bettwäsche & Textilien",
+        "Beleuchtung",
+        "Aufbewahrung",
+        "Bad",
+        "Vorhänge & Jalousien",
+        "Teppiche",
+        "Gartenmöbel",
+        "Dekoration"
+      ]
+    },
+    {
+      "id": "cat-004",
+      "name": "Sport & Outdoor",
+      "subcategories": [
+        "Fitness",
+        "Fahrräder",
+        "Camping & Wandern",
+        "Wintersport",
+        "Wassersport",
+        "Teamsport",
+        "Laufen & Leichtathletik",
+        "Yoga & Pilates",
+        "Klettern",
+        "Angeln"
+      ]
+    },
+    {
+      "id": "cat-005",
+      "name": "Hobbys & Unterhaltung",
+      "subcategories": [
+        "Bücher & Zeitschriften",
+        "Musikinstrumente",
+        "Brettspiele & Puzzle",
+        "Kunst & Basteln",
+        "Modellbau",
+        "Sammlerstücke",
+        "Filme & DVDs",
+        "Vinyl & CDs",
+        "Fotografie",
+        "DIY & Handwerk"
+      ]
+    },
+    {
+      "id": "cat-006",
+      "name": "Baby & Kinder",
+      "subcategories": [
+        "Babykleidung",
+        "Kinderwagen",
+        "Spielzeug",
+        "Babymöbel",
+        "Babypflege",
+        "Kinderbücher",
+        "Schulsachen",
+        "Kindersport",
+        "Fütterung & Stillen",
+        "Umstandsmode"
+      ]
+    },
+    {
+      "id": "cat-007",
+      "name": "Garten & Werkzeug",
+      "subcategories": [
+        "Gartengeräte",
+        "Elektrowerkzeuge",
+        "Handwerkzeuge",
+        "Rasenmäher",
+        "Pflanzen & Samen",
+        "Gartendeko",
+        "Werkstatt",
+        "Leitern & Gerüste",
+        "Werkzeugaufbewahrung",
+        "Messinstrumente"
+      ]
+    },
+    {
+      "id": "cat-008",
+      "name": "Haustiere & Tiere",
+      "subcategories": [
+        "Tierfutter & Snacks",
+        "Tierspielzeug",
+        "Aquarium",
+        "Vogelbedarf",
+        "Hundezubehör",
+        "Katzenzubehör",
+        "Kleintiere",
+        "Transportboxen",
+        "Tierpflege",
+        "Tiermöbel"
+      ]
+    },
+    {
+      "id": "cat-009",
+      "name": "Büro & Business",
+      "subcategories": [
+        "Büromöbel",
+        "Drucker & Scanner",
+        "Bürobedarf",
+        "Präsentation",
+        "Ablage & Aufbewahrung",
+        "Taschenrechner",
+        "Whiteboards",
+        "Schreibtisch-Zubehör",
+        "Schreibwaren",
+        "Business-Bücher"
+      ]
+    },
+    {
+      "id": "cat-010",
+      "name": "Beauty & Gesundheit",
+      "subcategories": [
+        "Hautpflege",
+        "Make-up",
+        "Haarpflege & Styling",
+        "Parfüm & Düfte",
+        "Wellness & Nahrungsergänzung",
+        "Fitness-Tracker",
+        "Beauty-Geräte",
+        "Nagelpflege",
+        "Bad & Körper",
+        "Herrenpflege"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,383 @@
+{
+  "_meta": {
+    "models": {
+      "products": "Die eigenen Anzeigen des Verkäufers mit Status, Aufrufen und Anfragen-Anzahl.",
+      "conversations": "Gruppierte Nachrichtenverläufe mit Käufern zu bestimmten Produkten.",
+      "messages": "Einzelne Nachrichten innerhalb einer Konversation.",
+      "quickActions": "Schnellzugriff-Buttons für häufige Aktionen im Dashboard.",
+      "stats": "Übersichtszahlen für das Dashboard (aktive Anzeigen, Nachrichten, Aufrufe).",
+      "categories": "Verfügbare Kategorien für das Erstellen von Anzeigen."
+    },
+    "relationships": [
+      "Jedes Product gehört zum eingeloggten Verkäufer",
+      "Jede Conversation bezieht sich auf ein Product und einen Käufer",
+      "Messages gehören zu einer Conversation",
+      "QuickActions sind statische UI-Elemente für Navigation"
+    ]
+  },
+  "seller": {
+    "id": "seller-001",
+    "name": "Thomas Müller",
+    "email": "thomas.mueller@email.de",
+    "avatar": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop",
+    "memberSince": "2023-03-15",
+    "isVerified": true
+  },
+  "stats": {
+    "activeListings": 4,
+    "totalViews": 847,
+    "unreadMessages": 3,
+    "pendingOffers": 2,
+    "soldThisMonth": 2
+  },
+  "quickActions": [
+    {
+      "id": "qa-1",
+      "label": "Neue Anzeige",
+      "icon": "plus",
+      "action": "create-listing"
+    },
+    {
+      "id": "qa-2",
+      "label": "Nachrichten",
+      "icon": "message",
+      "action": "open-inbox",
+      "badge": 3
+    },
+    {
+      "id": "qa-3",
+      "label": "Meine Anzeigen",
+      "icon": "grid",
+      "action": "view-listings"
+    },
+    {
+      "id": "qa-4",
+      "label": "Einstellungen",
+      "icon": "settings",
+      "action": "open-settings"
+    }
+  ],
+  "products": [
+    {
+      "id": "prod-001",
+      "title": "iPhone 14 Pro 256GB Space Black",
+      "description": "Verkaufe mein iPhone 14 Pro in einwandfreiem Zustand. Immer mit Hülle und Displayschutz genutzt. Akku-Kapazität noch bei 94%. Original-Zubehör und Karton dabei.",
+      "price": 849,
+      "negotiable": true,
+      "images": [
+        "https://images.unsplash.com/photo-1678685888221-cda773a3dcdb?w=400&h=400&fit=crop",
+        "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=400&h=400&fit=crop"
+      ],
+      "category": "elektronik",
+      "subcategory": "smartphones",
+      "condition": "wie-neu",
+      "location": {
+        "zip": "1010",
+        "city": "Wien",
+        "country": "AT",
+        "latitude": 48.2082,
+        "longitude": 16.3738
+      },
+      "shippingAvailable": true,
+      "status": "aktiv",
+      "views": 234,
+      "inquiries": 5,
+      "favorites": 12,
+      "createdAt": "2024-01-15T10:30:00Z",
+      "updatedAt": "2024-01-20T14:00:00Z"
+    },
+    {
+      "id": "prod-002",
+      "title": "IKEA KALLAX Regal 4x4 weiß",
+      "description": "Gut erhaltenes KALLAX Regal, 147x147cm. Normale Gebrauchsspuren, aber keine Beschädigungen. Nur Abholung möglich wegen Größe.",
+      "price": 45,
+      "negotiable": true,
+      "images": [
+        "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&h=400&fit=crop"
+      ],
+      "category": "wohnen",
+      "subcategory": "regale",
+      "condition": "gut",
+      "location": {
+        "zip": "1010",
+        "city": "Wien",
+        "country": "AT",
+        "latitude": 48.2082,
+        "longitude": 16.3738
+      },
+      "shippingAvailable": false,
+      "status": "aktiv",
+      "views": 89,
+      "inquiries": 2,
+      "favorites": 4,
+      "createdAt": "2024-01-18T16:45:00Z",
+      "updatedAt": "2024-01-18T16:45:00Z"
+    },
+    {
+      "id": "prod-003",
+      "title": "Sony WH-1000XM4 Kopfhörer",
+      "description": "Top Noise-Cancelling Kopfhörer, schwarz. Funktionieren einwandfrei, verkaufe wegen Upgrade auf XM5. Mit Tasche und Ladekabel.",
+      "price": 189,
+      "negotiable": false,
+      "images": [
+        "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=400&h=400&fit=crop",
+        "https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=400&h=400&fit=crop"
+      ],
+      "category": "elektronik",
+      "subcategory": "kopfhoerer",
+      "condition": "sehr-gut",
+      "location": {
+        "zip": "1010",
+        "city": "Wien",
+        "country": "AT",
+        "latitude": 48.2082,
+        "longitude": 16.3738
+      },
+      "shippingAvailable": true,
+      "status": "aktiv",
+      "views": 312,
+      "inquiries": 8,
+      "favorites": 23,
+      "createdAt": "2024-01-10T09:15:00Z",
+      "updatedAt": "2024-01-22T11:30:00Z"
+    },
+    {
+      "id": "prod-004",
+      "title": "Mountainbike Cube Attention 29 Zoll",
+      "description": "Solides Einsteiger-MTB, Rahmengröße M (17\"). Shimano Deore Schaltung, hydraulische Scheibenbremsen. Normale Gebrauchsspuren vom Trail-Fahren.",
+      "price": 420,
+      "negotiable": true,
+      "images": [
+        "https://images.unsplash.com/photo-1576435728678-68d0fbf94e91?w=400&h=400&fit=crop"
+      ],
+      "category": "sport",
+      "subcategory": "fahrraeder",
+      "condition": "gut",
+      "location": {
+        "zip": "1010",
+        "city": "Wien",
+        "country": "AT",
+        "latitude": 48.2082,
+        "longitude": 16.3738
+      },
+      "shippingAvailable": false,
+      "status": "verkauft",
+      "views": 156,
+      "inquiries": 4,
+      "favorites": 8,
+      "createdAt": "2024-01-05T13:20:00Z",
+      "updatedAt": "2024-01-19T18:00:00Z",
+      "soldAt": "2024-01-19T18:00:00Z"
+    },
+    {
+      "id": "prod-005",
+      "title": "Nintendo Switch OLED + 3 Spiele",
+      "description": "Switch OLED weiß mit Mario Kart 8, Zelda BOTW und Animal Crossing. Alles in OVP, Top-Zustand. Perfekt für Einsteiger!",
+      "price": 299,
+      "negotiable": true,
+      "images": [
+        "https://images.unsplash.com/photo-1578303512597-81e6cc155b3e?w=400&h=400&fit=crop",
+        "https://images.unsplash.com/photo-1612287230202-1ff1d85d1bdf?w=400&h=400&fit=crop"
+      ],
+      "category": "elektronik",
+      "subcategory": "gaming",
+      "condition": "sehr-gut",
+      "location": {
+        "zip": "1010",
+        "city": "Wien",
+        "country": "AT",
+        "latitude": 48.2082,
+        "longitude": 16.3738
+      },
+      "shippingAvailable": true,
+      "status": "pausiert",
+      "views": 67,
+      "inquiries": 1,
+      "favorites": 5,
+      "createdAt": "2024-01-12T11:00:00Z",
+      "updatedAt": "2024-01-21T09:00:00Z"
+    },
+    {
+      "id": "prod-006",
+      "title": "Vintage Ledersessel 60er Jahre",
+      "description": "Wunderschöner Mid-Century Sessel mit cognacfarbenem Leder. Patina vorhanden, aber keine Risse. Ein echtes Designerstück!",
+      "price": 380,
+      "negotiable": true,
+      "images": [
+        "https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=400&h=400&fit=crop"
+      ],
+      "category": "wohnen",
+      "subcategory": "sessel",
+      "condition": "gut",
+      "location": {
+        "zip": "1010",
+        "city": "Wien",
+        "country": "AT",
+        "latitude": 48.2082,
+        "longitude": 16.3738
+      },
+      "shippingAvailable": false,
+      "status": "aktiv",
+      "views": 145,
+      "inquiries": 3,
+      "favorites": 18,
+      "createdAt": "2024-01-08T14:30:00Z",
+      "updatedAt": "2024-01-08T14:30:00Z"
+    }
+  ],
+  "conversations": [
+    {
+      "id": "conv-001",
+      "productId": "prod-001",
+      "productTitle": "iPhone 14 Pro 256GB Space Black",
+      "productImage": "https://images.unsplash.com/photo-1678685888221-cda773a3dcdb?w=100&h=100&fit=crop",
+      "buyer": {
+        "id": "buyer-001",
+        "name": "Sarah Schmidt",
+        "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop"
+      },
+      "lastMessage": "Wäre 800€ möglich? Kann bar zahlen und heute noch abholen.",
+      "lastMessageAt": "2024-01-22T15:30:00Z",
+      "unreadCount": 2,
+      "hasOffer": true,
+      "offerAmount": 800
+    },
+    {
+      "id": "conv-002",
+      "productId": "prod-003",
+      "productTitle": "Sony WH-1000XM4 Kopfhörer",
+      "productImage": "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=100&h=100&fit=crop",
+      "buyer": {
+        "id": "buyer-002",
+        "name": "Michael Weber",
+        "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop"
+      },
+      "lastMessage": "Sind die Kopfhörer noch verfügbar?",
+      "lastMessageAt": "2024-01-22T14:15:00Z",
+      "unreadCount": 1,
+      "hasOffer": false
+    },
+    {
+      "id": "conv-003",
+      "productId": "prod-006",
+      "productTitle": "Vintage Ledersessel 60er Jahre",
+      "productImage": "https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=100&h=100&fit=crop",
+      "buyer": {
+        "id": "buyer-003",
+        "name": "Julia Hoffmann",
+        "avatar": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop"
+      },
+      "lastMessage": "Danke für die zusätzlichen Fotos! Ich überlege noch.",
+      "lastMessageAt": "2024-01-21T18:45:00Z",
+      "unreadCount": 0,
+      "hasOffer": false
+    },
+    {
+      "id": "conv-004",
+      "productId": "prod-001",
+      "productTitle": "iPhone 14 Pro 256GB Space Black",
+      "productImage": "https://images.unsplash.com/photo-1678685888221-cda773a3dcdb?w=100&h=100&fit=crop",
+      "buyer": {
+        "id": "buyer-004",
+        "name": "Lukas Bauer",
+        "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop"
+      },
+      "lastMessage": "Können Sie mir noch ein Foto vom Display schicken?",
+      "lastMessageAt": "2024-01-20T11:20:00Z",
+      "unreadCount": 0,
+      "hasOffer": false
+    }
+  ],
+  "messages": [
+    {
+      "id": "msg-001",
+      "conversationId": "conv-001",
+      "senderId": "buyer-001",
+      "senderName": "Sarah Schmidt",
+      "content": "Hallo! Ist das iPhone noch verfügbar?",
+      "timestamp": "2024-01-22T14:00:00Z",
+      "isOwn": false,
+      "isRead": true
+    },
+    {
+      "id": "msg-002",
+      "conversationId": "conv-001",
+      "senderId": "seller-001",
+      "senderName": "Thomas Müller",
+      "content": "Ja, ist noch da! Haben Sie Interesse?",
+      "timestamp": "2024-01-22T14:30:00Z",
+      "isOwn": true,
+      "isRead": true
+    },
+    {
+      "id": "msg-003",
+      "conversationId": "conv-001",
+      "senderId": "buyer-001",
+      "senderName": "Sarah Schmidt",
+      "content": "Wäre 800€ möglich? Kann bar zahlen und heute noch abholen.",
+      "timestamp": "2024-01-22T15:30:00Z",
+      "isOwn": false,
+      "isRead": false
+    },
+    {
+      "id": "msg-004",
+      "conversationId": "conv-002",
+      "senderId": "buyer-002",
+      "senderName": "Michael Weber",
+      "content": "Sind die Kopfhörer noch verfügbar?",
+      "timestamp": "2024-01-22T14:15:00Z",
+      "isOwn": false,
+      "isRead": false
+    }
+  ],
+  "categories": [
+    {
+      "id": "cat-1",
+      "name": "Elektronik",
+      "slug": "elektronik",
+      "subcategories": [
+        { "id": "sub-1-1", "name": "Smartphones", "slug": "smartphones" },
+        { "id": "sub-1-2", "name": "Tablets", "slug": "tablets" },
+        { "id": "sub-1-3", "name": "Laptops", "slug": "laptops" },
+        { "id": "sub-1-4", "name": "Kopfhörer", "slug": "kopfhoerer" },
+        { "id": "sub-1-5", "name": "Gaming", "slug": "gaming" },
+        { "id": "sub-1-6", "name": "Kameras", "slug": "kameras" }
+      ]
+    },
+    {
+      "id": "cat-2",
+      "name": "Wohnen",
+      "slug": "wohnen",
+      "subcategories": [
+        { "id": "sub-2-1", "name": "Sofas", "slug": "sofas" },
+        { "id": "sub-2-2", "name": "Sessel", "slug": "sessel" },
+        { "id": "sub-2-3", "name": "Tische", "slug": "tische" },
+        { "id": "sub-2-4", "name": "Regale", "slug": "regale" },
+        { "id": "sub-2-5", "name": "Betten", "slug": "betten" },
+        { "id": "sub-2-6", "name": "Dekoration", "slug": "dekoration" }
+      ]
+    },
+    {
+      "id": "cat-3",
+      "name": "Sport",
+      "slug": "sport",
+      "subcategories": [
+        { "id": "sub-3-1", "name": "Fahrräder", "slug": "fahrraeder" },
+        { "id": "sub-3-2", "name": "Fitness", "slug": "fitness" },
+        { "id": "sub-3-3", "name": "Outdoor", "slug": "outdoor" },
+        { "id": "sub-3-4", "name": "Wintersport", "slug": "wintersport" }
+      ]
+    },
+    {
+      "id": "cat-4",
+      "name": "Mode",
+      "slug": "mode",
+      "subcategories": [
+        { "id": "sub-4-1", "name": "Damen", "slug": "damen" },
+        { "id": "sub-4-2", "name": "Herren", "slug": "herren" },
+        { "id": "sub-4-3", "name": "Schuhe", "slug": "schuhe" },
+        { "id": "sub-4-4", "name": "Taschen", "slug": "taschen" }
+      ]
+    }
+  ]
+}
