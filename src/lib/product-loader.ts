@@ -14,6 +14,11 @@ const productFiles = import.meta.glob('/product/*.md', {
   eager: true,
 }) as Record<string, string>
 
+// Debug logging
+console.log('[Product Loader] Available product files:', Object.keys(productFiles))
+console.log('[Product Loader] Overview exists:', '/product/product-overview.md' in productFiles)
+console.log('[Product Loader] Roadmap exists:', '/product/product-roadmap.md' in productFiles)
+
 // Load zip files from root directory at build time
 const exportZipFiles = import.meta.glob('/product-plan.zip', {
   query: '?url',
@@ -23,12 +28,16 @@ const exportZipFiles = import.meta.glob('/product-plan.zip', {
 
 /**
  * Slugify a string for use as an ID
- * Converts " & " to "-and-" to maintain semantic meaning
+ * Converts German umlauts (ä→ae, ö→oe, ü→ue, ß→ss) and " & " to dashes
  */
 function slugify(str: string): string {
   return str
     .toLowerCase()
-    .replace(/\s+&\s+/g, '-and-') // Convert " & " to "-and-" first
+    .replace(/ä/g, 'ae')
+    .replace(/ö/g, 'oe')
+    .replace(/ü/g, 'ue')
+    .replace(/ß/g, 'ss')
+    .replace(/\s+&\s+/g, ' ') // Convert " & " to space (will become dash in next step)
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '')
 }
@@ -122,13 +131,22 @@ export function parseProductRoadmap(md: string): ProductRoadmap | null {
   try {
     const sections: Section[] = []
 
+    // Normalize line endings to \n
+    const normalizedMd = md.replace(/\r\n/g, '\n')
+
+    console.log('[Parser] Roadmap content preview:', normalizedMd.substring(0, 200))
+
     // Match sections with pattern ### N. Title
-    const sectionMatches = [...md.matchAll(/### (\d+)\.\s*(.+)\n+([\s\S]*?)(?=\n### |\n## |\n#[^#]|$)/g)]
+    const sectionMatches = [...normalizedMd.matchAll(/### (\d+)\.\s*(.+)\n+([\s\S]*?)(?=\n### |\n## |\n#[^#]|$)/g)]
+
+    console.log('[Parser] Found section matches:', sectionMatches.length)
 
     for (const match of sectionMatches) {
       const order = parseInt(match[1], 10)
       const title = match[2].trim()
       const description = match[3].trim()
+
+      console.log('[Parser] Section:', { order, title, description: description.substring(0, 50) })
 
       sections.push({
         id: slugify(title),
@@ -142,11 +160,14 @@ export function parseProductRoadmap(md: string): ProductRoadmap | null {
     sections.sort((a, b) => a.order - b.order)
 
     if (sections.length === 0) {
+      console.log('[Parser] No sections found, returning null')
       return null
     }
 
+    console.log('[Parser] Successfully parsed sections:', sections.map(s => s.title))
     return { sections }
-  } catch {
+  } catch (e) {
+    console.error('[Parser] Error parsing roadmap:', e)
     return null
   }
 }
@@ -158,9 +179,15 @@ export function loadProductData(): ProductData {
   const overviewContent = productFiles['/product/product-overview.md']
   const roadmapContent = productFiles['/product/product-roadmap.md']
 
+  console.log('[Product Loader] Overview content length:', overviewContent?.length || 0)
+  console.log('[Product Loader] Roadmap content length:', roadmapContent?.length || 0)
+
+  const parsedRoadmap = roadmapContent ? parseProductRoadmap(roadmapContent) : null
+  console.log('[Product Loader] Parsed roadmap:', parsedRoadmap)
+
   return {
     overview: overviewContent ? parseProductOverview(overviewContent) : null,
-    roadmap: roadmapContent ? parseProductRoadmap(roadmapContent) : null,
+    roadmap: parsedRoadmap,
     dataModel: loadDataModel(),
     designSystem: loadDesignSystem(),
     shell: loadShellInfo(),

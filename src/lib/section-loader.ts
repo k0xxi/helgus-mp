@@ -35,6 +35,12 @@ const screenshotFiles = import.meta.glob('/product/sections/*/*.png', {
   eager: true,
 }) as Record<string, string>
 
+// Debug logging
+console.log('[Section Loader] Spec files:', Object.keys(specFiles))
+console.log('[Section Loader] Data files:', Object.keys(dataFiles))
+console.log('[Section Loader] Screen design modules:', Object.keys(screenDesignModules))
+console.log('[Section Loader] Screenshot files:', Object.keys(screenshotFiles))
+
 /**
  * Extract section ID from a product/sections file path
  * e.g., "/product/sections/invoices/spec.md" -> "invoices"
@@ -149,6 +155,8 @@ export function getSectionScreenDesigns(sectionId: string): ScreenDesignInfo[] {
   const screenDesigns: ScreenDesignInfo[] = []
   const prefix = `/src/sections/${sectionId}/`
 
+  console.log(`[Section Loader] getSectionScreenDesigns("${sectionId}"): looking for prefix "${prefix}"`)
+
   for (const path of Object.keys(screenDesignModules)) {
     if (path.startsWith(prefix)) {
       const name = extractScreenDesignName(path)
@@ -162,6 +170,7 @@ export function getSectionScreenDesigns(sectionId: string): ScreenDesignInfo[] {
     }
   }
 
+  console.log(`[Section Loader] getSectionScreenDesigns("${sectionId}"): found ${screenDesigns.length} screen design(s)`)
   return screenDesigns
 }
 
@@ -224,7 +233,10 @@ export function loadSectionData(sectionId: string): SectionData {
  * Check if a section has a spec.md file
  */
 export function hasSectionSpec(sectionId: string): boolean {
-  return `/product/sections/${sectionId}/spec.md` in specFiles
+  const path = `/product/sections/${sectionId}/spec.md`
+  const has = path in specFiles
+  console.log(`[Section Loader] hasSectionSpec("${sectionId}"): checking "${path}" -> ${has}`)
+  return has
 }
 
 /**
@@ -244,7 +256,10 @@ export function sectionUsesShell(sectionId: string): boolean {
  * Check if a section has a data.json file
  */
 export function hasSectionData(sectionId: string): boolean {
-  return `/product/sections/${sectionId}/data.json` in dataFiles
+  const path = `/product/sections/${sectionId}/data.json`
+  const has = path in dataFiles
+  console.log(`[Section Loader] hasSectionData("${sectionId}"): checking "${path}" -> ${has}`)
+  return has
 }
 
 /**
