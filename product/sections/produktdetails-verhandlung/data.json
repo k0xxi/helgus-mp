@@ -1,0 +1,201 @@
+{
+  "_meta": {
+    "models": {
+      "product": "Das aktuell angezeigte Produkt mit allen Details wie Bildern, Preis, Beschreibung und Versandoptionen.",
+      "seller": "Der Verkäufer des Produkts mit Kontaktinformationen und Standort.",
+      "category": "Die Kategorie-Hierarchie für die Breadcrumb-Navigation.",
+      "messages": "Chat-Nachrichten zwischen dem aktuellen Benutzer und dem Verkäufer zu diesem Produkt.",
+      "offers": "Gegenangebote, die für dieses Produkt gesendet wurden.",
+      "notifications": "Push-Benachrichtigungen des aktuellen Benutzers."
+    },
+    "relationships": [
+      "Product gehört zu einem Seller (Verkäufer)",
+      "Product gehört zu einer Category (für Breadcrumb)",
+      "Messages beziehen sich auf ein Product und verbinden Käufer mit Seller",
+      "Offers beziehen sich auf ein Product und werden vom Käufer an den Seller gesendet",
+      "Notifications informieren den User über neue Messages und Offers"
+    ]
+  },
+  "product": {
+    "id": "prod-001",
+    "title": "Bosch Professional Akkuschrauber GSR 18V-55",
+    "price": 189.00,
+    "description": "Hochwertiger Akkuschrauber von Bosch Professional in sehr gutem Zustand. Wurde nur für ein Heimwerkerprojekt verwendet und ist praktisch wie neu. Inkl. 2x 2.0 Ah Akkus, Ladegerät und Transportkoffer. Drehmoment: 55 Nm, 2-Gang-Getriebe, LED-Arbeitslicht. Originalrechnung von 2024 vorhanden.",
+    "condition": "Wie neu",
+    "images": [
+      {
+        "id": "img-001",
+        "url": "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=600&q=80",
+        "alt": "Bosch Akkuschrauber Vorderansicht"
+      },
+      {
+        "id": "img-002",
+        "url": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80",
+        "alt": "Akkuschrauber mit Zubehör im Koffer"
+      },
+      {
+        "id": "img-003",
+        "url": "https://images.unsplash.com/photo-1586864387789-628af9feed72?w=600&q=80",
+        "alt": "Nahaufnahme Bohrfutter"
+      },
+      {
+        "id": "img-004",
+        "url": "https://images.unsplash.com/photo-1581147036324-c17ac41f3e6a?w=600&q=80",
+        "alt": "Werkzeugkoffer mit Zubehör"
+      }
+    ],
+    "postalCode": "9020",
+    "city": "Klagenfurt",
+    "createdAt": "2026-01-16T10:30:00Z",
+    "shippingOptions": {
+      "pickup": true,
+      "shipping": true,
+      "shippingCost": 6.90
+    },
+    "isFavorite": false,
+    "viewCount": 127,
+    "sellerId": "user-002"
+  },
+  "seller": {
+    "id": "user-002",
+    "name": "Harald Jörg",
+    "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face",
+    "city": "Klagenfurt",
+    "memberSince": "2023-05-12",
+    "rating": 4.8,
+    "totalSales": 23,
+    "responseTime": "Antwortet meist innerhalb von 2 Stunden",
+    "isVerified": true
+  },
+  "category": {
+    "main": {
+      "id": "cat-001",
+      "name": "Garten & Heimwerken",
+      "slug": "garten-heimwerken"
+    },
+    "sub": {
+      "id": "cat-001-03",
+      "name": "Werkzeug",
+      "slug": "werkzeug"
+    }
+  },
+  "messages": [
+    {
+      "id": "msg-001",
+      "senderId": "user-001",
+      "senderName": "Du",
+      "content": "Hallo! Ist der Akkuschrauber noch verfügbar?",
+      "timestamp": "2026-01-28T14:22:00Z",
+      "isOwn": true,
+      "isRead": true
+    },
+    {
+      "id": "msg-002",
+      "senderId": "user-002",
+      "senderName": "Harald Jörg",
+      "content": "Ja, ist noch da! Bei Interesse können wir gerne einen Abholtermin vereinbaren.",
+      "timestamp": "2026-01-28T14:45:00Z",
+      "isOwn": false,
+      "isRead": true
+    },
+    {
+      "id": "msg-003",
+      "senderId": "user-001",
+      "senderName": "Du",
+      "content": "Super! Funktionieren beide Akkus noch einwandfrei?",
+      "timestamp": "2026-01-28T15:10:00Z",
+      "isOwn": true,
+      "isRead": true
+    },
+    {
+      "id": "msg-004",
+      "senderId": "user-002",
+      "senderName": "Harald Jörg",
+      "content": "Ja, beide halten noch die volle Kapazität. Wie gesagt, wurde kaum benutzt. Ich kann Ihnen gerne ein kurzes Video schicken wenn Sie möchten.",
+      "timestamp": "2026-01-28T15:33:00Z",
+      "isOwn": false,
+      "isRead": true
+    },
+    {
+      "id": "msg-005",
+      "senderId": "user-001",
+      "senderName": "Du",
+      "content": "Das wäre super, danke!",
+      "timestamp": "2026-01-28T15:40:00Z",
+      "isOwn": true,
+      "isRead": true
+    }
+  ],
+  "offers": [
+    {
+      "id": "offer-001",
+      "productId": "prod-001",
+      "buyerId": "user-003",
+      "buyerName": "Maria K.",
+      "amount": 150.00,
+      "originalPrice": 189.00,
+      "message": "Würden Sie auch 150€ akzeptieren? Könnte bar abholen.",
+      "status": "pending",
+      "createdAt": "2026-01-27T09:15:00Z"
+    },
+    {
+      "id": "offer-002",
+      "productId": "prod-001",
+      "buyerId": "user-004",
+      "buyerName": "Thomas W.",
+      "amount": 140.00,
+      "originalPrice": 189.00,
+      "message": "Mein Angebot: 140€",
+      "status": "declined",
+      "createdAt": "2026-01-25T16:42:00Z",
+      "respondedAt": "2026-01-25T18:20:00Z"
+    }
+  ],
+  "notifications": [
+    {
+      "id": "notif-001",
+      "type": "new_message",
+      "title": "Neue Nachricht",
+      "message": "Harald Jörg hat auf Ihre Anfrage geantwortet",
+      "productId": "prod-001",
+      "productTitle": "Bosch Professional Akkuschrauber",
+      "timestamp": "2026-01-28T15:33:00Z",
+      "isRead": false
+    },
+    {
+      "id": "notif-002",
+      "type": "offer_received",
+      "title": "Neues Gegenangebot",
+      "message": "Sie haben ein Gegenangebot über 165€ erhalten",
+      "productId": "prod-005",
+      "productTitle": "IKEA Kallax Regal",
+      "timestamp": "2026-01-28T11:20:00Z",
+      "isRead": false
+    },
+    {
+      "id": "notif-003",
+      "type": "offer_accepted",
+      "title": "Angebot akzeptiert",
+      "message": "Ihr Angebot über 85€ wurde akzeptiert!",
+      "productId": "prod-008",
+      "productTitle": "Nintendo Switch Controller",
+      "timestamp": "2026-01-27T14:05:00Z",
+      "isRead": true
+    },
+    {
+      "id": "notif-004",
+      "type": "price_drop",
+      "title": "Preissenkung",
+      "message": "Ein Produkt auf Ihrer Merkliste wurde reduziert",
+      "productId": "prod-012",
+      "productTitle": "Canyon Mountainbike",
+      "timestamp": "2026-01-26T09:00:00Z",
+      "isRead": true
+    }
+  ],
+  "currentUser": {
+    "id": "user-001",
+    "name": "Max Mustermann",
+    "unreadNotifications": 2
+  }
+}
