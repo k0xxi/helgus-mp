@@ -124,6 +124,19 @@ export function useProducts(
     setError(null)
 
     try {
+      let categoryId: string | null = null
+
+      // If category filter is applied, find the category ID first
+      if (filters.category) {
+        const { data: categoryData } = await supabase
+          .from('categories')
+          .select('id')
+          .eq('slug', filters.category)
+          .single()
+
+        categoryId = categoryData?.id || null
+      }
+
       // Build query
       let query = supabase
         .from('products')
@@ -144,9 +157,9 @@ export function useProducts(
         )
       }
 
-      if (filters.category) {
-        // Filter by category slug
-        query = query.eq('categories.slug', filters.category)
+      if (categoryId) {
+        // Filter by category_id (direct column filter)
+        query = query.eq('category_id', categoryId)
       }
 
       if (filters.priceMin !== undefined) {
