@@ -28,6 +28,7 @@ import {
   SellPage,
   NotificationsPage,
   ProductPage as MarketplaceProductPage,
+  SellerDashboard,
 } from '@/marketplace/pages'
 
 // Wrapper to provide AuthContext to marketplace routes
@@ -120,6 +121,10 @@ export const router = createBrowserRouter([
           {
             path: 'profile',
             element: <ProfilePage />,
+          },
+          {
+            path: 'seller-dashboard',
+            element: <SellerDashboard />,
           },
           {
             path: 'profile/settings',

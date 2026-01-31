@@ -73,18 +73,16 @@ export function SellerCard({ seller, isSeller, onSendMessage, onViewProfile }: S
         </div>
       </div>
 
-      {/* Send Message Button */}
-      {!isSeller && (
-        <button
-          onClick={onSendMessage}
-          className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-2.5 text-red-600 dark:text-red-400 font-medium border border-slate-200 dark:border-slate-600 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
-        >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-          </svg>
-          Nachricht senden
-        </button>
-      )}
+      {/* Send Message Button - for buyers OR view messages button for sellers */}
+      <button
+        onClick={onSendMessage}
+        className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-2.5 text-red-600 dark:text-red-400 font-medium border border-slate-200 dark:border-slate-600 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+      >
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+        {isSeller ? 'Nachrichten anzeigen' : 'Nachricht senden'}
+      </button>
     </div>
   )
 }

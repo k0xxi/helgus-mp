@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import type { Tables } from '@/types/database'
 import type {
@@ -77,12 +78,13 @@ async function createNotification(params: {
   productId?: string
 }): Promise<void> {
   try {
-    await supabase.from('notifications').insert({
-      user_id: params.userId,
-      type: params.type,
-      title: params.title,
-      message: params.message,
-      product_id: params.productId || null,
+    // Use database function to bypass RLS and ensure real-time subscriptions work
+    await supabase.rpc('create_notification', {
+      p_user_id: params.userId,
+      p_type: params.type,
+      p_title: params.title,
+      p_message: params.message,
+      p_product_id: params.productId || null,
     } as never)
   } catch (err) {
     console.error('Failed to create notification:', err)
@@ -177,6 +179,14 @@ export function useProductDetail(
         sellerId: queryResult.seller_id,
       }
 
+      // Validate required data
+      if (!profile) {
+        throw new Error('Seller profile not found')
+      }
+      if (!cat) {
+        throw new Error('Product category not found')
+      }
+
       // Map to Seller type (use placeholder values for rating, sales, responseTime)
       const mappedSeller: Seller = {
         id: profile.id,
@@ -247,8 +257,15 @@ export function useProductDetail(
 // useConversation - Fetch or create conversation and messages
 // =============================================================================
 
+interface ConversationData {
+  id: string
+  buyer_id: string
+  seller_id: string
+}
+
 interface UseConversationResult {
   conversationId: string | null
+  buyerId: string | null
   messages: Message[]
   loading: boolean
   error: Error | null
@@ -262,6 +279,7 @@ export function useConversation(
   userId: string | undefined
 ): UseConversationResult {
   const [conversationId, setConversationId] = useState<string | null>(null)
+  const [conversation, setConversation] = useState<ConversationData | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
@@ -272,31 +290,36 @@ export function useConversation(
       return
     }
 
-    // Don't fetch conversation if user is the seller
-    if (userId === sellerId) {
-      setLoading(false)
-      return
-    }
-
     setLoading(true)
     setError(null)
 
     try {
-      // Try to find existing conversation
-      const { data: existingConv, error: convError } = await supabase
+      let query = supabase
         .from('conversations')
-        .select('id')
+        .select('id, buyer_id, seller_id')
         .eq('product_id', productId)
-        .eq('buyer_id', userId)
-        .single()
+
+      // If user is the buyer, find conversation where they're the buyer
+      // If user is the seller, find the most recent conversation
+      if (userId !== sellerId) {
+        query = query.eq('buyer_id', userId)
+      }
+
+      // Get the most recent conversation
+      const { data: existingConv, error: convError } = await query
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
 
       if (convError && convError.code !== 'PGRST116') {
         // PGRST116 = no rows returned
         throw convError
       }
 
-      let convId = existingConv?.id || null
+      const convData = existingConv as ConversationData | null
+      let convId = convData?.id || null
       setConversationId(convId)
+      setConversation(convData)
 
       if (convId) {
         // Fetch messages for this conversation
@@ -348,15 +371,26 @@ export function useConversation(
       return { error: new Error('Bitte melden Sie sich an, um Nachrichten zu senden.') }
     }
 
-    if (userId === sellerId) {
-      return { error: new Error('Sie können sich nicht selbst eine Nachricht senden.') }
+    // Validate message content
+    if (!content.trim()) {
+      return { error: new Error('Nachricht kann nicht leer sein.') }
+    }
+
+    if (content.length > 1000) {
+      return { error: new Error('Nachricht ist zu lang (max. 1000 Zeichen).') }
     }
 
     try {
       let convId = conversationId
 
-      // Create conversation if it doesn't exist
+      // Create conversation if it doesn't exist (only possible for buyers)
       if (!convId) {
+        // For sellers: error - can't start a new conversation
+        if (userId === sellerId) {
+          return { error: new Error('Keine aktive Konversation gefunden.') }
+        }
+
+        // For buyers: create new conversation
         const insertData = {
           product_id: productId,
           buyer_id: userId,
@@ -404,14 +438,18 @@ export function useConversation(
       }
       setMessages((prev) => [...prev, newMessage])
 
-      // Create notification for recipient (seller)
-      await createNotification({
-        userId: sellerId,
-        type: 'new_message',
-        title: 'Neue Nachricht',
-        message: content.length > 50 ? content.substring(0, 50) + '...' : content,
-        productId,
-      })
+      // Create notification for recipient
+      // If user is seller, notify the buyer; if user is buyer, notify the seller
+      const recipientId = userId === sellerId ? conversation?.buyer_id : sellerId
+      if (recipientId) {
+        await createNotification({
+          userId: recipientId,
+          type: 'new_message',
+          title: 'Neue Nachricht',
+          message: content.length > 50 ? content.substring(0, 50) + '...' : content,
+          productId,
+        })
+      }
 
       return { error: null }
     } catch (err) {
@@ -423,7 +461,7 @@ export function useConversation(
     fetchConversation()
   }, [fetchConversation])
 
-  return { conversationId, messages, loading, error, sendMessage, refetch: fetchConversation }
+  return { conversationId, buyerId: conversation?.buyer_id || null, messages, loading, error, sendMessage, refetch: fetchConversation }
 }
 
 // =============================================================================
@@ -448,6 +486,7 @@ export function useOffers(
   const [offers, setOffers] = useState<Offer[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
+  const queryClient = useQueryClient()
 
   const fetchOffers = useCallback(async () => {
     if (!productId || !userId) {
@@ -513,6 +552,20 @@ export function useOffers(
   const createOffer = async (amount: number, message?: string): Promise<{ error: Error | null }> => {
     if (!productId || !userId) {
       return { error: new Error('Bitte melden Sie sich an, um ein Angebot zu machen.') }
+    }
+
+    // Validate offer amount
+    if (!Number.isFinite(amount) || amount <= 0) {
+      return { error: new Error('Angebotspreis muss größer als 0 sein.') }
+    }
+
+    if (amount > 999999999) {
+      return { error: new Error('Angebotspreis ist zu hoch.') }
+    }
+
+    // Validate optional message
+    if (message && message.length > 500) {
+      return { error: new Error('Nachricht ist zu lang (max. 500 Zeichen).') }
     }
 
     try {
@@ -600,9 +653,34 @@ export function useOffers(
         message: notificationMessage,
         productId,
       })
+      // Invalidate buyer's notifications cache
+      queryClient.invalidateQueries({
+        queryKey: ['notifications', 'list', offer.buyerId],
+      })
+
+      // Create notification for seller about their response action
+      const sellerNotificationTitle = status === 'accepted' ? 'Angebot angenommen' : 'Angebot abgelehnt'
+      const sellerNotificationMessage = status === 'accepted'
+        ? `Du hast das Angebot von ${offer.buyerName} über ${offer.amount.toLocaleString('de-AT')} € angenommen.`
+        : `Du hast das Angebot von ${offer.buyerName} über ${offer.amount.toLocaleString('de-AT')} € abgelehnt.`
+
+      if (userId) {
+        await createNotification({
+          userId,
+          type: notificationType,
+          title: sellerNotificationTitle,
+          message: sellerNotificationMessage,
+          productId,
+        })
+        // Invalidate seller's notifications cache
+        queryClient.invalidateQueries({
+          queryKey: ['notifications', 'list', userId],
+        })
+      }
 
       return { error: null }
     } catch (err) {
+      console.error('Error in respondToOffer:', err)
       return { error: err as Error }
     }
   }
@@ -740,4 +818,74 @@ export function useNotifications(userId: string | undefined): UseNotificationsRe
     markAllAsRead,
     refetch: fetchNotifications,
   }
+}
+
+// =============================================================================
+// useBuyerProfile - Fetch buyer profile when seller is viewing conversation
+// =============================================================================
+
+interface UseBuyerProfileResult {
+  buyer: Seller | null
+  loading: boolean
+  error: Error | null
+}
+
+export function useBuyerProfile(buyerId: string | null | undefined): UseBuyerProfileResult {
+  const [buyer, setBuyer] = useState<Seller | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<Error | null>(null)
+
+  const fetchBuyer = useCallback(async () => {
+    if (!buyerId) {
+      setBuyer(null)
+      setLoading(false)
+      return
+    }
+
+    setLoading(true)
+    setError(null)
+
+    try {
+      const { data: profile, error: fetchError } = await supabase
+        .from('profiles')
+        .select('id, name, avatar_url, city, is_verified, created_at')
+        .eq('id', buyerId)
+        .single()
+
+      if (fetchError) {
+        throw fetchError
+      }
+
+      if (!profile) {
+        throw new Error('Buyer profile not found')
+      }
+
+      const mappedBuyer: Seller = {
+        id: profile.id,
+        name: profile.name,
+        avatar: profile.avatar_url
+          ? supabase.storage.from('profiles').getPublicUrl(profile.avatar_url).data.publicUrl
+          : undefined,
+        city: profile.city || 'Österreich',
+        memberSince: profile.created_at,
+        rating: 5,
+        totalSales: 0,
+        responseTime: 'Antwortet meist innerhalb von 24h',
+        isVerified: profile.is_verified,
+      }
+
+      setBuyer(mappedBuyer)
+    } catch (err) {
+      setError(err as Error)
+      setBuyer(null)
+    } finally {
+      setLoading(false)
+    }
+  }, [buyerId])
+
+  useEffect(() => {
+    fetchBuyer()
+  }, [fetchBuyer])
+
+  return { buyer, loading, error }
 }

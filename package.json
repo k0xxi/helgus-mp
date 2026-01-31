@@ -21,6 +21,7 @@
     "@radix-ui/react-tabs": "^1.1.13",
     "@supabase/supabase-js": "^2.93.3",
     "@tailwindcss/vite": "^4.1.17",
+    "@tanstack/react-query": "^5.90.20",
     "anthropic": "^0.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -29,6 +30,7 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.9.6",
+    "recharts": "^3.7.0",
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^4.1.17"
   },

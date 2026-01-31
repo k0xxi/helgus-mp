@@ -1,19 +1,60 @@
-import { useEffect } from 'react'
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom'
 import { ArrowLeft, AlertTriangle, Loader2 } from 'lucide-react'
 import { ProductDetail } from '@/sections/produktdetails-verhandlung/components/ProductDetail'
-import { useProductDetail, useConversation, useOffers, useNotifications } from '@/marketplace/hooks/useProductDetail'
+import {
+  useProductDetail,
+  useOffers,
+  useProductConversationsQuery,
+  useConversationMessagesQuery,
+  useBuyerProfileQuery,
+  useSendMessageMutation,
+  useMarkMessagesAsReadMutation,
+  useMessagesSubscription,
+  useConversationsSubscription,
+} from '@/marketplace/hooks'
 import { useFavorites } from '@/marketplace/hooks/useFavorites'
 import { useAuth } from '@/marketplace/context/AuthContext'
 
 export function ProductPage() {
   const { productId } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
   const { user, profile } = useAuth()
+  const [isTyping, setIsTyping] = useState(false)
+  const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null)
 
-  // Check if chat should open automatically (from notification click)
-  const shouldOpenChat = searchParams.get('openChat') === 'true'
+  // Track whether chat should be open (persists even after URL param is cleared)
+  const [shouldInitiallyChatOpen, setShouldInitiallyChatOpen] = useState(false)
+
+  // Detect if chat should open from URL param
+  useEffect(() => {
+    const openChatParam = searchParams.get('openChat') === 'true'
+    if (openChatParam && !shouldInitiallyChatOpen) {
+      setShouldInitiallyChatOpen(true)
+    }
+  }, [searchParams, shouldInitiallyChatOpen])
+
+  // Scroll to section if hash is present
+  useEffect(() => {
+    if (location.hash === '#gegenangebote') {
+      // Use setTimeout to ensure DOM is ready
+      setTimeout(() => {
+        const section = document.getElementById('gegenangebote')
+        if (section) {
+          section.scrollIntoView({ behavior: 'smooth' })
+        }
+      }, 100)
+    }
+  }, [location.hash])
+
+  // Handle typing indicator timeout
+  useEffect(() => {
+    return () => {
+      if (typingTimeout) clearTimeout(typingTimeout)
+    }
+  }, [typingTimeout])
 
   // Favorites hook
   const { isFavorited, toggleFavorite } = useFavorites(user?.id)
@@ -29,11 +70,37 @@ export function ProductPage() {
     incrementViewCount,
   } = useProductDetail(productId, user?.id, isProductFavorited)
 
-  // Conversation hook
+  // Conversation query (React Query)
   const {
-    messages,
-    sendMessage,
-  } = useConversation(productId, seller?.id, user?.id)
+    data: conversation,
+    isLoading: conversationLoading,
+  } = useProductConversationsQuery(productId, seller?.id, user?.id)
+
+  // Messages query (React Query)
+  const {
+    data: messages = [],
+    isLoading: messagesLoading,
+  } = useConversationMessagesQuery(conversation?.id, user?.id)
+
+  // Buyer profile query (React Query)
+  const {
+    data: buyerProfile,
+  } = useBuyerProfileQuery(conversation?.buyer_id)
+
+  // Send message mutation (React Query)
+  const {
+    mutateAsync: sendMessage,
+    isPending: isSendingMessage,
+  } = useSendMessageMutation()
+
+  // Mark messages as read mutation (React Query)
+  const {
+    mutate: markMessagesAsRead,
+  } = useMarkMessagesAsReadMutation()
+
+  // Real-time message subscriptions
+  useMessagesSubscription(conversation?.id)
+  useConversationsSubscription(user?.id)
 
   // Offers hook
   const {
@@ -42,21 +109,15 @@ export function ProductPage() {
     respondToOffer,
   } = useOffers(productId, product?.price || 0, user?.id, seller?.id)
 
-  // Notifications hook
-  const {
-    notifications,
-    unreadCount,
-    markAsRead,
-    markAllAsRead,
-  } = useNotifications(user?.id)
 
-  // Clear the openChat param after reading it
+  // Clear the openChat param after detecting it (to keep URL clean)
   useEffect(() => {
-    if (shouldOpenChat) {
-      searchParams.delete('openChat')
-      setSearchParams(searchParams, { replace: true })
+    if (searchParams.has('openChat')) {
+      const params = new URLSearchParams(searchParams)
+      params.delete('openChat')
+      setSearchParams(params, { replace: true })
     }
-  }, [shouldOpenChat, searchParams, setSearchParams])
+  }, []) // Only run once on mount
 
   // Increment view count on first load
   useEffect(() => {
@@ -66,6 +127,20 @@ export function ProductPage() {
     // Only run once when product loads
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productId, !!product])
+
+  // Mark messages as read when viewing a conversation
+  useEffect(() => {
+    if (conversation?.id && user?.id && messages.length > 0) {
+      // Check if there are unread messages from other users
+      const hasUnread = messages.some(msg => !msg.isOwn && !msg.isRead)
+      if (hasUnread) {
+        markMessagesAsRead({
+          conversationId: conversation.id,
+          userId: user.id,
+        })
+      }
+    }
+  }, [conversation?.id, user?.id, messages, markMessagesAsRead])
 
   // Loading state
   if (productLoading) {
@@ -120,7 +195,6 @@ export function ProductPage() {
   const currentUser = {
     id: user?.id || '',
     name: profile?.name || 'Gast',
-    unreadNotifications: unreadCount,
   }
 
   // Handlers
@@ -203,9 +277,29 @@ export function ProductPage() {
       navigate('/marketplace/auth')
       return
     }
-    const { error } = await sendMessage(content)
-    if (error) {
+
+    if (!productId || !seller?.id) {
+      console.error('Missing product or seller information')
+      return
+    }
+
+    try {
+      // Show typing indicator for outgoing messages
+      setIsTyping(true)
+
+      await sendMessage({
+        conversationId: conversation?.id,
+        content,
+        userId: user.id,
+        productId,
+        sellerId: seller.id,
+      })
+
+      // Clear typing indicator after send
+      setIsTyping(false)
+    } catch (error) {
       console.error('Error sending message:', error)
+      setIsTyping(false)
     }
   }
 
@@ -213,23 +307,17 @@ export function ProductPage() {
     navigate(`/marketplace/profile/${sellerId}`)
   }
 
-  const handleNotificationClick = (notification: { id: string; productId: string; type: string }) => {
-    if (notification.productId) {
-      // Add openChat param for message notifications
-      const chatParam = notification.type === 'new_message' ? '?openChat=true' : ''
-      navigate(`/marketplace/product/${notification.productId}${chatParam}`)
-    }
-    markAsRead(notification.id)
-  }
-
   const handleRespondToOffer = async (offerId: string, status: 'accepted' | 'declined') => {
+    console.log('📌 handleRespondToOffer called:', { offerId, status })
     if (!user) {
       navigate('/marketplace/auth')
       return
     }
     const { error } = await respondToOffer(offerId, status)
     if (error) {
-      console.error('Error responding to offer:', error)
+      console.error('❌ Error responding to offer:', error)
+    } else {
+      console.log('✅ Offer response handled successfully')
     }
   }
 
@@ -237,11 +325,12 @@ export function ProductPage() {
     <ProductDetail
       product={productWithFavorite}
       seller={seller}
+      buyer={buyerProfile}
       category={category}
       messages={messages}
       offers={offers}
-      notifications={notifications}
       currentUser={currentUser}
+      isTyping={isTyping}
       onBack={handleBack}
       onCategoryClick={handleCategoryClick}
       onMakeOffer={handleMakeOffer}
@@ -250,12 +339,9 @@ export function ProductPage() {
       onShare={handleShare}
       onSendMessage={handleSendMessage}
       onViewSellerProfile={handleViewSellerProfile}
-      onMarkNotificationRead={markAsRead}
-      onMarkAllNotificationsRead={markAllAsRead}
-      onNotificationClick={handleNotificationClick}
       onAcceptOffer={(offerId) => handleRespondToOffer(offerId, 'accepted')}
       onDeclineOffer={(offerId) => handleRespondToOffer(offerId, 'declined')}
-      initialChatOpen={shouldOpenChat}
+      initialChatOpen={shouldInitiallyChatOpen}
     />
   )
 }

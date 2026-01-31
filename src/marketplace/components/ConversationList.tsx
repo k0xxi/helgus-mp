@@ -55,62 +55,63 @@ export function ConversationList({
         const unreadCount = conversation.unreadCount || 0
 
         return (
-          <button
-            key={conversation.id}
-            onClick={() => onConversationClick(conversation)}
-            className="w-full text-left rounded-lg border border-slate-200 dark:border-slate-700 p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors flex gap-4"
-          >
-            {/* Product Image Placeholder */}
-            <div className="flex-shrink-0 w-16 h-16 bg-slate-200 dark:bg-slate-700 rounded-lg overflow-hidden flex items-center justify-center">
-              {conversation.product?.images && conversation.product.images.length > 0 ? (
-                <img
-                  src={conversation.product.images[0].url}
-                  alt={conversation.product.title}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <svg className="w-8 h-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              )}
-            </div>
-
-            {/* Conversation Info */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-3 mb-1">
-                <h3 className="font-semibold text-slate-900 dark:text-white truncate">
-                  {conversation.product?.title || 'Unbekanntes Produkt'}
-                </h3>
-                <div className="flex-shrink-0 flex flex-col items-end gap-1">
-                  <span className="text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">
-                    {lastMessage ? formatDate(lastMessage.createdAt) : 'Neu'}
-                  </span>
-                  {unreadCount > 0 && (
-                    <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-medium text-white bg-red-600 rounded-full">
-                      {unreadCount}
-                    </span>
-                  )}
-                </div>
+          <div key={conversation.id} className="flex gap-2 items-stretch group">
+            <button
+              onClick={() => onConversationClick(conversation)}
+              className="flex-1 text-left rounded-lg border border-slate-200 dark:border-slate-700 p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors flex gap-4 cursor-pointer"
+            >
+              {/* Product Image Placeholder */}
+              <div className="flex-shrink-0 w-16 h-16 bg-slate-200 dark:bg-slate-700 rounded-lg overflow-hidden flex items-center justify-center">
+                {conversation.product?.images && conversation.product.images.length > 0 ? (
+                  <img
+                    src={conversation.product.images[0].url}
+                    alt={conversation.product.title}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <svg className="w-8 h-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                )}
               </div>
 
-              {/* Other Party Name */}
-              <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">
-                {otherParty?.name || 'Unbekannter Nutzer'}
-              </p>
+              {/* Conversation Info */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between gap-3 mb-1">
+                  <h3 className="font-semibold text-slate-900 dark:text-white truncate">
+                    {conversation.product?.title || 'Unbekanntes Produkt'}
+                  </h3>
+                  <div className="flex-shrink-0 flex flex-col items-end gap-1">
+                    <span className="text-xs text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                      {lastMessage ? formatDate(lastMessage.createdAt) : 'Neu'}
+                    </span>
+                    {unreadCount > 0 && (
+                      <span className="inline-flex items-center justify-center px-2 py-0.5 text-xs font-medium text-white bg-red-600 rounded-full">
+                        {unreadCount}
+                      </span>
+                    )}
+                  </div>
+                </div>
 
-              {/* Last Message Preview */}
-              {lastMessage ? (
-                <p className="text-sm text-slate-600 dark:text-slate-400 truncate">
-                  <span className={lastMessage.senderId === currentUserId ? 'text-slate-500 dark:text-slate-500' : ''}>
-                    {lastMessage.senderId === currentUserId ? 'Du: ' : ''}
-                  </span>
-                  {truncateMessage(lastMessage.content)}
+                {/* Other Party Name */}
+                <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">
+                  {otherParty?.name || 'Unbekannter Nutzer'}
                 </p>
-              ) : (
-                <p className="text-sm text-slate-400 dark:text-slate-500 italic">Keine Nachrichten</p>
-              )}
-            </div>
-          </button>
+
+                {/* Last Message Preview */}
+                {lastMessage ? (
+                  <p className="text-sm text-slate-600 dark:text-slate-400 truncate">
+                    <span className={lastMessage.senderId === currentUserId ? 'text-slate-500 dark:text-slate-500' : ''}>
+                      {lastMessage.senderId === currentUserId ? 'Du: ' : ''}
+                    </span>
+                    {truncateMessage(lastMessage.content)}
+                  </p>
+                ) : (
+                  <p className="text-sm text-slate-400 dark:text-slate-500 italic">Keine Nachrichten</p>
+                )}
+              </div>
+            </button>
+          </div>
         )
       })}
     </div>

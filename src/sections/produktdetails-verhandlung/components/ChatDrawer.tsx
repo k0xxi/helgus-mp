@@ -5,8 +5,9 @@ interface ChatDrawerProps {
   isOpen: boolean
   onClose: () => void
   messages: Message[]
-  seller: Seller
+  otherParty: Seller
   onSendMessage?: (content: string) => void
+  isTyping?: boolean
 }
 
 function formatTime(timestamp: string): string {
@@ -28,7 +29,7 @@ function formatDate(timestamp: string): string {
   return date.toLocaleDateString('de-AT', { day: 'numeric', month: 'long' })
 }
 
-export function ChatDrawer({ isOpen, onClose, messages, seller, onSendMessage }: ChatDrawerProps) {
+export function ChatDrawer({ isOpen, onClose, messages, otherParty, onSendMessage, isTyping = false }: ChatDrawerProps) {
   const [newMessage, setNewMessage] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -83,8 +84,8 @@ export function ChatDrawer({ isOpen, onClose, messages, seller, onSendMessage }:
 
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden flex-shrink-0">
-              {seller.avatar ? (
-                <img src={seller.avatar} alt={seller.name} className="w-full h-full object-cover" />
+              {otherParty.avatar ? (
+                <img src={otherParty.avatar} alt={otherParty.name} className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-slate-400">
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -94,8 +95,8 @@ export function ChatDrawer({ isOpen, onClose, messages, seller, onSendMessage }:
               )}
             </div>
             <div className="min-w-0">
-              <p className="font-semibold text-slate-900 dark:text-white truncate">{seller.name}</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400">{seller.responseTime}</p>
+              <p className="font-semibold text-slate-900 dark:text-white truncate">{otherParty.name}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">{otherParty.responseTime}</p>
             </div>
           </div>
         </div>
@@ -111,7 +112,7 @@ export function ChatDrawer({ isOpen, onClose, messages, seller, onSendMessage }:
               </div>
               <p className="text-slate-600 dark:text-slate-300 font-medium">Noch keine Nachrichten</p>
               <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                Schreiben Sie {seller.name} eine Nachricht
+                Schreiben Sie {otherParty.name} eine Nachricht
               </p>
             </div>
           ) : (
@@ -149,6 +150,19 @@ export function ChatDrawer({ isOpen, onClose, messages, seller, onSendMessage }:
                 </div>
               </div>
             ))
+          )}
+
+          {/* Typing Indicator */}
+          {isTyping && (
+            <div className="flex justify-start">
+              <div className="max-w-[80%] px-4 py-2.5 rounded-2xl bg-slate-100 dark:bg-slate-800 rounded-bl-md">
+                <div className="flex gap-1">
+                  <div className="w-2 h-2 bg-slate-400 dark:bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <div className="w-2 h-2 bg-slate-400 dark:bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '100ms' }} />
+                  <div className="w-2 h-2 bg-slate-400 dark:bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '200ms' }} />
+                </div>
+              </div>
+            </div>
           )}
           <div ref={messagesEndRef} />
         </div>

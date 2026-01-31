@@ -111,6 +111,8 @@ export interface ProductDetailProps {
   product: Product
   /** Der Verkäufer des Produkts */
   seller: Seller
+  /** Der Käufer (für Verkäufersicht) */
+  buyer?: Seller | null
   /** Kategorie-Pfad für Breadcrumb */
   category: Category
   /** Chat-Nachrichten zu diesem Produkt */
@@ -121,6 +123,8 @@ export interface ProductDetailProps {
   notifications: Notification[]
   /** Aktueller Benutzer */
   currentUser: CurrentUser
+  /** Typing indicator state */
+  isTyping?: boolean
 
   // === Navigation ===
   /** Zurück zur vorherigen Seite */

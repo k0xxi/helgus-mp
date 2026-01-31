@@ -1,4 +1,4 @@
-import { User, Settings, Package, Shield, BadgeCheck } from 'lucide-react'
+import { User, Settings, Package, Shield, BadgeCheck, LayoutDashboard } from 'lucide-react'
 import { useAuth } from '@/marketplace/context/AuthContext'
 import { Link, useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
@@ -72,20 +72,22 @@ export function ProfilePage() {
 
       {/* Quick links */}
       <div className="grid gap-4 md:grid-cols-2">
-        <Link
-          to="/marketplace/profile/settings"
-          className="flex items-center gap-4 rounded-lg border border-slate-200 bg-white p-4 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700"
-        >
-          <div className="rounded-lg bg-slate-100 p-3 dark:bg-slate-700">
-            <Settings className="h-5 w-5 text-slate-600 dark:text-slate-300" />
-          </div>
-          <div>
-            <h3 className="font-medium text-slate-900 dark:text-white">Einstellungen</h3>
-            <p className="text-sm text-slate-600 dark:text-slate-400">
-              Profil und Kontoeinstellungen bearbeiten
-            </p>
-          </div>
-        </Link>
+        {profile?.isVerified && (
+          <Link
+            to="/marketplace/seller-dashboard"
+            className="flex items-center gap-4 rounded-lg border border-slate-200 bg-white p-4 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700"
+          >
+            <div className="rounded-lg bg-slate-100 p-3 dark:bg-slate-700">
+              <LayoutDashboard className="h-5 w-5 text-slate-600 dark:text-slate-300" />
+            </div>
+            <div>
+              <h3 className="font-medium text-slate-900 dark:text-white">Verkäufer-Dashboard</h3>
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                Statistiken und Verkaufsaktivitäten
+              </p>
+            </div>
+          </Link>
+        )}
 
         <Link
           to="/marketplace/sell"
@@ -98,6 +100,21 @@ export function ProfilePage() {
             <h3 className="font-medium text-slate-900 dark:text-white">Meine Anzeigen</h3>
             <p className="text-sm text-slate-600 dark:text-slate-400">
               Ihre aktiven und verkauften Artikel
+            </p>
+          </div>
+        </Link>
+
+        <Link
+          to="/marketplace/profile/settings"
+          className="flex items-center gap-4 rounded-lg border border-slate-200 bg-white p-4 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700"
+        >
+          <div className="rounded-lg bg-slate-100 p-3 dark:bg-slate-700">
+            <Settings className="h-5 w-5 text-slate-600 dark:text-slate-300" />
+          </div>
+          <div>
+            <h3 className="font-medium text-slate-900 dark:text-white">Einstellungen</h3>
+            <p className="text-sm text-slate-600 dark:text-slate-400">
+              Profil und Kontoeinstellungen bearbeiten
             </p>
           </div>
         </Link>

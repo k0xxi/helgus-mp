@@ -1,7 +1,8 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Search, TrendingUp, Tag, Shield } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/marketplace/context/AuthContext'
 import type { Tables } from '@/types/database'
 
 interface CategoryWithCount extends Tables<'categories'> {
@@ -9,8 +10,23 @@ interface CategoryWithCount extends Tables<'categories'> {
 }
 
 export function HomePage() {
+  const navigate = useNavigate()
+  const { user, profile } = useAuth()
   const [categories, setCategories] = useState<CategoryWithCount[]>([])
   const [loading, setLoading] = useState(true)
+
+  const handleSellClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    if (!user) {
+      navigate('/marketplace/auth')
+      return
+    }
+    if (!profile?.isVerified) {
+      navigate('/marketplace/profile/verification')
+      return
+    }
+    navigate('/marketplace/sell')
+  }
 
   useEffect(() => {
     async function fetchCategoriesWithCounts() {
@@ -68,12 +84,12 @@ export function HomePage() {
               <Search className="h-5 w-5" />
               Jetzt stöbern
             </Link>
-            <Link
-              to="/marketplace/sell"
+            <button
+              onClick={handleSellClick}
               className="inline-flex items-center justify-center gap-2 rounded-lg border-2 border-white px-6 py-3 font-medium text-white transition-colors hover:bg-white/10"
             >
               Artikel verkaufen
-            </Link>
+            </button>
           </div>
         </div>
       </section>
