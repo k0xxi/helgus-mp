@@ -33,7 +33,7 @@ export function FilterSidebar({
   // Get subcategories for selected category
   const getSubcategories = () => {
     if (!filters.category) return []
-    const category = categories.find((cat) => cat.name === filters.category)
+    const category = categories.find((cat) => cat.slug === filters.category)
     return category?.subcategories || []
   }
 
@@ -77,7 +77,7 @@ export function FilterSidebar({
           >
             <option value="">Alle Kategorien</option>
             {categories.map((category) => (
-              <option key={category.id} value={category.name}>
+              <option key={category.id} value={category.slug}>
                 {category.name}
               </option>
             ))}
