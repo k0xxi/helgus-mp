@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom'
 import { AlertTriangle, Loader2 } from 'lucide-react'
 import { ProductCatalog } from '@/sections/produktkatalog-suche/components/ProductCatalog'
 import { useProducts, useCategories, useDeleteProduct } from '@/marketplace/hooks/useProducts'
+import { useCategoriesWithCounts } from '@/marketplace/hooks/useCategoriesWithCounts'
 import { useFavorites } from '@/marketplace/hooks/useFavorites'
 import { useAuth } from '@/marketplace/context/AuthContext'
 import type { ProductFilters, SortOption } from '@/../product/sections/produktkatalog-suche/types'
@@ -44,8 +45,8 @@ export function SearchPage() {
   // Fetch favorites
   const { favoriteIds, toggleFavorite } = useFavorites(user?.id)
 
-  // Fetch categories
-  const { categories, loading: categoriesLoading } = useCategories()
+  // Fetch categories with product counts
+  const { categories, loading: categoriesLoading } = useCategoriesWithCounts()
 
   // Fetch products
   const {
