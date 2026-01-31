@@ -220,7 +220,7 @@ export function useProducts(
             name: profile?.name ?? 'Unbekannter Verkäufer',
             rating: 5, // Placeholder - ratings not implemented yet
           },
-          category: category.name,
+          category: category?.name ?? 'Uncategorized',
           subcategory: '', // Subcategories not implemented yet
           createdAt: product.created_at,
           phoneContactAvailable: product.phone_contact_available,
