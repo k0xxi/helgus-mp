@@ -145,8 +145,8 @@ export function useProducts(
       }
 
       if (filters.category) {
-        // Filter by category name
-        query = query.eq('categories.name', filters.category)
+        // Filter by category slug
+        query = query.eq('categories.slug', filters.category)
       }
 
       if (filters.priceMin !== undefined) {
