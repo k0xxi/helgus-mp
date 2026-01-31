@@ -105,6 +105,16 @@ interface UseProductDetailResult {
   incrementViewCount: () => Promise<void>
 }
 
+/**
+ * Hook to fetch detailed product information including seller and category data
+ *
+ * @param productId - The ID of the product to fetch
+ * @param userId - Current user ID (for favorit check)
+ * @returns Object containing product, seller, category data and helper functions
+ *
+ * @example
+ * const { product, seller, loading } = useProductDetail(productId, userId)
+ */
 export function useProductDetail(
   productId: string | undefined,
   userId: string | undefined,
@@ -187,7 +197,12 @@ export function useProductDetail(
         throw new Error('Product category not found')
       }
 
-      // Map to Seller type (use placeholder values for rating, sales, responseTime)
+      // Map to Seller type
+      // TODO: Add database fields for rating, totalSales, and responseTime:
+      // - rating: Calculate from seller reviews (avg rating, count)
+      // - totalSales: Count completed transactions
+      // - responseTime: Median response time to messages
+      // Currently hardcoded as: rating=5, totalSales=0, responseTime='Antwortet meist innerhalb von 24h'
       const mappedSeller: Seller = {
         id: profile.id,
         name: profile.name,
@@ -196,9 +211,9 @@ export function useProductDetail(
           : undefined,
         city: profile.city || 'Österreich',
         memberSince: profile.created_at,
-        rating: 5, // Placeholder
-        totalSales: 0, // Placeholder
-        responseTime: 'Antwortet meist innerhalb von 24h', // Placeholder
+        rating: 5,
+        totalSales: 0,
+        responseTime: 'Antwortet meist innerhalb von 24h',
         isVerified: profile.is_verified,
       }
 
@@ -263,6 +278,17 @@ interface ConversationData {
   seller_id: string
 }
 
+/**
+ * Hook to manage conversations and messages for a product between buyer and seller
+ *
+ * @returns Object with messages, conversation functions for sending/managing messages
+ *
+ * @remarks
+ * - Automatically creates conversation if it doesn't exist (for buyers only)
+ * - Handles real-time message subscription via Supabase
+ * - Input validation: messages checked for empty/length before sending
+ * - Returns error object instead of throwing for user-facing operations
+ */
 interface UseConversationResult {
   conversationId: string | null
   buyerId: string | null
@@ -477,6 +503,19 @@ interface UseOffersResult {
   refetch: () => Promise<void>
 }
 
+/**
+ * Hook to manage counter-offers for a product
+ *
+ * @param productId - Product ID to manage offers for
+ * @param userId - Current user ID (for seller authorization)
+ * @returns Object with offers list and functions to create/respond to offers
+ *
+ * @remarks
+ * - Validates offer amount > 0
+ * - Creates notifications for both buyer and seller when offers are accepted/declined
+ * - Invalidates related caches to ensure real-time updates
+ * - Only sellers can accept/decline offers
+ */
 export function useOffers(
   productId: string | undefined,
   originalPrice: number,
@@ -860,6 +899,8 @@ export function useBuyerProfile(buyerId: string | null | undefined): UseBuyerPro
         throw new Error('Buyer profile not found')
       }
 
+      // TODO: Add database fields for rating, totalSales, and responseTime
+      // (see line ~200 for details on what needs to be added)
       const mappedBuyer: Seller = {
         id: profile.id,
         name: profile.name,

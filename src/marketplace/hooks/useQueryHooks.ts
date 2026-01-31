@@ -8,6 +8,63 @@ import type {
 import type { Conversation } from '@/types/marketplace'
 
 // =============================================================================
+// Internal Types for Supabase Responses
+// =============================================================================
+
+/**
+ * Raw message record from Supabase database
+ */
+interface SupabaseMessage {
+  id: string
+  conversation_id: string
+  sender_id: string
+  content: string
+  is_read: boolean
+  created_at: string
+  profiles?: {
+    name: string
+  }
+}
+
+/**
+ * Raw conversation record from Supabase database
+ */
+interface SupabaseConversation {
+  id: string
+  product_id: string
+  buyer_id: string
+  seller_id: string
+  created_at: string
+  products?: {
+    id: string
+    title: string
+    seller_id: string
+  }
+  profiles_buyer?: {
+    id: string
+    name: string
+    avatar_url: string | null
+  }
+  profiles_seller?: {
+    id: string
+    name: string
+    avatar_url: string | null
+  }
+}
+
+/**
+ * Raw profile record from Supabase database
+ */
+interface SupabaseProfile {
+  id: string
+  name: string
+  avatar_url: string | null
+  city: string | null
+  is_verified: boolean
+  created_at: string
+}
+
+// =============================================================================
 // Query Keys - Centralized for easy cache invalidation
 // =============================================================================
 
@@ -48,6 +105,34 @@ export const queryKeys = {
 // Conversations Hook - Replaces useConversations
 // =============================================================================
 
+/**
+ * Query hook to fetch all conversations for a user (as buyer or seller)
+ *
+ * @param userId - User ID to fetch conversations for
+ * @returns React Query result with conversation data
+ *
+ * @remarks
+ * - Fetches latest message and unread count for each conversation
+ * - Updates cache on real-time changes via subscription
+ * - Returns empty array if userId is not provided
+ *
+ * @note Performance: Has N+1 query issue
+ *
+ * @todo Optimize N+1 queries:
+ *   Current: 1 query for conversations + 2 queries per conversation (last message + unread count)
+ *   = 1 + (2 × N) queries for N conversations
+ *
+ *   Solution: Use SQL window functions and aggregate queries:
+ *   - Fetch conversations with LATERAL JOIN for last message
+ *   - Use aggregate function to get unread count in same query
+ *   - Reduces to single query with JOIN and window functions
+ *
+ *   Example SQL pattern (pseudocode):
+ *   SELECT c.*,
+ *     LATERAL (SELECT * FROM messages WHERE conversation_id = c.id ORDER BY created_at DESC LIMIT 1) AS last_msg,
+ *     COUNT(*) FILTER (WHERE is_read = false AND sender_id != userId) AS unread_count
+ *   FROM conversations c
+ */
 export function useConversationsQuery(userId: string | undefined) {
   return useQuery({
     queryKey: queryKeys.conversations.list(userId),
@@ -74,21 +159,21 @@ export function useConversationsQuery(userId: string | undefined) {
 
       // Fetch latest message and unread count for each conversation
       const conversationsWithMessages = await Promise.all(
-        (data || []).map(async (conv: any) => {
-          const { data: messageData } = await (supabase
+        (data || []).map(async (conv: SupabaseConversation) => {
+          const { data: messageData } = await supabase
             .from('messages')
             .select('*')
             .eq('conversation_id', conv.id)
             .order('created_at', { ascending: false })
             .limit(1)
-            .single() as any)
+            .single<SupabaseMessage>()
 
-          const { count, error: countError } = await (supabase
+          const { count, error: countError } = await supabase
             .from('messages')
             .select('id', { count: 'exact', head: true })
             .eq('conversation_id', conv.id)
             .eq('is_read', false)
-            .neq('sender_id', userId) as any)
+            .neq('sender_id', userId)
 
           if (countError) {
             console.error('Error fetching unread count:', countError)
@@ -128,7 +213,7 @@ export function useConversationsQuery(userId: string | undefined) {
         })
       )
 
-      return conversationsWithMessages as Conversation[]
+      return conversationsWithMessages
     },
     enabled: !!userId,
     staleTime: 1000 * 30, // 30 seconds
@@ -139,6 +224,17 @@ export function useConversationsQuery(userId: string | undefined) {
 // Send Message Mutation - Replaces sendMessage function
 // =============================================================================
 
+/**
+ * Mutation hook to send a message in a conversation
+ *
+ * @returns React Query mutation for sending messages
+ *
+ * @remarks
+ * - Creates a new conversation if one doesn't exist (buyer-seller only)
+ * - Requires valid conversation ID, content, userId, and productId
+ * - Invalidates messages and conversations queries on success
+ * - Content validation should be done before calling mutation
+ */
 export function useSendMessageMutation() {
   const queryClient = useQueryClient()
 
@@ -160,7 +256,7 @@ export function useSendMessageMutation() {
 
       // If no conversation exists, create one (only for buyers)
       if (!msgConversationId && sellerId && userId !== sellerId) {
-        const { data: newConv, error: createError } = await (supabase as any)
+        const { data: newConv, error: createError } = await supabase
           .from('conversations')
           .insert({
             product_id: productId,
@@ -168,17 +264,20 @@ export function useSendMessageMutation() {
             seller_id: sellerId,
           })
           .select('id')
-          .single()
+          .single<{ id: string }>()
 
         if (createError) throw createError
-        msgConversationId = (newConv as any).id
+        if (!newConv?.id) {
+          throw new Error('Konversation konnte nicht erstellt werden.')
+        }
+        msgConversationId = newConv.id
       }
 
       if (!msgConversationId) {
         throw new Error('Keine aktive Konversation gefunden.')
       }
 
-      const { data: newMsg, error: sendError } = await (supabase as any)
+      const { data: newMsg, error: sendError } = await supabase
         .from('messages')
         .insert({
           conversation_id: msgConversationId,
@@ -186,7 +285,7 @@ export function useSendMessageMutation() {
           content,
         })
         .select('id, created_at')
-        .single()
+        .single<{ id: string; created_at: string }>()
 
       if (sendError) throw sendError
 
@@ -216,6 +315,19 @@ export function useSendMessageMutation() {
 // Get Conversations for a Specific Product
 // =============================================================================
 
+/**
+ * Query hook to fetch a conversation for a specific product
+ *
+ * @param productId - Product ID to fetch conversations for
+ * @param sellerId - Seller ID to identify the product owner
+ * @param userId - Current user ID to determine their role
+ * @returns React Query result with conversation data or null
+ *
+ * @remarks
+ * - Returns the user's existing conversation or null if none exists
+ * - Buyers see their conversation with the seller
+ * - Sellers see the most recent conversation for the product
+ */
 export function useProductConversationsQuery(
   productId: string | undefined,
   sellerId: string | undefined,
@@ -240,13 +352,13 @@ export function useProductConversationsQuery(
       const { data: existingConv, error: convError } = await query
         .order('created_at', { ascending: false })
         .limit(1)
-        .maybeSingle() as any
+        .maybeSingle<{ id: string; buyer_id: string; seller_id: string }>()
 
       if (convError && convError.code !== 'PGRST116') {
         throw convError
       }
 
-      return existingConv as any || null
+      return existingConv || null
     },
     enabled: !!productId && !!userId && !!sellerId,
     staleTime: 1000 * 60 * 2,
@@ -257,6 +369,19 @@ export function useProductConversationsQuery(
 // Get Messages for a Conversation
 // =============================================================================
 
+/**
+ * Query hook to fetch all messages in a conversation
+ *
+ * @param conversationId - Conversation ID to fetch messages for
+ * @param userId - Current user ID to mark ownership of messages
+ * @returns React Query result with array of messages
+ *
+ * @remarks
+ * - Messages are ordered by creation date (oldest first)
+ * - Refetches every 3 seconds to catch new messages
+ * - Returns empty array if conversationId is not provided
+ * - Includes sender name for each message
+ */
 export function useConversationMessagesQuery(
   conversationId: string | null | undefined,
   userId: string | null | undefined
@@ -266,7 +391,7 @@ export function useConversationMessagesQuery(
     queryFn: async () => {
       if (!conversationId) return []
 
-      const { data: messagesData, error: msgError } = await (supabase
+      const { data: messagesData, error: msgError } = await supabase
         .from('messages')
         .select(`
           id,
@@ -277,11 +402,12 @@ export function useConversationMessagesQuery(
           profiles!sender_id(name)
         `)
         .eq('conversation_id', conversationId)
-        .order('created_at', { ascending: true }) as any)
+        .order('created_at', { ascending: true })
+        .returns<Array<SupabaseMessage & { profiles: { name: string } }>>()
 
       if (msgError) throw msgError
 
-      return ((messagesData || []) as any[]).map((msg) => ({
+      return ((messagesData || []).map((msg) => ({
         id: msg.id,
         senderId: msg.sender_id,
         senderName: msg.profiles.name,
@@ -301,17 +427,35 @@ export function useConversationMessagesQuery(
 // Get Buyer Profile
 // =============================================================================
 
+/**
+ * Query hook to fetch a buyer's profile information
+ *
+ * @param buyerId - Buyer ID to fetch profile for
+ * @returns React Query result with seller information (rating, member since, etc.)
+ *
+ * @remarks
+ * - Caches profile data for 1 hour (profiles rarely change)
+ * - Throws error if profile is not found in database
+ * - Maps profile data to Seller type with defaults for calculated fields
+ *
+ * @todo Add missing profile fields to database:
+ *   - rating: Calculate from seller reviews (avg, count)
+ *   - totalSales: Count completed transactions
+ *   - responseTime: Median response time to messages
+ *   - Currently hardcoded as: rating=5, totalSales=0, responseTime='Antwortet meist innerhalb von 24h'
+ *   - These should be fetched from aggregated tables or materialized views
+ */
 export function useBuyerProfileQuery(buyerId: string | null | undefined) {
   return useQuery({
     queryKey: queryKeys.profiles.detail(buyerId || undefined),
     queryFn: async () => {
       if (!buyerId) return null
 
-      const { data: profile, error: fetchError } = await (supabase
+      const { data: profile, error: fetchError } = await supabase
         .from('profiles')
         .select('id, name, avatar_url, city, is_verified, created_at')
         .eq('id', buyerId)
-        .single() as any)
+        .single<SupabaseProfile>()
 
       if (fetchError) throw fetchError
 
@@ -342,6 +486,17 @@ export function useBuyerProfileQuery(buyerId: string | null | undefined) {
 // Mark Messages as Read Mutation
 // =============================================================================
 
+/**
+ * Mutation hook to mark all unread messages as read in a conversation
+ *
+ * @returns React Query mutation for marking messages as read
+ *
+ * @remarks
+ * - Marks all unread messages from other users as read
+ * - Skips messages the current user sent
+ * - Invalidates conversations and messages queries after marking
+ * - Used when user opens a conversation
+ */
 export function useMarkMessagesAsReadMutation() {
   const queryClient = useQueryClient()
 
@@ -354,7 +509,7 @@ export function useMarkMessagesAsReadMutation() {
       userId: string
     }) => {
       // Mark all unread messages from other users as read
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('messages')
         .update({ is_read: true })
         .eq('conversation_id', conversationId)
@@ -383,6 +538,15 @@ export function useMarkMessagesAsReadMutation() {
 // Real-Time Message Subscription
 // =============================================================================
 
+/**
+ * Subscription hook for real-time message updates in a conversation
+ *
+ * @param conversationId - Conversation ID to subscribe to
+ * @remarks
+ * - Uses Supabase Postgres Changes to detect new messages and updates
+ * - Automatically unsubscribes on component unmount
+ * - Invalidates message and conversation queries when changes detected
+ */
 export function useMessagesSubscription(conversationId: string | null | undefined) {
   const queryClient = useQueryClient()
 
@@ -423,6 +587,16 @@ export function useMessagesSubscription(conversationId: string | null | undefine
 // Real-Time Conversations Subscription
 // =============================================================================
 
+/**
+ * Subscription hook for real-time conversation updates (new messages)
+ *
+ * @param userId - User ID to subscribe to for their conversations
+ * @remarks
+ * - Listens for INSERT events on messages table (new messages)
+ * - Automatically unsubscribes on component unmount
+ * - Invalidates conversations query to update unread counts
+ * - Triggers refetch of all conversations when new messages arrive
+ */
 export function useConversationsSubscription(userId: string | null | undefined) {
   const queryClient = useQueryClient()
 
@@ -458,6 +632,16 @@ export function useConversationsSubscription(userId: string | null | undefined) 
 // Real-Time Notifications Subscription
 // =============================================================================
 
+/**
+ * Subscription hook for real-time notification updates
+ *
+ * @param userId - User ID to subscribe to for their notifications
+ * @remarks
+ * - Listens for all changes (INSERT, UPDATE, DELETE) on notifications table
+ * - Automatically unsubscribes on component unmount
+ * - Invalidates notifications query to update the notification list
+ * - Includes notifications marked as read/unread
+ */
 export function useNotificationsSubscription(userId: string | null | undefined) {
   const queryClient = useQueryClient()
 
@@ -494,6 +678,16 @@ export function useNotificationsSubscription(userId: string | null | undefined) 
 // Typing Indicator Mutation
 // =============================================================================
 
+/**
+ * Mutation hook to send a typing indicator
+ *
+ * @returns React Query mutation for typing indicator (currently a no-op)
+ *
+ * @remarks
+ * - Currently not implemented (typing is tracked but not logged)
+ * - TODO: Implement with either temporary table or Supabase presence
+ * - Could use a timed cache to clear typing status after user stops typing
+ */
 export function useTypingIndicatorMutation() {
   return useMutation({
     mutationFn: async ({
@@ -519,6 +713,18 @@ export function useTypingIndicatorMutation() {
 // Real-Time Typing Subscription (Listen for typing indicators)
 // =============================================================================
 
+/**
+ * Subscription hook for tracking which users are typing
+ *
+ * @param conversationId - Conversation ID to subscribe to
+ * @param userId - Current user ID
+ * @returns Set of user IDs currently typing
+ *
+ * @remarks
+ * - Currently returns empty set (typing tracking not fully implemented)
+ * - TODO: Implement with presence API or temporary typing status
+ * - Could enhance chat UX with "X is typing..." indicator
+ */
 export function useTypingSubscription(
   conversationId: string | null | undefined,
   userId: string | null | undefined
@@ -558,6 +764,16 @@ export function useTypingSubscription(
 // Delete Conversation Mutation
 // =============================================================================
 
+/**
+ * Mutation hook to delete a conversation and all its messages
+ *
+ * @returns React Query mutation with error handling
+ *
+ * @remarks
+ * - Deletes all messages in the conversation first, then the conversation
+ * - Invalidates all conversation queries after deletion
+ * - Throws error if deletion fails
+ */
 export function useDeleteConversationMutation() {
   const queryClient = useQueryClient()
 
@@ -599,6 +815,16 @@ export function useDeleteConversationMutation() {
 // Delete Notification Mutation
 // =============================================================================
 
+/**
+ * Mutation hook to delete a notification
+ *
+ * @returns React Query mutation with error handling
+ *
+ * @remarks
+ * - Deletes notification from database
+ * - Invalidates all notification queries after deletion
+ * - Throws error if deletion fails with descriptive message
+ */
 export function useDeleteNotificationMutation() {
   const queryClient = useQueryClient()
 
