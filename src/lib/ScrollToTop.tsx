@@ -4,8 +4,8 @@ import { useLocation } from 'react-router-dom'
 /**
  * ScrollToTop component
  *
- * Prevents automatic scroll-to-top on page navigation.
- * Only scrolls to top when an anchor link is explicitly clicked.
+ * Scrolls to top when navigating to a different route.
+ * If navigating with a hash (anchor link), scrolls to that element instead.
  *
  * Place this component in your app layout so it runs on every route change.
  */
@@ -13,7 +13,7 @@ export function ScrollToTop() {
   const { pathname, hash } = useLocation()
 
   useEffect(() => {
-    // If there's a hash (anchor link), scroll to that element
+    // If there's a hash (anchor link), scroll to that element smoothly
     if (hash) {
       const id = hash.replace('#', '')
       const element = document.getElementById(id)
@@ -23,8 +23,10 @@ export function ScrollToTop() {
           element.scrollIntoView({ behavior: 'smooth' })
         }, 0)
       }
+    } else {
+      // No hash - scroll to top instantly for normal route navigation
+      window.scrollTo(0, 0)
     }
-    // If no hash, don't scroll - keep user's current scroll position
   }, [pathname, hash])
 
   return null
