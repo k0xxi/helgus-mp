@@ -131,14 +131,14 @@ export function ChatDrawer({ isOpen, onClose, messages, seller, onSendMessage }:
                       <div
                         className={`max-w-[80%] px-4 py-2.5 rounded-2xl ${
                           message.isOwn
-                            ? 'bg-red-500 text-white rounded-br-md'
+                            ? 'bg-blue-600 text-white rounded-br-md'
                             : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white rounded-bl-md'
                         }`}
                       >
                         <p className="text-sm whitespace-pre-wrap">{message.content}</p>
                         <p
                           className={`text-xs mt-1 ${
-                            message.isOwn ? 'text-red-200' : 'text-slate-400 dark:text-slate-500'
+                            message.isOwn ? 'text-blue-200' : 'text-slate-400 dark:text-slate-500'
                           }`}
                         >
                           {formatTime(message.timestamp)}

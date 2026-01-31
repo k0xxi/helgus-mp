@@ -10,9 +10,31 @@ if (!supabaseUrl || !supabaseAnonKey) {
   )
 }
 
+// Custom lock implementation that doesn't use navigator.locks (which can hang in some environments)
+const noopLock = async <T>(
+  _name: string,
+  _acquireTimeout: number,
+  fn: () => Promise<T>
+): Promise<T> => {
+  return fn()
+}
+
 // Create typed Supabase client
 // When env vars are missing, placeholder values allow the app to load (for design preview)
 export const supabase: SupabaseClient<Database> = createClient<Database>(
   supabaseUrl ?? 'https://placeholder.supabase.co',
-  supabaseAnonKey ?? 'placeholder-key'
+  supabaseAnonKey ?? 'placeholder-key',
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+      flowType: 'pkce',
+      storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+      lock: noopLock,
+    },
+    global: {
+      fetch: fetch.bind(globalThis),
+    },
+  }
 )

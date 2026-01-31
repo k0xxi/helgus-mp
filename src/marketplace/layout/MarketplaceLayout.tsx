@@ -1,4 +1,4 @@
-import { Outlet, Link, useLocation } from 'react-router-dom'
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/marketplace/context/AuthContext'
 import {
   Home,
@@ -17,9 +17,15 @@ import { useState } from 'react'
 export function MarketplaceLayout() {
   const { user, signOut, loading } = useAuth()
   const location = useLocation()
+  const navigate = useNavigate()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const isActive = (path: string) => location.pathname === path
+
+  const handleLogout = async () => {
+    await signOut()
+    navigate('/marketplace')
+  }
 
   const navItems = [
     { path: '/marketplace', icon: Home, label: 'Start' },
@@ -87,7 +93,7 @@ export function MarketplaceLayout() {
                   <User className="h-5 w-5" />
                 </Link>
                 <button
-                  onClick={() => signOut()}
+                  onClick={handleLogout}
                   className="hidden rounded-lg p-2 text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700 md:block"
                 >
                   <LogOut className="h-5 w-5" />
@@ -151,7 +157,7 @@ export function MarketplaceLayout() {
                   </Link>
                   <button
                     onClick={() => {
-                      signOut()
+                      handleLogout()
                       setMobileMenuOpen(false)
                     }}
                     className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700"

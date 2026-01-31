@@ -1,3 +1,5 @@
 export { usePublicProfile, useSellerVerification, useUserListings } from './useProfile'
 export { useProducts, useCategories, useDeleteProduct } from './useProducts'
 export { useFavorites } from './useFavorites'
+export { useProductDetail, useConversation, useOffers, useNotifications } from './useProductDetail'
+export { useConversations } from './useConversations'

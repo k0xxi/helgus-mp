@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { Tables } from '@/types/database'
 import type {
@@ -92,7 +92,7 @@ interface ProductQueryResult {
     id: string
     name: string
     is_verified: boolean
-  }
+  } | null
   categories: {
     id: string
     name: string
@@ -115,19 +115,23 @@ export function useProducts(
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
 
+  // Use ref to avoid favoriteIds Set reference changes triggering re-fetches
+  const favoriteIdsRef = useRef(favoriteIds)
+  favoriteIdsRef.current = favoriteIds
+
   const fetchProducts = useCallback(async () => {
     setLoading(true)
     setError(null)
 
     try {
-      // Start building query
+      // Build query
       let query = supabase
         .from('products')
         .select(
           `
           *,
-          profiles!inner(id, name, is_verified),
-          categories!inner(id, name, slug),
+          profiles!seller_id(id, name, is_verified),
+          categories!category_id(id, name, slug),
           product_images(id, storage_path, sort_order)
         `
         )
@@ -212,15 +216,15 @@ export function useProducts(
             city: product.city,
           },
           seller: {
-            id: profile.id,
-            name: profile.name,
+            id: profile?.id ?? product.seller_id,
+            name: profile?.name ?? 'Unbekannter Verkäufer',
             rating: 5, // Placeholder - ratings not implemented yet
           },
           category: category.name,
           subcategory: '', // Subcategories not implemented yet
           createdAt: product.created_at,
           phoneContactAvailable: product.phone_contact_available,
-          isFavorited: favoriteIds.has(product.id),
+          isFavorited: favoriteIdsRef.current.has(product.id),
           isOwn: userId === product.seller_id,
         }
       })
@@ -232,7 +236,7 @@ export function useProducts(
     } finally {
       setLoading(false)
     }
-  }, [filters, sortBy, userId, favoriteIds])
+  }, [filters, sortBy, userId])
 
   useEffect(() => {
     fetchProducts()

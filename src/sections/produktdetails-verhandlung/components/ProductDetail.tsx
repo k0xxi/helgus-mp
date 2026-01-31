@@ -15,11 +15,27 @@ function formatPrice(price: number): string {
   return price.toLocaleString('de-AT', { minimumFractionDigits: 0, maximumFractionDigits: 2 })
 }
 
+function getConditionBadgeClasses(condition: string): string {
+  switch (condition) {
+    case 'Neu':
+      return 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+    case 'Wie neu':
+      return 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
+    case 'Sehr gut':
+      return 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+    case 'Gut':
+    case 'Akzeptabel':
+    default:
+      return 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400'
+  }
+}
+
 export function ProductDetail({
   product,
   seller,
   category,
   messages,
+  offers,
   notifications,
   currentUser,
   onBack,
@@ -32,10 +48,14 @@ export function ProductDetail({
   onViewSellerProfile,
   onMarkNotificationRead,
   onMarkAllNotificationsRead,
-  onNotificationClick
-}: ProductDetailProps) {
-  const [isChatOpen, setIsChatOpen] = useState(false)
+  onNotificationClick,
+  onAcceptOffer,
+  onDeclineOffer,
+  initialChatOpen = false,
+}: ProductDetailProps & { initialChatOpen?: boolean }) {
+  const [isChatOpen, setIsChatOpen] = useState(initialChatOpen)
   const [isOfferModalOpen, setIsOfferModalOpen] = useState(false)
+  const isSeller = currentUser.id === seller.id
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -108,19 +128,21 @@ export function ProductDetail({
             </div>
 
             {/* Make Offer Button */}
-            <button
-              onClick={() => setIsOfferModalOpen(true)}
-              className="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-colors"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Gegenangebot machen
-            </button>
+            {!isSeller && (
+              <button
+                onClick={() => setIsOfferModalOpen(true)}
+                className="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Gegenangebot machen
+              </button>
+            )}
 
             {/* Badges */}
             <div className="flex flex-wrap items-center gap-3">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-sm font-medium rounded-full">
+              <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-full ${getConditionBadgeClasses(product.condition)}`}>
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -179,24 +201,68 @@ export function ProductDetail({
               </p>
             </div>
 
+            {/* Pending Offers (Seller View) */}
+            {currentUser.id === seller.id && offers && offers.filter(o => o.status === 'pending').length > 0 && (
+              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-5">
+                <h3 className="font-semibold text-amber-900 dark:text-amber-200 mb-4 flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Offene Preisangebote
+                </h3>
+                <div className="space-y-3">
+                  {offers.filter(o => o.status === 'pending').map((offer) => (
+                    <div key={offer.id} className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-amber-100 dark:border-amber-900">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="font-medium text-slate-900 dark:text-white">{offer.buyerName}</p>
+                          <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">{formatPrice(offer.amount)} €</p>
+                          {offer.message && (
+                            <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">{offer.message}</p>
+                          )}
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => onAcceptOffer?.(offer.id)}
+                            className="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors"
+                          >
+                            Annehmen
+                          </button>
+                          <button
+                            onClick={() => onDeclineOffer?.(offer.id)}
+                            className="px-3 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-sm font-medium rounded-lg transition-colors"
+                          >
+                            Ablehnen
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Seller Card */}
             <SellerCard
               seller={seller}
+              isSeller={isSeller}
               onSendMessage={() => setIsChatOpen(true)}
               onViewProfile={() => onViewSellerProfile?.(seller.id)}
             />
 
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-3">
-              <button
-                onClick={onBuyRequest}
-                className="flex-1 px-6 py-4 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-colors shadow-lg shadow-red-500/20"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-                Kaufen
-              </button>
+              {!isSeller && (
+                <button
+                  onClick={onBuyRequest}
+                  className="flex-1 px-6 py-4 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-colors shadow-lg shadow-red-500/20"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                  Kaufen
+                </button>
+              )}
               <button
                 onClick={() => onToggleFavorite?.(product.id)}
                 className={`px-4 py-4 rounded-xl border transition-colors ${

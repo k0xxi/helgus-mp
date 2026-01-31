@@ -2,11 +2,12 @@ import type { Seller } from '@/../product/sections/produktdetails-verhandlung/ty
 
 interface SellerCardProps {
   seller: Seller
+  isSeller?: boolean
   onSendMessage?: () => void
   onViewProfile?: () => void
 }
 
-export function SellerCard({ seller, onSendMessage, onViewProfile }: SellerCardProps) {
+export function SellerCard({ seller, isSeller, onSendMessage, onViewProfile }: SellerCardProps) {
   return (
     <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5">
       <div className="flex items-start gap-4">
@@ -73,15 +74,17 @@ export function SellerCard({ seller, onSendMessage, onViewProfile }: SellerCardP
       </div>
 
       {/* Send Message Button */}
-      <button
-        onClick={onSendMessage}
-        className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-2.5 text-red-600 dark:text-red-400 font-medium border border-slate-200 dark:border-slate-600 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
-      >
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-        </svg>
-        Nachricht senden
-      </button>
+      {!isSeller && (
+        <button
+          onClick={onSendMessage}
+          className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-2.5 text-red-600 dark:text-red-400 font-medium border border-slate-200 dark:border-slate-600 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+          Nachricht senden
+        </button>
+      )}
     </div>
   )
 }

@@ -166,11 +166,21 @@ export function useSellerVerification(userId: string | undefined): UseSellerVeri
         iban: data.iban,
         bic: data.bic || null,
         accepted_terms: data.acceptedTerms,
-        status: 'pending',
+        status: 'verified',
       })
 
       if (insertError) {
         return { error: insertError }
+      }
+
+      // Set profile as verified
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ is_verified: true })
+        .eq('id', userId)
+
+      if (profileError) {
+        console.error('Error updating profile verification:', profileError)
       }
 
       // Refetch after successful submission
