@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Filter, RotateCcw } from 'lucide-react'
 import type { ProductFilters, Category } from '@/../product/sections/produktkatalog-suche/types'
 
@@ -16,6 +16,11 @@ export function FilterSidebar({
   onResetFilters,
 }: FilterSidebarProps) {
   const [filters, setFilters] = useState<ProductFilters>(initialFilters || {})
+
+  // Update internal state when filters prop changes (e.g., from URL)
+  useEffect(() => {
+    setFilters(initialFilters || {})
+  }, [initialFilters])
 
   const handleApply = () => {
     onApplyFilters?.(filters)
@@ -78,7 +83,7 @@ export function FilterSidebar({
             <option value="">Alle Kategorien</option>
             {categories.map((category) => (
               <option key={category.id} value={category.slug}>
-                {category.name}
+                {category.name} {(category as any).productCount ? `(${(category as any).productCount})` : ''}
               </option>
             ))}
           </select>

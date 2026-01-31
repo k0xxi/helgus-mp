@@ -4,12 +4,16 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { Tables } from '@/types/database'
 
+interface CategoryWithCount extends Tables<'categories'> {
+  productCount?: number
+}
+
 export function HomePage() {
-  const [categories, setCategories] = useState<Tables<'categories'>[]>([])
+  const [categories, setCategories] = useState<CategoryWithCount[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    async function fetchCategories() {
+    async function fetchCategoriesWithCounts() {
       const { data, error } = await supabase
         .from('categories')
         .select('*')
@@ -18,13 +22,31 @@ export function HomePage() {
 
       if (error) {
         console.error('Error fetching categories:', error)
-      } else {
-        setCategories(data || [])
+        setLoading(false)
+        return
       }
+
+      // Fetch product counts for each category
+      const categoriesWithCounts = await Promise.all(
+        (data || []).map(async (category) => {
+          const { count, error: countError } = await supabase
+            .from('products')
+            .select('id', { count: 'exact', head: true })
+            .eq('category_id', category.id)
+            .eq('is_active', true)
+
+          return {
+            ...category,
+            productCount: countError ? 0 : (count || 0),
+          }
+        })
+      )
+
+      setCategories(categoriesWithCounts)
       setLoading(false)
     }
 
-    fetchCategories()
+    fetchCategoriesWithCounts()
   }, [])
 
   return (
@@ -81,6 +103,9 @@ export function HomePage() {
                 <span className="text-sm font-medium text-slate-900 group-hover:text-red-600 dark:text-white dark:group-hover:text-red-400">
                   {category.name}
                 </span>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                  {category.productCount} {category.productCount === 1 ? 'Artikel' : 'Artikel'}
+                </p>
               </Link>
             ))}
           </div>
