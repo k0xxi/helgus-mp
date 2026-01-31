@@ -78,7 +78,7 @@ export function CategoryDropdown({
               className="w-full px-3 py-2.5 text-left hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-900 dark:text-slate-100 font-['Inter'] flex items-center justify-between group"
             >
               <span>{category.name}</span>
-              <span className="text-slate-500 dark:text-slate-400 text-sm">
+              <span className="text-slate-500 dark:text-slate-400 text-sm font-['IBM_Plex_Mono']">
                 ({category.productCount || 0})
               </span>
             </button>
