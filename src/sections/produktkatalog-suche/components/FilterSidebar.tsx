@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Filter, RotateCcw } from 'lucide-react'
+import { CategoryDropdown } from '@/marketplace/components/CategoryDropdown'
 import type { ProductFilters, Category } from '@/../product/sections/produktkatalog-suche/types'
 
 interface FilterSidebarProps {
@@ -72,26 +73,15 @@ export function FilterSidebar({
           <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2 font-['DM_Sans']">
             Kategorie
           </label>
-          <select
-            value={filters.category || ''}
-            onChange={(e) => {
-              updateFilter('category', e.target.value)
+          <CategoryDropdown
+            categories={categories as any[]}
+            value={filters.category}
+            onChange={(slug) => {
+              updateFilter('category', slug || undefined)
               updateFilter('subcategory', '') // Reset subcategory
             }}
-            className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 focus:border-transparent font-['Inter']"
-          >
-            <option value="">Alle Kategorien</option>
-            {categories.map((category) => {
-              const count = (category as any).productCount || 0
-              // Pad category name and add count on the right
-              const categoryDisplay = `${category.name.padEnd(30)} (${count})`
-              return (
-                <option key={category.id} value={category.slug}>
-                  {categoryDisplay}
-                </option>
-              )
-            })}
-          </select>
+            placeholder="Alle Kategorien"
+          />
         </div>
 
         {/* Subcategory (only if category selected) */}
