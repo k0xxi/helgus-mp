@@ -29,19 +29,6 @@ export function AuthPage({
         <div className="absolute -bottom-1/2 -left-1/2 w-full h-full bg-gradient-to-tr from-blue-500/5 to-transparent rounded-full blur-3xl" />
       </div>
 
-      {/* Header */}
-      <header className="relative z-10 py-6 px-4">
-        <div className="max-w-md mx-auto flex items-center justify-center">
-          <a href="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg shadow-red-500/20 group-hover:shadow-red-500/30 transition-shadow">
-              <span className="text-white font-bold text-lg">H</span>
-            </div>
-            <span className="text-xl font-bold text-slate-900 dark:text-white">
-              HELGUS
-            </span>
-          </a>
-        </div>
-      </header>
 
       {/* Main Content */}
       <main className="relative z-10 flex-1 flex items-center justify-center py-8 px-4">
