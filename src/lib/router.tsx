@@ -7,6 +7,7 @@ import { SectionPage } from '@/components/SectionPage'
 import { ScreenDesignPage, ScreenDesignFullscreen } from '@/components/ScreenDesignPage'
 import { ShellDesignPage, ShellDesignFullscreen } from '@/components/ShellDesignPage'
 import { ExportPage } from '@/components/ExportPage'
+import { RootLayout } from '@/lib/RootLayout'
 
 // Marketplace imports
 import { AuthProvider } from '@/marketplace/context/AuthContext'
@@ -41,108 +42,114 @@ function MarketplaceWrapper() {
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <ProductPage />,
-  },
-  {
-    path: '/data-model',
-    element: <DataModelPage />,
-  },
-  {
-    path: '/design',
-    element: <DesignPage />,
-  },
-  {
-    path: '/sections',
-    element: <SectionsPage />,
-  },
-  {
-    path: '/sections/:sectionId',
-    element: <SectionPage />,
-  },
-  {
-    path: '/sections/:sectionId/screen-designs/:screenDesignName',
-    element: <ScreenDesignPage />,
-  },
-  {
-    path: '/sections/:sectionId/screen-designs/:screenDesignName/fullscreen',
-    element: <ScreenDesignFullscreen />,
-  },
-  {
-    path: '/shell/design',
-    element: <ShellDesignPage />,
-  },
-  {
-    path: '/shell/design/fullscreen',
-    element: <ShellDesignFullscreen />,
-  },
-  {
-    path: '/export',
-    element: <ExportPage />,
-  },
-  // Marketplace routes
-  {
-    path: '/marketplace',
-    element: <MarketplaceWrapper />,
+    element: <RootLayout />,
     children: [
       {
         index: true,
-        element: <MarketplaceHomePage />,
+        element: <ProductPage />,
       },
       {
-        path: 'search',
-        element: <SearchPage />,
+        path: 'data-model',
+        element: <DataModelPage />,
       },
       {
-        path: 'auth',
-        element: <AuthPage />,
+        path: 'design',
+        element: <DesignPage />,
       },
       {
-        path: 'auth/callback',
-        element: <AuthCallbackPage />,
+        path: 'sections',
+        element: <SectionsPage />,
       },
       {
-        path: 'auth/reset-password',
-        element: <PasswordResetPage />,
+        path: 'sections/:sectionId',
+        element: <SectionPage />,
       },
       {
-        path: 'favorites',
-        element: <FavoritesPage />,
+        path: 'sections/:sectionId/screen-designs/:screenDesignName',
+        element: <ScreenDesignPage />,
       },
       {
-        path: 'messages',
-        element: <MessagesPage />,
+        path: 'sections/:sectionId/screen-designs/:screenDesignName/fullscreen',
+        element: <ScreenDesignFullscreen />,
       },
       {
-        path: 'profile',
-        element: <ProfilePage />,
+        path: 'shell/design',
+        element: <ShellDesignPage />,
       },
       {
-        path: 'profile/settings',
-        element: <ProfileSettingsPage />,
+        path: 'shell/design/fullscreen',
+        element: <ShellDesignFullscreen />,
       },
       {
-        path: 'profile/verification',
-        element: <SellerVerificationPage />,
+        path: 'export',
+        element: <ExportPage />,
       },
+      // Marketplace routes
       {
-        path: 'profile/change-password',
-        element: <ChangePasswordPage />,
-      },
-      {
-        path: 'user/:userId',
-        element: <PublicProfilePage />,
-      },
-      {
-        path: 'sell',
-        element: <SellPage />,
-      },
-      {
-        path: 'notifications',
-        element: <NotificationsPage />,
-      },
-      {
-        path: 'product/:productId',
-        element: <MarketplaceProductPage />,
+        path: 'marketplace',
+        element: <MarketplaceWrapper />,
+        children: [
+          {
+            index: true,
+            element: <MarketplaceHomePage />,
+          },
+          {
+            path: 'search',
+            element: <SearchPage />,
+          },
+          {
+            path: 'auth',
+            element: <AuthPage />,
+          },
+          {
+            path: 'auth/callback',
+            element: <AuthCallbackPage />,
+          },
+          {
+            path: 'auth/reset-password',
+            element: <PasswordResetPage />,
+          },
+          {
+            path: 'favorites',
+            element: <FavoritesPage />,
+          },
+          {
+            path: 'messages',
+            element: <MessagesPage />,
+          },
+          {
+            path: 'profile',
+            element: <ProfilePage />,
+          },
+          {
+            path: 'profile/settings',
+            element: <ProfileSettingsPage />,
+          },
+          {
+            path: 'profile/verification',
+            element: <SellerVerificationPage />,
+          },
+          {
+            path: 'profile/change-password',
+            element: <ChangePasswordPage />,
+          },
+          {
+            path: 'user/:userId',
+            element: <PublicProfilePage />,
+          },
+          {
+            path: 'sell',
+            element: <SellPage />,
+          },
+          {
+            path: 'notifications',
+            element: <NotificationsPage />,
+          },
+          {
+            path: 'product/:productId',
+            element: <MarketplaceProductPage />,
+          },
+        ],
       },
     ],
   },
