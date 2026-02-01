@@ -12,21 +12,6 @@ import type { Conversation } from '@/types/marketplace'
 // =============================================================================
 
 /**
- * Raw message record from Supabase database
- */
-interface SupabaseMessage {
-  id: string
-  conversation_id: string
-  sender_id: string
-  content: string
-  is_read: boolean
-  created_at: string
-  profiles?: {
-    name: string
-  }
-}
-
-/**
  * Raw conversation record from Supabase database
  */
 interface SupabaseConversation {
@@ -217,6 +202,7 @@ export function useConversationsQuery(userId: string | undefined) {
     },
     enabled: !!userId,
     staleTime: 1000 * 30, // 30 seconds
+    refetchInterval: 1000 * 60, // Fallback: refetch every 60 seconds if subscriptions fail
   })
 }
 
@@ -391,7 +377,7 @@ export function useConversationMessagesQuery(
     queryFn: async () => {
       if (!conversationId) return []
 
-      const { data: messagesData, error: msgError } = await supabase
+      const { data: messagesData, error: msgError } = await (supabase
         .from('messages')
         .select(`
           id,
@@ -402,12 +388,11 @@ export function useConversationMessagesQuery(
           profiles!sender_id(name)
         `)
         .eq('conversation_id', conversationId)
-        .order('created_at', { ascending: true })
-        .returns<Array<SupabaseMessage & { profiles: { name: string } }>>()
+        .order('created_at', { ascending: true }) as any)
 
       if (msgError) throw msgError
 
-      return ((messagesData || []).map((msg) => ({
+      return ((messagesData || []).map((msg: any) => ({
         id: msg.id,
         senderId: msg.sender_id,
         senderName: msg.profiles.name,

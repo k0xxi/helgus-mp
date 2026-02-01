@@ -69,6 +69,8 @@ export function useNotifications(userId: string | undefined): UseNotificationsRe
       }))
     },
     enabled: !!userId,
+    staleTime: 1000 * 30, // 30 seconds
+    refetchInterval: 1000 * 60, // Fallback: refetch every 60 seconds if subscriptions fail
   })
 
   // Mark single notification as read
