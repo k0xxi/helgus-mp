@@ -160,13 +160,17 @@ export function useConversationsQuery(userId: string | undefined) {
       // Fetch latest message and unread count for each conversation
       const conversationsWithMessages = await Promise.all(
         (data || []).map(async (conv: SupabaseConversation) => {
+<<<<<<< HEAD
           const { data: messageData } = await (supabase
+=======
+          const { data: messageData } = await supabase
+>>>>>>> 11633f73ee3451e74ee5ca6a99001284fe209daf
             .from('messages')
             .select('*')
             .eq('conversation_id', conv.id)
             .order('created_at', { ascending: false })
             .limit(1)
-            .single() as any)
+            .single<SupabaseMessage>()
 
           const { count, error: countError } = await supabase
             .from('messages')
@@ -256,7 +260,7 @@ export function useSendMessageMutation() {
 
       // If no conversation exists, create one (only for buyers)
       if (!msgConversationId && sellerId && userId !== sellerId) {
-        const { data: newConv, error: createError } = await (supabase as any)
+        const { data: newConv, error: createError } = await supabase
           .from('conversations')
           .insert({
             product_id: productId,
@@ -264,7 +268,7 @@ export function useSendMessageMutation() {
             seller_id: sellerId,
           })
           .select('id')
-          .single()
+          .single<{ id: string }>()
 
         if (createError) throw createError
         if (!newConv?.id) {
@@ -277,7 +281,7 @@ export function useSendMessageMutation() {
         throw new Error('Keine aktive Konversation gefunden.')
       }
 
-      const { data: newMsg, error: sendError } = await (supabase as any)
+      const { data: newMsg, error: sendError } = await supabase
         .from('messages')
         .insert({
           conversation_id: msgConversationId,
@@ -285,7 +289,7 @@ export function useSendMessageMutation() {
           content,
         })
         .select('id, created_at')
-        .single()
+        .single<{ id: string; created_at: string }>()
 
       if (sendError) throw sendError
 
@@ -352,7 +356,7 @@ export function useProductConversationsQuery(
       const { data: existingConv, error: convError } = await query
         .order('created_at', { ascending: false })
         .limit(1)
-        .maybeSingle() as any
+        .maybeSingle<{ id: string; buyer_id: string; seller_id: string }>()
 
       if (convError && convError.code !== 'PGRST116') {
         throw convError
@@ -391,7 +395,7 @@ export function useConversationMessagesQuery(
     queryFn: async () => {
       if (!conversationId) return []
 
-      const { data: messagesData, error: msgError } = await (supabase
+      const { data: messagesData, error: msgError } = await supabase
         .from('messages')
         .select(`
           id,
@@ -402,7 +406,8 @@ export function useConversationMessagesQuery(
           profiles!sender_id(name)
         `)
         .eq('conversation_id', conversationId)
-        .order('created_at', { ascending: true }) as any)
+        .order('created_at', { ascending: true })
+        .returns<Array<SupabaseMessage & { profiles: { name: string } }>>()
 
       if (msgError) throw msgError
 
@@ -450,11 +455,11 @@ export function useBuyerProfileQuery(buyerId: string | null | undefined) {
     queryFn: async () => {
       if (!buyerId) return null
 
-      const { data: profile, error: fetchError } = await (supabase
+      const { data: profile, error: fetchError } = await supabase
         .from('profiles')
         .select('id, name, avatar_url, city, is_verified, created_at')
         .eq('id', buyerId)
-        .single() as any)
+        .single<SupabaseProfile>()
 
       if (fetchError) throw fetchError
 
