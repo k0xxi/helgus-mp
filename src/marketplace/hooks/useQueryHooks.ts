@@ -160,17 +160,13 @@ export function useConversationsQuery(userId: string | undefined) {
       // Fetch latest message and unread count for each conversation
       const conversationsWithMessages = await Promise.all(
         (data || []).map(async (conv: SupabaseConversation) => {
-<<<<<<< HEAD
           const { data: messageData } = await (supabase
-=======
-          const { data: messageData } = await supabase
->>>>>>> 11633f73ee3451e74ee5ca6a99001284fe209daf
             .from('messages')
             .select('*')
             .eq('conversation_id', conv.id)
             .order('created_at', { ascending: false })
             .limit(1)
-            .single<SupabaseMessage>()
+            .single() as any)
 
           const { count, error: countError } = await supabase
             .from('messages')
