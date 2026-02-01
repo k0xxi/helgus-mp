@@ -122,3 +122,6 @@ export function useNotifications(userId: string | undefined): UseNotificationsRe
     refetch: () => refetch().then(() => undefined),
   }
 }
+
+// Export with both names for compatibility
+export const useUserNotifications = useNotifications

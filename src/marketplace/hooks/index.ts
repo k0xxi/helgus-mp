@@ -4,6 +4,7 @@ export { useFavorites } from './useFavorites'
 export { useProductDetail, useConversation, useOffers } from './useProductDetail'
 export { useCategoriesWithCounts } from './useCategoriesWithCounts'
 export { useDashboardStats } from './useDashboardStats'
+export { useNotifications, useUserNotifications } from './useNotifications'
 export {
   useConversationsQuery,
   useSendMessageMutation,
