@@ -85,17 +85,7 @@ export function ProfileSettings({
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
-          Profil-Einstellungen
-        </h1>
-        <p className="text-slate-500 dark:text-slate-400">
-          Verwalte deine persönlichen Daten und Einstellungen
-        </p>
-      </div>
-
+    <div>
       {/* Profile Summary Card */}
       <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 mb-8">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">

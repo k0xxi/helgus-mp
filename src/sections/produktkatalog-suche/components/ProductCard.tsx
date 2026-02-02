@@ -4,6 +4,7 @@ import type { Product } from '@/../product/sections/produktkatalog-suche/types'
 
 interface ProductCardProps {
   product: Product
+  isAuthenticated?: boolean
   onView?: () => void
   onToggleFavorite?: () => void
   onEdit?: () => void
@@ -12,6 +13,7 @@ interface ProductCardProps {
 
 export function ProductCard({
   product,
+  isAuthenticated = false,
   onView,
   onToggleFavorite,
   onEdit,
@@ -83,8 +85,8 @@ export function ProductCard({
           </div>
         )}
 
-        {/* Favorite Icon (not shown for own products) */}
-        {!product.isOwn && (
+        {/* Favorite Icon (not shown for own products or unauthenticated users) */}
+        {isAuthenticated && !product.isOwn && (
           <button
             onClick={(e) => {
               e.stopPropagation()

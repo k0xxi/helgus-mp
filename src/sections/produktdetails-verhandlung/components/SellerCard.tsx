@@ -3,11 +3,12 @@ import type { Seller } from '@/../product/sections/produktdetails-verhandlung/ty
 interface SellerCardProps {
   seller: Seller
   isSeller?: boolean
+  isAuthenticated?: boolean
   onSendMessage?: () => void
   onViewProfile?: () => void
 }
 
-export function SellerCard({ seller, isSeller, onSendMessage, onViewProfile }: SellerCardProps) {
+export function SellerCard({ seller, isSeller, isAuthenticated = false, onSendMessage, onViewProfile }: SellerCardProps) {
   return (
     <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5">
       <div className="flex items-start gap-4">
@@ -74,6 +75,7 @@ export function SellerCard({ seller, isSeller, onSendMessage, onViewProfile }: S
       </div>
 
       {/* Send Message Button - for buyers OR view messages button for sellers */}
+      {(isSeller || isAuthenticated) && (
       <button
         onClick={onSendMessage}
         className="w-full mt-4 flex items-center justify-center gap-2 px-4 py-2.5 text-red-600 dark:text-red-400 font-medium border border-slate-200 dark:border-slate-600 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
@@ -83,6 +85,7 @@ export function SellerCard({ seller, isSeller, onSendMessage, onViewProfile }: S
         </svg>
         {isSeller ? 'Nachrichten anzeigen' : 'Nachricht senden'}
       </button>
+      )}
     </div>
   )
 }

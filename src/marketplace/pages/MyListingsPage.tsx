@@ -102,21 +102,29 @@ export function MyListingsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Package className="h-6 w-6 text-slate-400" />
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-            Meine Anzeigen
-          </h1>
+      {/* Header Section */}
+      <div className="bg-gradient-to-br from-red-50 to-pink-50 dark:from-slate-800 dark:to-slate-900 rounded-lg px-6 py-8 border border-red-100 dark:border-red-900/30">
+        <div className="flex items-center gap-2 mb-4">
+          <Package className="h-5 w-5 text-red-600 dark:text-red-500" />
+          <span className="text-sm font-semibold text-red-600 dark:text-red-500">Ihre Artikel</span>
         </div>
-        <button
-          onClick={() => navigate('/marketplace/sell')}
-          className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 transition-colors"
-        >
-          <Plus className="h-4 w-4" />
-          Neue Anzeige
-        </button>
+        <div className="flex items-center justify-between gap-4 mb-4">
+          <div>
+            <h1 className="text-[2rem] font-bold text-slate-900 dark:text-slate-100">
+              Meine <span className="text-red-600 dark:text-red-500">Anzeigen</span>
+            </h1>
+          </div>
+          <button
+            onClick={() => navigate('/marketplace/sell')}
+            className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 transition-colors whitespace-nowrap flex-shrink-0"
+          >
+            <Plus className="h-4 w-4" />
+            Neue Anzeige
+          </button>
+        </div>
+        <p className="text-slate-600 dark:text-slate-400 max-w-2xl">
+          Verwalten Sie Ihre Angebote, bearbeiten Sie Preise und verfolgen Sie Ihre Verkäufe.
+        </p>
       </div>
 
       {/* Status Filter Tabs */}

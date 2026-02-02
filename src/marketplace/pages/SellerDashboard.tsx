@@ -32,12 +32,20 @@ export function SellerDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <TrendingUp className="h-6 w-6 text-slate-400" />
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-          Verkäufer-Dashboard
-        </h1>
+      {/* Header Section */}
+      <div className="bg-gradient-to-br from-red-50 to-pink-50 dark:from-slate-800 dark:to-slate-900 rounded-lg px-6 py-8 border border-red-100 dark:border-red-900/30">
+        <div className="flex items-center gap-2 mb-4">
+          <TrendingUp className="h-5 w-5 text-red-600 dark:text-red-500" />
+          <span className="text-sm font-semibold text-red-600 dark:text-red-500">Ihre Verkäufe</span>
+        </div>
+        <div className="mb-3">
+          <h1 className="text-[2rem] font-bold text-slate-900 dark:text-white">
+            Verkäufer-<span className="text-red-600 dark:text-red-500">Dashboard</span>
+          </h1>
+        </div>
+        <p className="text-slate-600 dark:text-slate-400 max-w-2xl">
+          Überwachen Sie Ihre Verkaufsleistung, Ansichten und Anfragen in Echtzeit.
+        </p>
       </div>
 
       {/* Stat Cards Grid */}

@@ -37,6 +37,7 @@ export function ProductDetail({
   messages,
   offers,
   currentUser,
+  isAuthenticated = false,
   isTyping = false,
   onBack,
   onCategoryClick,
@@ -52,7 +53,7 @@ export function ProductDetail({
   productConversations = [],
   selectedConversationId,
   onSelectConversation,
-}: ProductDetailProps & { initialChatOpen?: boolean }) {
+}: ProductDetailProps & { isAuthenticated?: boolean; initialChatOpen?: boolean }) {
   const [isChatOpen, setIsChatOpen] = useState(initialChatOpen)
   const [isOfferModalOpen, setIsOfferModalOpen] = useState(false)
   const isSeller = currentUser.id === seller.id
@@ -126,8 +127,8 @@ export function ProductDetail({
               </div>
             </div>
 
-            {/* Make Offer Button - only show if price is negotiable */}
-            {!isSeller && product.isNegotiable && (
+            {/* Make Offer Button - only show if price is negotiable and user is authenticated */}
+            {isAuthenticated && !isSeller && product.isNegotiable && (
               <button
                 onClick={() => setIsOfferModalOpen(true)}
                 className="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-colors"
@@ -247,6 +248,7 @@ export function ProductDetail({
             <SellerCard
               seller={seller}
               isSeller={isSeller}
+              isAuthenticated={isAuthenticated}
               onSendMessage={() => setIsChatOpen(true)}
               onViewProfile={() => onViewSellerProfile?.(seller.id)}
             />
@@ -264,6 +266,7 @@ export function ProductDetail({
                   Kaufen
                 </button>
               )}
+              {isAuthenticated && (
               <button
                 onClick={() => onToggleFavorite?.(product.id)}
                 className={`px-4 py-4 rounded-xl border transition-colors ${
@@ -281,6 +284,7 @@ export function ProductDetail({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
               </button>
+              )}
               <button
                 onClick={() => onShare?.(product.id)}
                 className="px-4 py-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 rounded-xl hover:border-slate-300 dark:hover:border-slate-600 transition-colors"

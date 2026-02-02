@@ -98,19 +98,30 @@ export function NotificationsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Bell className="h-6 w-6 text-amber-500" />
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Benachrichtigungen</h1>
+      {/* Header Section */}
+      <div className="bg-gradient-to-br from-red-50 to-pink-50 dark:from-slate-800 dark:to-slate-900 rounded-lg px-6 py-8 border border-red-100 dark:border-red-900/30">
+        <div className="flex items-center justify-between gap-4 mb-4">
+          <div className="flex items-center gap-2">
+            <Bell className="h-5 w-5 text-red-600 dark:text-red-500" />
+            <span className="text-sm font-semibold text-red-600 dark:text-red-500">System</span>
+          </div>
+          {notifications.length > 0 && (
+            <button
+              onClick={markAllAsRead}
+              className="text-sm font-medium text-red-600 hover:text-red-700 dark:text-red-500 dark:hover:text-red-400 cursor-pointer"
+            >
+              Alle gelesen
+            </button>
+          )}
         </div>
-        {notifications.length > 0 && (
-          <button
-            onClick={markAllAsRead}
-            className="text-sm font-medium text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 cursor-pointer"
-          >
-            Alle gelesen
-          </button>
-        )}
+        <div className="mb-3">
+          <h1 className="text-[2rem] font-bold text-slate-900 dark:text-white">
+            <span className="text-red-600 dark:text-red-500">Benachrichtigungen</span>
+          </h1>
+        </div>
+        <p className="text-slate-600 dark:text-slate-400 max-w-2xl">
+          Bleiben Sie über neue Nachrichten, Angebote und Ihre Artikel informiert.
+        </p>
       </div>
 
       {notifications.length === 0 ? (

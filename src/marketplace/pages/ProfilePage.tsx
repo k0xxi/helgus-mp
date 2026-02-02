@@ -24,9 +24,20 @@ export function ProfilePage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <User className="h-6 w-6 text-slate-400" />
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Mein Profil</h1>
+      {/* Header Section */}
+      <div className="bg-gradient-to-br from-red-50 to-pink-50 dark:from-slate-800 dark:to-slate-900 rounded-lg px-6 py-8 border border-red-100 dark:border-red-900/30">
+        <div className="flex items-center gap-2 mb-4">
+          <User className="h-5 w-5 text-red-600 dark:text-red-500" />
+          <span className="text-sm font-semibold text-red-600 dark:text-red-500">Benutzerkonto</span>
+        </div>
+        <div className="mb-3">
+          <h1 className="text-[2rem] font-bold text-slate-900 dark:text-white">
+            Mein <span className="text-red-600 dark:text-red-500">Profil</span>
+          </h1>
+        </div>
+        <p className="text-slate-600 dark:text-slate-400 max-w-2xl">
+          Verwalten Sie Ihre Kontoeinstellungen, Verifizierung und persönliche Informationen.
+        </p>
       </div>
 
       {/* Profile card */}

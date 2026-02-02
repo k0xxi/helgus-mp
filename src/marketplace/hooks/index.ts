@@ -2,6 +2,7 @@ export { usePublicProfile, useSellerVerification, useUserListings, useMyListings
 export type { ListingStatus, MyListing, ListingFormData, ListingImage } from './useProfile'
 export { useProducts, useCategories, useDeleteProduct } from './useProducts'
 export { useFavorites } from './useFavorites'
+export { useFavoriteProducts } from './useFavoriteProducts'
 export { useProductDetail, useConversation, useOffers } from './useProductDetail'
 export { useCategoriesWithCounts } from './useCategoriesWithCounts'
 export { useDashboardStats } from './useDashboardStats'

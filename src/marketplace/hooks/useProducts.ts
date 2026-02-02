@@ -257,6 +257,16 @@ export function useProducts(
     fetchProducts()
   }, [fetchProducts])
 
+  // Update isFavorited status when favoriteIds changes
+  useEffect(() => {
+    setProducts((prevProducts) =>
+      prevProducts.map((product) => ({
+        ...product,
+        isFavorited: favoriteIdsRef.current.has(product.id),
+      }))
+    )
+  }, [favoriteIds])
+
   return { products, loading, error, refetch: fetchProducts }
 }
 

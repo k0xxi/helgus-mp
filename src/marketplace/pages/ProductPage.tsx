@@ -349,6 +349,7 @@ export function ProductPage() {
       messages={messages}
       offers={offers}
       currentUser={currentUser}
+      isAuthenticated={!!user}
       isTyping={isTyping}
       onBack={handleBack}
       onCategoryClick={handleCategoryClick}

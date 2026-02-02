@@ -219,6 +219,7 @@ export function SearchPage() {
           categories={categories}
           filters={filters}
           sortBy={sortBy}
+          isAuthenticated={!!user}
           onApplyFilters={handleApplyFilters}
           onResetFilters={handleResetFilters}
           onSortChange={handleSortChange}

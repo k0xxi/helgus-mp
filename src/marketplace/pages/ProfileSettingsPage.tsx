@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Settings } from 'lucide-react'
 import { useAuth } from '@/marketplace/context/AuthContext'
 import { ProfileSettings } from '@/sections/nutzerverwaltung/components'
 import type { User as DesignOSUser, Country, ConnectedAccount } from '@/../product/sections/nutzerverwaltung/types'
@@ -97,16 +98,33 @@ export function ProfileSettingsPage() {
   }
 
   return (
-    <ProfileSettings
-      user={designOSUser}
-      connectedAccounts={connectedAccounts}
-      countries={COUNTRIES}
-      onSaveProfile={handleSaveProfile}
-      onChangePassword={handleChangePassword}
-      onStartVerification={handleStartVerification}
-      onConnectAccount={handleConnectAccount}
-      onDisconnectAccount={handleDisconnectAccount}
-      onDeleteAccount={handleDeleteAccount}
-    />
+    <div className="space-y-6">
+      {/* Header Section */}
+      <div className="bg-gradient-to-br from-red-50 to-pink-50 dark:from-slate-800 dark:to-slate-900 rounded-lg px-6 py-8 border border-red-100 dark:border-red-900/30">
+        <div className="flex items-center gap-2 mb-4">
+          <Settings className="h-5 w-5 text-red-600 dark:text-red-500" />
+          <span className="text-sm font-semibold text-red-600 dark:text-red-500">Einstellungen</span>
+        </div>
+        <div className="mb-3">
+          <h1 className="text-[2rem] font-bold text-slate-900 dark:text-white">
+            Profil <span className="text-red-600 dark:text-red-500">Einstellungen</span>
+          </h1>
+        </div>
+        <p className="text-slate-600 dark:text-slate-400 max-w-2xl">
+          Verwalten Sie Ihre persönlichen Daten, Passwort und Benachrichtigungseinstellungen.
+        </p>
+      </div>
+      <ProfileSettings
+        user={designOSUser}
+        connectedAccounts={connectedAccounts}
+        countries={COUNTRIES}
+        onSaveProfile={handleSaveProfile}
+        onChangePassword={handleChangePassword}
+        onStartVerification={handleStartVerification}
+        onConnectAccount={handleConnectAccount}
+        onDisconnectAccount={handleDisconnectAccount}
+        onDeleteAccount={handleDeleteAccount}
+      />
+    </div>
   )
 }

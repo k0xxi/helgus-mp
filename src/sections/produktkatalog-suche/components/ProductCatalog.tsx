@@ -9,6 +9,7 @@ export function ProductCatalog({
   categories,
   filters,
   sortBy = 'newest',
+  isAuthenticated = false,
   onApplyFilters,
   onResetFilters,
   onSortChange,
@@ -16,7 +17,7 @@ export function ProductCatalog({
   onToggleFavorite,
   onEditProduct,
   onDeleteProduct,
-}: ProductCatalogProps) {
+}: ProductCatalogProps & { isAuthenticated?: boolean }) {
   const [showMobileFilter, setShowMobileFilter] = useState(false)
   // Sort products based on sortBy
   const sortedProducts = [...products].sort((a, b) => {
@@ -41,27 +42,26 @@ export function ProductCatalog({
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-br from-red-50 to-pink-50 dark:from-slate-800 dark:to-slate-900 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-full text-sm font-medium mb-4">
-            <Package className="w-4 h-4" />
-            <span className="font-['Inter']">Produkte entdecken</span>
+    <div className="space-y-6">
+          {/* Header Section */}
+          <div className="bg-gradient-to-br from-red-50 to-pink-50 dark:from-slate-800 dark:to-slate-900 rounded-lg px-6 py-8 border border-red-100 dark:border-red-900/30">
+            <div className="flex items-center gap-2 mb-4">
+              <Package className="h-5 w-5 text-red-600 dark:text-red-500" />
+              <span className="text-sm font-semibold text-red-600 dark:text-red-500">Produkte entdecken</span>
+            </div>
+            <div className="mb-3">
+              <h1 className="text-[2rem] font-bold text-slate-900 dark:text-slate-100">
+                Alle <span className="text-red-600 dark:text-red-500">Produkte</span>
+              </h1>
+            </div>
+            <p className="text-slate-600 dark:text-slate-400 max-w-2xl">
+              Durchstöbern Sie unsere große Auswahl an Produkten. Finden Sie genau das, was Sie
+              suchen.
+            </p>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 dark:text-slate-100 mb-4 font-['DM_Sans']">
-            Alle <span className="text-red-600 dark:text-red-500">Produkte</span>
-          </h1>
-          <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl font-['Inter']">
-            Durchstöbern Sie unsere große Auswahl an Produkten. Finden Sie genau das, was Sie
-            suchen.
-          </p>
-        </div>
-      </div>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Main Content */}
+          <div className="flex flex-col lg:flex-row gap-8">
           {/* Filter Sidebar - Desktop */}
           <aside className="hidden lg:block lg:w-80 flex-shrink-0">
             <FilterSidebar
@@ -85,7 +85,7 @@ export function ProductCatalog({
               <div className="fixed inset-y-0 left-0 w-full max-w-sm bg-white dark:bg-slate-900 z-50 overflow-y-auto lg:hidden">
                 {/* Header */}
                 <div className="sticky top-0 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 px-4 py-4 flex items-center justify-between">
-                  <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 font-['DM_Sans']">
+                  <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
                     Filter
                   </h2>
                   <button
@@ -120,7 +120,7 @@ export function ProductCatalog({
           <main className="flex-1">
             {/* Results Header */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-              <p className="text-slate-600 dark:text-slate-400 font-['Inter']">
+              <p className="text-slate-600 dark:text-slate-400">
                 <span className="font-medium text-slate-900 dark:text-slate-100">
                   {sortedProducts.length}
                 </span>{' '}
@@ -131,7 +131,7 @@ export function ProductCatalog({
                 {/* Mobile Filter Button */}
                 <button
                   onClick={() => setShowMobileFilter(true)}
-                  className="lg:hidden flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 text-white font-medium rounded-lg transition-colors font-['Inter'] flex-1 sm:flex-initial justify-center"
+                  className="lg:hidden flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 text-white font-medium rounded-lg transition-colors flex-1 sm:flex-initial justify-center"
                 >
                   <Filter className="w-4 h-4" />
                   <span>Filter</span>
@@ -139,13 +139,13 @@ export function ProductCatalog({
 
                 {/* Sort Dropdown */}
                 <div className="flex items-center gap-2 flex-1 sm:flex-initial">
-                  <label className="text-sm text-slate-600 dark:text-slate-400 font-['Inter'] whitespace-nowrap">
+                  <label className="text-sm text-slate-600 dark:text-slate-400 whitespace-nowrap">
                     Sortieren:
                   </label>
                   <select
                     value={sortBy}
                     onChange={(e) => onSortChange?.(e.target.value as SortOption)}
-                    className="px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 focus:border-transparent font-['Inter'] w-full"
+                    className="px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 focus:border-transparent w-full"
                   >
                     <option value="newest">{getSortLabel('newest')}</option>
                     <option value="price-asc">{getSortLabel('price-asc')}</option>
@@ -162,6 +162,7 @@ export function ProductCatalog({
                   <ProductCard
                     key={product.id}
                     product={product}
+                    isAuthenticated={isAuthenticated}
                     onView={() => onViewProduct?.(product.id)}
                     onToggleFavorite={() => onToggleFavorite?.(product.id)}
                     onEdit={() => onEditProduct?.(product.id)}
@@ -175,17 +176,17 @@ export function ProductCatalog({
                 <div className="w-24 h-24 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-6">
                   <Package className="w-12 h-12 text-slate-400 dark:text-slate-600" />
                 </div>
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2 font-['DM_Sans']">
+                <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">
                   Keine Produkte gefunden
                 </h3>
-                <p className="text-slate-600 dark:text-slate-400 text-center max-w-md mb-6 font-['Inter']">
+                <p className="text-slate-600 dark:text-slate-400 text-center max-w-md mb-6">
                   Versuchen Sie andere Filter oder erweitern Sie den Suchradius, um mehr Ergebnisse
                   zu finden.
                 </p>
                 {onResetFilters && (
                   <button
                     onClick={onResetFilters}
-                    className="px-6 py-3 bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 text-white font-bold rounded-lg transition-colors font-['DM_Sans']"
+                    className="px-6 py-3 bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 text-white font-bold rounded-lg transition-colors"
                   >
                     Filter zurücksetzen
                   </button>
@@ -193,8 +194,7 @@ export function ProductCatalog({
               </div>
             )}
           </main>
-        </div>
-      </div>
+          </div>
     </div>
   )
 }
