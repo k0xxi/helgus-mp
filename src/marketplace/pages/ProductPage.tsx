@@ -112,7 +112,7 @@ export function ProductPage() {
   } = useMarkMessagesAsReadMutation()
 
   // Real-time message subscriptions
-  useMessagesSubscription(conversation?.id)
+  useMessagesSubscription(conversation?.id, productId)
   useConversationsSubscription(user?.id)
 
   // Offers hook

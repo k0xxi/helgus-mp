@@ -652,11 +652,13 @@ export function useMarkMessagesAsReadMutation() {
  * - Automatically unsubscribes on component unmount
  * - Invalidates message and conversation queries when changes detected
  */
-export function useMessagesSubscription(conversationId: string | null | undefined) {
+export function useMessagesSubscription(conversationId: string | null | undefined, productId?: string) {
   const queryClient = useQueryClient()
 
   useEffect(() => {
     if (!conversationId) return
+
+    console.log('🔔 [useMessagesSubscription] Subscribing to:', conversationId)
 
     // Subscribe to new messages and updates using modern Supabase channel API
     const channel = supabase
@@ -669,7 +671,8 @@ export function useMessagesSubscription(conversationId: string | null | undefine
           table: 'messages',
           filter: `conversation_id=eq.${conversationId}`,
         },
-        () => {
+        (payload) => {
+          console.log('💬 [useMessagesSubscription] Event received:', payload.eventType)
           // Invalidate messages query to trigger refetch
           queryClient.invalidateQueries({
             queryKey: queryKeys.messages.list(conversationId),
@@ -680,6 +683,13 @@ export function useMessagesSubscription(conversationId: string | null | undefine
             queryKey: queryKeys.conversations.all,
             refetchType: 'active',
           })
+          // Invalidate product conversations sidebar for sellers
+          if (productId) {
+            queryClient.invalidateQueries({
+              queryKey: queryKeys.conversations.byProduct(productId),
+              refetchType: 'active',
+            })
+          }
         }
       )
       .subscribe()
@@ -687,7 +697,7 @@ export function useMessagesSubscription(conversationId: string | null | undefine
     return () => {
       channel.unsubscribe()
     }
-  }, [conversationId, queryClient])
+  }, [conversationId, productId, queryClient])
 }
 
 // =============================================================================
@@ -710,6 +720,8 @@ export function useConversationsSubscription(userId: string | null | undefined) 
   useEffect(() => {
     if (!userId) return
 
+    console.log('🔔 [useConversationsSubscription] Subscribing for userId:', userId)
+
     const channel = supabase
       .channel(`conversations:${userId}`)
       .on(
@@ -719,14 +731,22 @@ export function useConversationsSubscription(userId: string | null | undefined) 
           schema: 'public',
           table: 'messages',
         },
-        () => {
+        (payload) => {
+          console.log('📨 [useConversationsSubscription] New message event:', payload)
           queryClient.invalidateQueries({
             queryKey: queryKeys.conversations.all,
             refetchType: 'active',
           })
+          // Also invalidate product conversations in case seller is viewing sidebar
+          queryClient.invalidateQueries({
+            queryKey: queryKeys.conversations.byProduct(),
+            refetchType: 'active',
+          })
         }
       )
-      .subscribe()
+      .subscribe((status) => {
+        console.log('🔌 [useConversationsSubscription] Channel status:', status)
+      })
 
     return () => {
       channel.unsubscribe()
