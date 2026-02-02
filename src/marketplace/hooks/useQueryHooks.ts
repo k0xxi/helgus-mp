@@ -658,8 +658,6 @@ export function useMessagesSubscription(conversationId: string | null | undefine
   useEffect(() => {
     if (!conversationId) return
 
-    console.log('🔔 [useMessagesSubscription] Subscribing to:', conversationId)
-
     // Subscribe to new messages and updates using modern Supabase channel API
     const channel = supabase
       .channel(`messages:${conversationId}`)
@@ -671,8 +669,7 @@ export function useMessagesSubscription(conversationId: string | null | undefine
           table: 'messages',
           filter: `conversation_id=eq.${conversationId}`,
         },
-        (payload) => {
-          console.log('💬 [useMessagesSubscription] Event received:', payload.eventType)
+        () => {
           // Invalidate messages query to trigger refetch
           queryClient.invalidateQueries({
             queryKey: queryKeys.messages.list(conversationId),
@@ -720,8 +717,6 @@ export function useConversationsSubscription(userId: string | null | undefined) 
   useEffect(() => {
     if (!userId) return
 
-    console.log('🔔 [useConversationsSubscription] Subscribing for userId:', userId)
-
     const channel = supabase
       .channel(`conversations:${userId}`)
       .on(
@@ -731,8 +726,7 @@ export function useConversationsSubscription(userId: string | null | undefined) 
           schema: 'public',
           table: 'messages',
         },
-        (payload) => {
-          console.log('📨 [useConversationsSubscription] New message event:', payload)
+        () => {
           queryClient.invalidateQueries({
             queryKey: queryKeys.conversations.all,
             refetchType: 'active',
@@ -744,9 +738,7 @@ export function useConversationsSubscription(userId: string | null | undefined) 
           })
         }
       )
-      .subscribe((status) => {
-        console.log('🔌 [useConversationsSubscription] Channel status:', status)
-      })
+      .subscribe()
 
     return () => {
       channel.unsubscribe()

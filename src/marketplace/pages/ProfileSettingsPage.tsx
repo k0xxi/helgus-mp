@@ -81,11 +81,10 @@ export function ProfileSettingsPage() {
 
   const handleConnectAccount = async (provider: 'google' | 'apple') => {
     // OAuth account linking would require additional Supabase setup
-    console.log('Connect account:', provider)
   }
 
   const handleDisconnectAccount = async (accountId: string) => {
-    console.log('Disconnect account:', accountId)
+    // Account disconnection would require Supabase setup
   }
 
   const handleDeleteAccount = async () => {

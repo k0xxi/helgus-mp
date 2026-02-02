@@ -30,8 +30,6 @@ export function useConversationRealtimeSync(conversationId?: string) {
         queryClient.invalidateQueries({
           queryKey: queryKeys.conversations.all,
         })
-
-        console.log(`[Realtime] Message ${event.type} in conversation ${conversationId}`)
       }
     },
     [conversationId, queryClient]

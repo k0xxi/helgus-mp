@@ -246,7 +246,6 @@ export function ProductPage() {
     }
     // For now, just open chat - actual buy flow can be implemented later
     // Could also navigate to a checkout page
-    console.log('Buy request for product:', productId)
   }
 
   const handleToggleFavorite = async () => {
@@ -271,14 +270,12 @@ export function ProductPage() {
         await navigator.share({ title, url })
       } catch (err) {
         // User cancelled or share failed
-        console.log('Share cancelled or failed:', err)
       }
     } else {
       // Fallback: copy to clipboard
       try {
         await navigator.clipboard.writeText(url)
         // Could show a toast notification here
-        console.log('URL copied to clipboard')
       } catch (err) {
         console.error('Failed to copy URL:', err)
       }
@@ -321,16 +318,13 @@ export function ProductPage() {
   }
 
   const handleRespondToOffer = async (offerId: string, status: 'accepted' | 'declined') => {
-    console.log('📌 handleRespondToOffer called:', { offerId, status })
     if (!user) {
       navigate('/marketplace/auth')
       return
     }
     const { error } = await respondToOffer(offerId, status)
     if (error) {
-      console.error('❌ Error responding to offer:', error)
-    } else {
-      console.log('✅ Offer response handled successfully')
+      console.error('Error responding to offer:', error)
     }
   }
 

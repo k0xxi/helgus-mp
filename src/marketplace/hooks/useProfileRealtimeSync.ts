@@ -23,8 +23,6 @@ export function useProfileRealtimeSync() {
           queryKey: queryKeys.profiles.detail(event.new.id as string),
         })
       }
-
-      console.log(`[Realtime] Profile ${event.type}:`, event.new?.id || event.old?.id)
     },
     [queryClient]
   )

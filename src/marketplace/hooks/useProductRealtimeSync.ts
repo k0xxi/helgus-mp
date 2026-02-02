@@ -28,8 +28,6 @@ export function useProductRealtimeSync() {
           queryKey: queryKeys.products.detail(event.new.id as string),
         })
       }
-
-      console.log(`[Realtime] Product ${event.type}:`, event.new?.id || event.old?.id)
     },
     [queryClient]
   )
