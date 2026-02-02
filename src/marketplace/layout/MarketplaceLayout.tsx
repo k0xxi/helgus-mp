@@ -1,6 +1,6 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/marketplace/context/AuthContext'
-import { useConversationsQuery, useUserNotifications, useNotificationsSubscription } from '@/marketplace/hooks'
+import { useConversationsQuery, useUserNotifications, useNotificationsSubscription, useNavigationRefresh, useProductRealtimeSync, useProfileRealtimeSync } from '@/marketplace/hooks'
 import { NotificationDropdown } from '@/marketplace/components/NotificationDropdown'
 import {
   Home,
@@ -24,6 +24,13 @@ export function MarketplaceLayout() {
   const [notificationDropdownOpen, setNotificationDropdownOpen] = useState(false)
   const { data: conversations = [] } = useConversationsQuery(user?.id)
   const { notifications, unreadCount: unreadNotifications, markAsRead } = useUserNotifications(user?.id)
+
+  // Refresh profile data when navigating to different pages
+  useNavigationRefresh()
+
+  // Set up real-time subscriptions for data sync
+  useProductRealtimeSync()
+  useProfileRealtimeSync()
 
   // Set up real-time subscription for notifications
   useNotificationsSubscription(user?.id)

@@ -28,42 +28,49 @@ export function HomePage() {
     navigate('/marketplace/sell')
   }
 
+  // Fetch categories whenever component mounts or user changes
   useEffect(() => {
     async function fetchCategoriesWithCounts() {
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .is('parent_id', null)
-        .order('sort_order')
+      try {
+        setLoading(true)
+        const { data, error } = await supabase
+          .from('categories')
+          .select('*')
+          .is('parent_id', null)
+          .order('sort_order')
 
-      if (error) {
-        console.error('Error fetching categories:', error)
+        if (error || !data) {
+          console.error('Error fetching categories:', error)
+          setLoading(false)
+          return
+        }
+
+        // Fetch product counts for each category
+        const categoriesWithCounts = await Promise.all(
+          (data as Tables<'categories'>[]).map(async (category) => {
+            const { count, error: countError } = await supabase
+              .from('products')
+              .select('id', { count: 'exact', head: true })
+              .eq('category_id', category.id)
+              .eq('is_active', true)
+
+            return {
+              ...category,
+              productCount: countError ? 0 : (count || 0),
+            }
+          })
+        )
+
+        setCategories(categoriesWithCounts)
+      } catch (err) {
+        console.error('Exception fetching categories:', err)
+      } finally {
         setLoading(false)
-        return
       }
-
-      // Fetch product counts for each category
-      const categoriesWithCounts = await Promise.all(
-        (data || []).map(async (category) => {
-          const { count, error: countError } = await supabase
-            .from('products')
-            .select('id', { count: 'exact', head: true })
-            .eq('category_id', category.id)
-            .eq('is_active', true)
-
-          return {
-            ...category,
-            productCount: countError ? 0 : (count || 0),
-          }
-        })
-      )
-
-      setCategories(categoriesWithCounts)
-      setLoading(false)
     }
 
     fetchCategoriesWithCounts()
-  }, [])
+  }, [user])
 
   return (
     <div className="space-y-12">

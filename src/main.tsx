@@ -9,10 +9,11 @@ import { router } from '@/lib/router'
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
-      gcTime: 1000 * 60 * 10, // 10 minutes (formerly cacheTime)
+      staleTime: 1000 * 60 * 1, // 1 minute - data is stale after 1 minute
+      gcTime: 1000 * 60 * 5, // 5 minutes (formerly cacheTime)
       retry: 1,
-      refetchOnWindowFocus: false, // Disable auto-refetch on window focus to prevent extra requests
+      refetchOnWindowFocus: true, // Auto-refetch when window regains focus
+      refetchOnReconnect: true, // Auto-refetch when reconnecting
     },
     mutations: {
       retry: 1,
