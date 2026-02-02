@@ -6,6 +6,7 @@ import {
   useProductDetail,
   useOffers,
   useProductConversationsQuery,
+  useProductConversationsListQuery,
   useConversationMessagesQuery,
   useBuyerProfileQuery,
   useSendMessageMutation,
@@ -27,6 +28,9 @@ export function ProductPage() {
 
   // Track whether chat should be open (persists even after URL param is cleared)
   const [shouldInitiallyChatOpen, setShouldInitiallyChatOpen] = useState(false)
+
+  // Get conversationId from URL params (for sellers navigating from messages page)
+  const urlConversationId = searchParams.get('conversationId')
 
   // Detect if chat should open from URL param
   useEffect(() => {
@@ -71,10 +75,19 @@ export function ProductPage() {
   } = useProductDetail(productId, user?.id, isProductFavorited)
 
   // Conversation query (React Query)
+  // Pass conversationId from URL if present (for sellers navigating from messages page)
   const {
     data: conversation,
     isLoading: conversationLoading,
-  } = useProductConversationsQuery(productId, seller?.id, user?.id)
+  } = useProductConversationsQuery(productId, seller?.id, user?.id, urlConversationId)
+
+  // Product conversations list query (for seller sidebar showing all conversations)
+  const {
+    data: productConversations = [],
+  } = useProductConversationsListQuery(
+    productId,
+    user?.id === seller?.id ? seller?.id : undefined
+  )
 
   // Messages query (React Query)
   const {
@@ -321,6 +334,18 @@ export function ProductPage() {
     }
   }
 
+  const handleSelectConversation = (conversationId: string) => {
+    // Update URL to select this conversation
+    setSearchParams(
+      (current) => {
+        const params = new URLSearchParams(current)
+        params.set('conversationId', conversationId)
+        return params
+      },
+      { replace: false }
+    )
+  }
+
   return (
     <ProductDetail
       product={productWithFavorite}
@@ -342,6 +367,9 @@ export function ProductPage() {
       onAcceptOffer={(offerId) => handleRespondToOffer(offerId, 'accepted')}
       onDeclineOffer={(offerId) => handleRespondToOffer(offerId, 'declined')}
       initialChatOpen={shouldInitiallyChatOpen}
+      productConversations={productConversations}
+      selectedConversationId={conversation?.id}
+      onSelectConversation={handleSelectConversation}
     />
   )
 }

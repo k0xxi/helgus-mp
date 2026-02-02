@@ -63,6 +63,7 @@ export const queryKeys = {
     all: ['conversations'] as const,
     list: (userId?: string) => [...queryKeys.conversations.all, 'list', userId] as const,
     detail: (id?: string) => [...queryKeys.conversations.all, 'detail', id] as const,
+    byProduct: (productId?: string) => [...queryKeys.conversations.all, 'byProduct', productId] as const,
   },
   messages: {
     all: ['messages'] as const,
@@ -281,14 +282,17 @@ export function useSendMessageMutation() {
       // Invalidate and refetch messages
       queryClient.invalidateQueries({
         queryKey: queryKeys.messages.list(data.conversationId),
+        refetchType: 'active',
       })
-      // Invalidate conversations to update last message
+      // Invalidate conversations to update last message and unread count
       queryClient.invalidateQueries({
         queryKey: queryKeys.conversations.all,
+        refetchType: 'active',
       })
       // Invalidate product conversations
       queryClient.invalidateQueries({
         queryKey: queryKeys.conversations.detail(variables.productId),
+        refetchType: 'active',
       })
     },
     onError: (error) => {
@@ -307,22 +311,40 @@ export function useSendMessageMutation() {
  * @param productId - Product ID to fetch conversations for
  * @param sellerId - Seller ID to identify the product owner
  * @param userId - Current user ID to determine their role
+ * @param conversationId - Optional specific conversation ID to fetch (for sellers viewing specific conversations)
  * @returns React Query result with conversation data or null
  *
  * @remarks
  * - Returns the user's existing conversation or null if none exists
  * - Buyers see their conversation with the seller
- * - Sellers see the most recent conversation for the product
+ * - Sellers see the specified conversation (if conversationId provided) or the most recent
  */
 export function useProductConversationsQuery(
   productId: string | undefined,
   sellerId: string | undefined,
-  userId: string | undefined
+  userId: string | undefined,
+  conversationId?: string | null
 ) {
   return useQuery({
-    queryKey: queryKeys.conversations.detail(productId),
+    queryKey: queryKeys.conversations.detail(conversationId || productId),
     queryFn: async () => {
       if (!productId || !userId || !sellerId) return null
+
+      // If a specific conversationId is provided, fetch that conversation directly
+      if (conversationId) {
+        const { data: specificConv, error: specificError } = await supabase
+          .from('conversations')
+          .select('id, buyer_id, seller_id')
+          .eq('id', conversationId)
+          .eq('product_id', productId)
+          .maybeSingle<{ id: string; buyer_id: string; seller_id: string }>()
+
+        if (specificError && specificError.code !== 'PGRST116') {
+          throw specificError
+        }
+
+        return specificConv || null
+      }
 
       let query: any = supabase
         .from('conversations')
@@ -348,6 +370,104 @@ export function useProductConversationsQuery(
     },
     enabled: !!productId && !!userId && !!sellerId,
     staleTime: 1000 * 60 * 2,
+  })
+}
+
+// =============================================================================
+// Get All Conversations for a Specific Product (Sidebar/List View)
+// =============================================================================
+
+/**
+ * Query hook to fetch all conversations for a specific product
+ *
+ * @param productId - Product ID to fetch conversations for
+ * @param sellerId - Seller ID of the product (for authorization/filtering)
+ * @returns React Query result with array of conversations with buyer info
+ *
+ * @remarks
+ * - Fetches all conversations where the product ID matches
+ * - Only available to the product's seller
+ * - Includes latest message and unread count for each conversation
+ * - Ordered by creation date (newest first)
+ * - Used for sidebar on Product Page and buyer list on Messages Page
+ */
+export function useProductConversationsListQuery(
+  productId: string | undefined,
+  sellerId: string | undefined
+) {
+  return useQuery({
+    queryKey: queryKeys.conversations.byProduct(productId),
+    queryFn: async () => {
+      if (!productId || !sellerId) return []
+
+      // Fetch all conversations for this product
+      const { data, error: fetchError } = await supabase
+        .from('conversations')
+        .select(`
+          id,
+          product_id,
+          buyer_id,
+          seller_id,
+          created_at,
+          profiles_buyer:profiles!buyer_id(id, name, avatar_url)
+        `)
+        .eq('product_id', productId)
+        .eq('seller_id', sellerId)
+        .order('created_at', { ascending: false })
+
+      if (fetchError) throw fetchError
+
+      // Fetch latest message and unread count for each conversation
+      const conversationsWithMessages = await Promise.all(
+        (data || []).map(async (conv: any) => {
+          const { data: messageData } = await supabase
+            .from('messages')
+            .select('*')
+            .eq('conversation_id', conv.id)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single<any>()
+
+          const { count, error: countError } = await supabase
+            .from('messages')
+            .select('id', { count: 'exact', head: true })
+            .eq('conversation_id', conv.id)
+            .eq('is_read', false)
+            .neq('sender_id', sellerId)
+
+          if (countError) {
+            console.error('Error fetching unread count:', countError)
+          }
+
+          return {
+            id: conv.id,
+            productId: conv.product_id,
+            buyerId: conv.buyer_id,
+            sellerId: conv.seller_id,
+            createdAt: new Date(conv.created_at),
+            buyer: conv.profiles_buyer ? {
+              id: conv.profiles_buyer.id,
+              name: conv.profiles_buyer.name,
+              avatarUrl: conv.profiles_buyer.avatar_url,
+            } : undefined,
+            lastMessage: messageData ? {
+              id: messageData.id,
+              conversationId: messageData.conversation_id,
+              senderId: messageData.sender_id,
+              content: messageData.content,
+              isRead: messageData.is_read,
+              createdAt: new Date(messageData.created_at),
+            } : undefined,
+            unreadCount: count || 0,
+          }
+        })
+      )
+
+      return conversationsWithMessages
+    },
+    enabled: !!productId && !!sellerId,
+    staleTime: 1000 * 60 * 2, // 2 minutes
+    refetchInterval: 1000 * 60, // Fallback: refetch every 60 seconds
   })
 }
 
@@ -553,10 +673,12 @@ export function useMessagesSubscription(conversationId: string | null | undefine
           // Invalidate messages query to trigger refetch
           queryClient.invalidateQueries({
             queryKey: queryKeys.messages.list(conversationId),
+            refetchType: 'active',
           })
           // Also invalidate conversations to update unread badge
           queryClient.invalidateQueries({
             queryKey: queryKeys.conversations.all,
+            refetchType: 'active',
           })
         }
       )
@@ -588,7 +710,6 @@ export function useConversationsSubscription(userId: string | null | undefined) 
   useEffect(() => {
     if (!userId) return
 
-    // Subscribe to conversation changes (new messages, status updates) using modern channel API
     const channel = supabase
       .channel(`conversations:${userId}`)
       .on(
@@ -599,9 +720,9 @@ export function useConversationsSubscription(userId: string | null | undefined) 
           table: 'messages',
         },
         () => {
-          // When a new message is added, invalidate all conversations to update unread counts
           queryClient.invalidateQueries({
             queryKey: queryKeys.conversations.all,
+            refetchType: 'active',
           })
         }
       )
@@ -633,7 +754,6 @@ export function useNotificationsSubscription(userId: string | null | undefined) 
   useEffect(() => {
     if (!userId) return
 
-    // Subscribe to notification changes (new notifications, marked as read) using modern channel API
     const channel = supabase
       .channel(`notifications:${userId}`)
       .on(
@@ -645,9 +765,9 @@ export function useNotificationsSubscription(userId: string | null | undefined) 
           filter: `user_id=eq.${userId}`,
         },
         () => {
-          // When notifications change, invalidate the notifications query to trigger refetch
           queryClient.invalidateQueries({
-            queryKey: ['notifications', 'list', userId],
+            queryKey: queryKeys.notifications.list(userId),
+            refetchType: 'active',
           })
         }
       )

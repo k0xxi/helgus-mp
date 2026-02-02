@@ -90,7 +90,7 @@ export function ProfilePage() {
         )}
 
         <Link
-          to="/marketplace/sell"
+          to="/marketplace/my-listings"
           className="flex items-center gap-4 rounded-lg border border-slate-200 bg-white p-4 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700"
         >
           <div className="rounded-lg bg-slate-100 p-3 dark:bg-slate-700">

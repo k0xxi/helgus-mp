@@ -77,6 +77,7 @@ interface ProductQueryResult {
   title: string
   description: string
   price: number
+  is_negotiable: boolean
   condition: string
   delivery_options: string[]
   shipping_cost: number | null
@@ -221,6 +222,7 @@ export function useProducts(
           title: product.title,
           description: product.description,
           price: Number(product.price),
+          isNegotiable: product.is_negotiable ?? false,
           images: imageUrls.length > 0 ? imageUrls : [],
           condition: product.condition as Product['condition'],
           deliveryOptions: product.delivery_options as Product['deliveryOptions'],

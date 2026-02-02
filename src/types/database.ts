@@ -144,6 +144,7 @@ export interface Database {
           title: string
           description: string
           price: number
+          is_negotiable: boolean
           condition: ProductCondition
           delivery_options: DeliveryOption[]
           shipping_cost: number | null
@@ -163,6 +164,7 @@ export interface Database {
           title: string
           description: string
           price: number
+          is_negotiable?: boolean
           condition: ProductCondition
           delivery_options: DeliveryOption[]
           shipping_cost?: number | null
@@ -182,6 +184,7 @@ export interface Database {
           title?: string
           description?: string
           price?: number
+          is_negotiable?: boolean
           condition?: ProductCondition
           delivery_options?: DeliveryOption[]
           shipping_cost?: number | null

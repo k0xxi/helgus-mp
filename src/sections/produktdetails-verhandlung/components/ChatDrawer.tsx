@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import type { Message, Seller } from '@/../product/sections/produktdetails-verhandlung/types'
+import type { Message, Seller, ProductConversation } from '@/../product/sections/produktdetails-verhandlung/types'
 
 interface ChatDrawerProps {
   isOpen: boolean
@@ -8,6 +8,10 @@ interface ChatDrawerProps {
   otherParty: Seller
   onSendMessage?: (content: string) => void
   isTyping?: boolean
+  isSeller?: boolean
+  productConversations?: ProductConversation[]
+  selectedConversationId?: string
+  onSelectConversation?: (conversationId: string) => void
 }
 
 function formatTime(timestamp: string): string {
@@ -29,7 +33,18 @@ function formatDate(timestamp: string): string {
   return date.toLocaleDateString('de-AT', { day: 'numeric', month: 'long' })
 }
 
-export function ChatDrawer({ isOpen, onClose, messages, otherParty, onSendMessage, isTyping = false }: ChatDrawerProps) {
+export function ChatDrawer({
+  isOpen,
+  onClose,
+  messages,
+  otherParty,
+  onSendMessage,
+  isTyping = false,
+  isSeller = false,
+  productConversations = [],
+  selectedConversationId,
+  onSelectConversation,
+}: ChatDrawerProps) {
   const [newMessage, setNewMessage] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -61,6 +76,10 @@ export function ChatDrawer({ isOpen, onClose, messages, otherParty, onSendMessag
 
   if (!isOpen) return null
 
+  // Show wider drawer when showing conversations sidebar
+  const showConversationsSidebar = isSeller && productConversations.length > 0
+  const drawerWidth = showConversationsSidebar ? 'max-w-2xl' : 'max-w-md'
+
   return (
     <>
       {/* Backdrop */}
@@ -70,132 +89,297 @@ export function ChatDrawer({ isOpen, onClose, messages, otherParty, onSendMessag
       />
 
       {/* Drawer */}
-      <div className="fixed inset-y-0 right-0 w-full max-w-md bg-white dark:bg-slate-900 shadow-2xl z-50 flex flex-col animate-in slide-in-from-right duration-300">
-        {/* Header */}
-        <div className="flex items-center gap-3 px-4 py-4 border-b border-slate-200 dark:border-slate-700">
-          <button
-            onClick={onClose}
-            className="p-2 -ml-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden flex-shrink-0">
-              {otherParty.avatar ? (
-                <img src={otherParty.avatar} alt={otherParty.name} className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-slate-400">
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </div>
-              )}
-            </div>
-            <div className="min-w-0">
-              <p className="font-semibold text-slate-900 dark:text-white truncate">{otherParty.name}</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400">{otherParty.responseTime}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-6">
-          {groupedMessages.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-center px-8">
-              <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
-                <svg className="w-8 h-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
+      <div className={`fixed inset-y-0 right-0 w-full ${drawerWidth} bg-white dark:bg-slate-900 shadow-2xl z-50 flex flex-col animate-in slide-in-from-right duration-300`}>
+        {showConversationsSidebar ? (
+          <div className="flex h-full min-w-0 divide-x divide-slate-200 dark:divide-slate-700">
+            {/* Conversations Sidebar */}
+            <div className="w-48 flex flex-col border-r border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-950">
+              <div className="px-3 py-3 border-b border-slate-200 dark:border-slate-700">
+                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Nachrichten</p>
               </div>
-              <p className="text-slate-600 dark:text-slate-300 font-medium">Noch keine Nachrichten</p>
-              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                Schreiben Sie {otherParty.name} eine Nachricht
-              </p>
+              <div className="flex-1 overflow-y-auto space-y-1">
+                {productConversations.map((conv) => (
+                  <button
+                    key={conv.id}
+                    onClick={() => onSelectConversation?.(conv.id)}
+                    className={`w-full text-left px-3 py-2 text-sm transition-colors ${
+                      selectedConversationId === conv.id
+                        ? 'bg-white dark:bg-slate-900 border-l-2 border-blue-600'
+                        : 'hover:bg-slate-100 dark:hover:bg-slate-900 border-l-2 border-transparent'
+                    }`}
+                  >
+                    <p className="font-medium text-slate-900 dark:text-white truncate">{conv.buyer?.name || 'Unbekannt'}</p>
+                    {conv.lastMessage && (
+                      <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{conv.lastMessage.content}</p>
+                    )}
+                    {conv.unreadCount > 0 && (
+                      <span className="inline-block mt-1 px-2 py-0.5 text-xs font-medium text-white bg-red-600 rounded-full">
+                        {conv.unreadCount}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
             </div>
-          ) : (
-            groupedMessages.map((group) => (
-              <div key={group.date}>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
-                  <span className="text-xs font-medium text-slate-400 dark:text-slate-500">{group.date}</span>
-                  <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
+
+            {/* Chat Column */}
+            <div className="flex-1 flex flex-col min-w-0">
+              {/* Header */}
+              <div className="flex items-center gap-3 px-4 py-4 border-b border-slate-200 dark:border-slate-700">
+                <button
+                  onClick={onClose}
+                  className="p-2 -ml-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden flex-shrink-0">
+                    {otherParty.avatar ? (
+                      <img src={otherParty.avatar} alt={otherParty.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-slate-400">
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-slate-900 dark:text-white truncate">{otherParty.name}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{otherParty.responseTime}</p>
+                  </div>
                 </div>
-                <div className="space-y-3">
-                  {group.messages.map((message) => (
-                    <div
-                      key={message.id}
-                      className={`flex ${message.isOwn ? 'justify-end' : 'justify-start'}`}
-                    >
-                      <div
-                        className={`max-w-[80%] px-4 py-2.5 rounded-2xl ${
-                          message.isOwn
-                            ? 'bg-blue-600 text-white rounded-br-md'
-                            : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white rounded-bl-md'
-                        }`}
-                      >
-                        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                        <p
-                          className={`text-xs mt-1 ${
-                            message.isOwn ? 'text-blue-200' : 'text-slate-400 dark:text-slate-500'
-                          }`}
-                        >
-                          {formatTime(message.timestamp)}
-                        </p>
+              </div>
+
+              {/* Messages */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-6">
+                {groupedMessages.length === 0 ? (
+                  <div className="h-full flex flex-col items-center justify-center text-center px-8">
+                    <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
+                      <svg className="w-8 h-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                      </svg>
+                    </div>
+                    <p className="text-slate-600 dark:text-slate-300 font-medium">Noch keine Nachrichten</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                      Schreiben Sie {otherParty.name} eine Nachricht
+                    </p>
+                  </div>
+                ) : (
+                  groupedMessages.map((group) => (
+                    <div key={group.date}>
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
+                        <span className="text-xs font-medium text-slate-400 dark:text-slate-500">{group.date}</span>
+                        <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
+                      </div>
+                      <div className="space-y-3">
+                        {group.messages.map((message) => (
+                          <div
+                            key={message.id}
+                            className={`flex ${message.isOwn ? 'justify-end' : 'justify-start'}`}
+                          >
+                            <div
+                              className={`max-w-[80%] px-4 py-2.5 rounded-2xl ${
+                                message.isOwn
+                                  ? 'bg-blue-600 text-white rounded-br-md'
+                                  : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white rounded-bl-md'
+                              }`}
+                            >
+                              <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                              <p
+                                className={`text-xs mt-1 ${
+                                  message.isOwn ? 'text-blue-200' : 'text-slate-400 dark:text-slate-500'
+                                }`}
+                              >
+                                {formatTime(message.timestamp)}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
-                  ))}
-                </div>
-              </div>
-            ))
-          )}
+                  ))
+                )}
 
-          {/* Typing Indicator */}
-          {isTyping && (
-            <div className="flex justify-start">
-              <div className="max-w-[80%] px-4 py-2.5 rounded-2xl bg-slate-100 dark:bg-slate-800 rounded-bl-md">
-                <div className="flex gap-1">
-                  <div className="w-2 h-2 bg-slate-400 dark:bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <div className="w-2 h-2 bg-slate-400 dark:bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '100ms' }} />
-                  <div className="w-2 h-2 bg-slate-400 dark:bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '200ms' }} />
-                </div>
+                {/* Typing Indicator */}
+                {isTyping && (
+                  <div className="flex justify-start">
+                    <div className="max-w-[80%] px-4 py-2.5 rounded-2xl bg-slate-100 dark:bg-slate-800 rounded-bl-md">
+                      <div className="flex gap-1">
+                        <div className="w-2 h-2 bg-slate-400 dark:bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                        <div className="w-2 h-2 bg-slate-400 dark:bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '100ms' }} />
+                        <div className="w-2 h-2 bg-slate-400 dark:bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '200ms' }} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+                <div ref={messagesEndRef} />
               </div>
-            </div>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
 
-        {/* Input */}
-        <form onSubmit={handleSubmit} className="p-4 border-t border-slate-200 dark:border-slate-700">
-          <div className="flex items-end gap-3">
-            <div className="flex-1 relative">
-              <textarea
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                placeholder="Nachricht schreiben..."
-                rows={1}
-                className="w-full px-4 py-3 bg-slate-100 dark:bg-slate-800 border-0 rounded-xl resize-none focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault()
-                    handleSubmit(e)
-                  }
-                }}
-              />
+              {/* Input */}
+              <form onSubmit={handleSubmit} className="p-4 border-t border-slate-200 dark:border-slate-700">
+                <div className="flex items-end gap-3">
+                  <div className="flex-1 relative">
+                    <textarea
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      placeholder="Nachricht schreiben..."
+                      rows={1}
+                      className="w-full px-4 py-3 bg-slate-100 dark:bg-slate-800 border-0 rounded-xl resize-none focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault()
+                          handleSubmit(e)
+                        }
+                      }}
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={!newMessage.trim()}
+                    className="flex-shrink-0 w-12 h-12 bg-red-500 hover:bg-red-600 disabled:bg-slate-300 dark:disabled:bg-slate-700 text-white rounded-xl flex items-center justify-center transition-colors disabled:cursor-not-allowed"
+                  >
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                  </button>
+                </div>
+              </form>
             </div>
-            <button
-              type="submit"
-              disabled={!newMessage.trim()}
-              className="flex-shrink-0 w-12 h-12 bg-red-500 hover:bg-red-600 disabled:bg-slate-300 dark:disabled:bg-slate-700 text-white rounded-xl flex items-center justify-center transition-colors disabled:cursor-not-allowed"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-              </svg>
-            </button>
           </div>
-        </form>
+        ) : (
+          <>
+            {/* Header */}
+            <div className="flex items-center gap-3 px-4 py-4 border-b border-slate-200 dark:border-slate-700 flex-col">
+              <button
+                onClick={onClose}
+                className="p-2 -ml-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors self-start"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+
+              <div className="flex items-center gap-3 flex-1 min-w-0 self-stretch">
+                <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden flex-shrink-0">
+                  {otherParty.avatar ? (
+                    <img src={otherParty.avatar} alt={otherParty.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-slate-400">
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <p className="font-semibold text-slate-900 dark:text-white truncate">{otherParty.name}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">{otherParty.responseTime}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-6">
+              {groupedMessages.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-center px-8">
+                  <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
+                    <svg className="w-8 h-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                  </div>
+                  <p className="text-slate-600 dark:text-slate-300 font-medium">Noch keine Nachrichten</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                    Schreiben Sie {otherParty.name} eine Nachricht
+                  </p>
+                </div>
+              ) : (
+                groupedMessages.map((group) => (
+                  <div key={group.date}>
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
+                      <span className="text-xs font-medium text-slate-400 dark:text-slate-500">{group.date}</span>
+                      <div className="flex-1 h-px bg-slate-200 dark:bg-slate-700" />
+                    </div>
+                    <div className="space-y-3">
+                      {group.messages.map((message) => (
+                        <div
+                          key={message.id}
+                          className={`flex ${message.isOwn ? 'justify-end' : 'justify-start'}`}
+                        >
+                          <div
+                            className={`max-w-[80%] px-4 py-2.5 rounded-2xl ${
+                              message.isOwn
+                                ? 'bg-blue-600 text-white rounded-br-md'
+                                : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white rounded-bl-md'
+                            }`}
+                          >
+                            <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                            <p
+                              className={`text-xs mt-1 ${
+                                message.isOwn ? 'text-blue-200' : 'text-slate-400 dark:text-slate-500'
+                              }`}
+                            >
+                              {formatTime(message.timestamp)}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))
+              )}
+
+              {/* Typing Indicator */}
+              {isTyping && (
+                <div className="flex justify-start">
+                  <div className="max-w-[80%] px-4 py-2.5 rounded-2xl bg-slate-100 dark:bg-slate-800 rounded-bl-md">
+                    <div className="flex gap-1">
+                      <div className="w-2 h-2 bg-slate-400 dark:bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <div className="w-2 h-2 bg-slate-400 dark:bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '100ms' }} />
+                      <div className="w-2 h-2 bg-slate-400 dark:bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '200ms' }} />
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Input */}
+            <form onSubmit={handleSubmit} className="p-4 border-t border-slate-200 dark:border-slate-700">
+              <div className="flex items-end gap-3">
+                <div className="flex-1 relative">
+                  <textarea
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    placeholder="Nachricht schreiben..."
+                    rows={1}
+                    className="w-full px-4 py-3 bg-slate-100 dark:bg-slate-800 border-0 rounded-xl resize-none focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault()
+                        handleSubmit(e)
+                      }
+                    }}
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={!newMessage.trim()}
+                  className="flex-shrink-0 w-12 h-12 bg-red-500 hover:bg-red-600 disabled:bg-slate-300 dark:disabled:bg-slate-700 text-white rounded-xl flex items-center justify-center transition-colors disabled:cursor-not-allowed"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                  </svg>
+                </button>
+              </div>
+            </form>
+          </>
+        )}
       </div>
     </>
   )

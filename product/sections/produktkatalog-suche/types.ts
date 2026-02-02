@@ -18,6 +18,7 @@ export interface Product {
   title: string
   description: string
   price: number
+  isNegotiable: boolean
   images: string[]
   condition: 'neu' | 'wie-neu' | 'sehr-gut' | 'gut' | 'akzeptabel'
   deliveryOptions: ('abholung' | 'versand')[]

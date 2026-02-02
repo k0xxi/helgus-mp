@@ -22,6 +22,7 @@ interface ProductDetailQueryResult {
   title: string
   description: string
   price: number
+  is_negotiable: boolean
   condition: string
   delivery_options: string[]
   shipping_cost: number | null
@@ -174,6 +175,7 @@ export function useProductDetail(
         title: queryResult.title,
         description: queryResult.description,
         price: Number(queryResult.price),
+        isNegotiable: queryResult.is_negotiable ?? false,
         condition: conditionDisplayMap[queryResult.condition] || 'Gut',
         images: productImages,
         postalCode: queryResult.zip,
@@ -696,26 +698,6 @@ export function useOffers(
       queryClient.invalidateQueries({
         queryKey: ['notifications', 'list', offer.buyerId],
       })
-
-      // Create notification for seller about their response action
-      const sellerNotificationTitle = status === 'accepted' ? 'Angebot angenommen' : 'Angebot abgelehnt'
-      const sellerNotificationMessage = status === 'accepted'
-        ? `Du hast das Angebot von ${offer.buyerName} über ${offer.amount.toLocaleString('de-AT')} € angenommen.`
-        : `Du hast das Angebot von ${offer.buyerName} über ${offer.amount.toLocaleString('de-AT')} € abgelehnt.`
-
-      if (userId) {
-        await createNotification({
-          userId,
-          type: notificationType,
-          title: sellerNotificationTitle,
-          message: sellerNotificationMessage,
-          productId,
-        })
-        // Invalidate seller's notifications cache
-        queryClient.invalidateQueries({
-          queryKey: ['notifications', 'list', userId],
-        })
-      }
 
       return { error: null }
     } catch (err) {

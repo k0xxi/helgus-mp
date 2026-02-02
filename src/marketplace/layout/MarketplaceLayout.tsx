@@ -1,6 +1,6 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/marketplace/context/AuthContext'
-import { useConversationsQuery, useUserNotifications, useNotificationsSubscription, useNavigationRefresh, useProductRealtimeSync, useProfileRealtimeSync } from '@/marketplace/hooks'
+import { useConversationsQuery, useUserNotifications, useNotificationsSubscription, useConversationsSubscription, useNavigationRefresh, useProductRealtimeSync, useProfileRealtimeSync } from '@/marketplace/hooks'
 import { NotificationDropdown } from '@/marketplace/components/NotificationDropdown'
 import {
   Home,
@@ -34,6 +34,9 @@ export function MarketplaceLayout() {
 
   // Set up real-time subscription for notifications
   useNotificationsSubscription(user?.id)
+
+  // Set up real-time subscription for conversations (message badge updates)
+  useConversationsSubscription(user?.id)
 
   // Calculate total unread messages
   const totalUnreadMessages = conversations.reduce((sum, conv) => sum + (conv.unreadCount || 0), 0)

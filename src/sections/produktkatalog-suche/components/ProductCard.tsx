@@ -142,6 +142,9 @@ export function ProductCard({
         <div className="absolute bottom-3 right-3">
           <span className="px-3 py-1.5 bg-white/95 dark:bg-slate-800/95 backdrop-blur-sm text-red-600 dark:text-red-500 text-xl font-bold rounded-lg shadow-lg">
             € {product.price}
+            {product.isNegotiable && (
+              <span className="ml-1 text-sm font-medium text-slate-500 dark:text-slate-400">VB</span>
+            )}
           </span>
         </div>
       </div>

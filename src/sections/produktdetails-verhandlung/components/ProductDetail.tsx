@@ -49,6 +49,9 @@ export function ProductDetail({
   onAcceptOffer,
   onDeclineOffer,
   initialChatOpen = false,
+  productConversations = [],
+  selectedConversationId,
+  onSelectConversation,
 }: ProductDetailProps & { initialChatOpen?: boolean }) {
   const [isChatOpen, setIsChatOpen] = useState(initialChatOpen)
   const [isOfferModalOpen, setIsOfferModalOpen] = useState(false)
@@ -113,13 +116,18 @@ export function ProductDetail({
               <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white leading-tight">
                 {product.title}
               </h1>
-              <p className="text-3xl sm:text-4xl font-bold text-red-600 dark:text-red-500 mt-3">
-                {formatPrice(product.price)} €
-              </p>
+              <div className="flex items-baseline gap-2 mt-3">
+                <p className="text-3xl sm:text-4xl font-bold text-red-600 dark:text-red-500">
+                  {formatPrice(product.price)} €
+                </p>
+                {product.isNegotiable && (
+                  <span className="text-lg font-medium text-slate-500 dark:text-slate-400">VB</span>
+                )}
+              </div>
             </div>
 
-            {/* Make Offer Button */}
-            {!isSeller && (
+            {/* Make Offer Button - only show if price is negotiable */}
+            {!isSeller && product.isNegotiable && (
               <button
                 onClick={() => setIsOfferModalOpen(true)}
                 className="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-colors"
@@ -299,6 +307,10 @@ export function ProductDetail({
         otherParty={chatOtherParty}
         onSendMessage={onSendMessage}
         isTyping={isTyping}
+        isSeller={isSeller}
+        productConversations={productConversations}
+        selectedConversationId={selectedConversationId}
+        onSelectConversation={onSelectConversation}
       />
 
       {/* Offer Modal */}

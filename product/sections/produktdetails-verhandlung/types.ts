@@ -18,6 +18,7 @@ export interface Product {
   id: string
   title: string
   price: number
+  isNegotiable: boolean
   description: string
   condition: 'Neu' | 'Wie neu' | 'Gut' | 'Akzeptabel'
   images: ProductImage[]
@@ -102,6 +103,33 @@ export interface CurrentUser {
   unreadNotifications: number
 }
 
+export interface ConversationParticipant {
+  id: string
+  name: string
+  avatarUrl?: string
+}
+
+export interface ConversationMessage {
+  id: string
+  conversationId: string
+  senderId: string
+  content: string
+  isRead: boolean
+  createdAt: Date
+}
+
+export interface ProductConversation {
+  id: string
+  productId: string
+  buyerId: string
+  sellerId: string
+  createdAt: Date
+  buyer?: ConversationParticipant
+  seller?: ConversationParticipant
+  lastMessage?: ConversationMessage
+  unreadCount: number
+}
+
 // =============================================================================
 // Component Props
 // =============================================================================
@@ -161,4 +189,12 @@ export interface ProductDetailProps {
   onAcceptOffer?: (offerId: string) => void
   /** Gegenangebot ablehnen */
   onDeclineOffer?: (offerId: string) => void
+
+  // === Chat Conversations (für Verkäufer-Ansicht) ===
+  /** Alle Unterhaltungen für dieses Produkt */
+  productConversations?: ProductConversation[]
+  /** Currently selected conversation ID */
+  selectedConversationId?: string
+  /** Callback when seller selects a different conversation */
+  onSelectConversation?: (conversationId: string) => void
 }
