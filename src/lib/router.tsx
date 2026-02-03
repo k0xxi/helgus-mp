@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { ProductPage } from '@/components/ProductPage'
 import { DataModelPage } from '@/components/DataModelPage'
 import { DesignPage } from '@/components/DesignPage'
@@ -49,6 +49,10 @@ function MarketplaceWrapper() {
 export const router = createBrowserRouter([
   {
     path: '/',
+    element: <Navigate to="/marketplace" replace />,
+  },
+  {
+    path: 'design-os',
     element: <RootLayout />,
     children: [
       {
@@ -91,11 +95,12 @@ export const router = createBrowserRouter([
         path: 'export',
         element: <ExportPage />,
       },
-      // Marketplace routes
-      {
-        path: 'marketplace',
-        element: <MarketplaceWrapper />,
-        children: [
+    ],
+  },
+  {
+    path: 'marketplace',
+    element: <MarketplaceWrapper />,
+    children: [
           {
             index: true,
             element: <MarketplaceHomePage />,
@@ -173,7 +178,5 @@ export const router = createBrowserRouter([
             element: <MarketplaceProductPage />,
           },
         ],
-      },
-    ],
   },
 ])
