@@ -260,6 +260,8 @@ export function useUserListings(userId: string | undefined): UseUserListingsResu
         )
         .eq('seller_id', userId)
         .eq('is_active', true)
+        .is('sold_at', null)
+        .is('pending_since', null)
         .order('created_at', { ascending: false })
         .limit(20)
 
@@ -320,7 +322,7 @@ export function useUserListings(userId: string | undefined): UseUserListingsResu
 // useMyListings - Fetch and manage user's own listings (all statuses)
 // =============================================================================
 
-export type ListingStatus = 'active' | 'paused' | 'sold'
+export type ListingStatus = 'active' | 'paused' | 'pending' | 'sold'
 
 export interface MyListing {
   id: string
@@ -337,6 +339,7 @@ export interface MyListing {
   viewCount: number
   isActive: boolean
   soldAt: string | null
+  pendingSince: string | null
 }
 
 interface UseMyListingsResult {
@@ -346,6 +349,7 @@ interface UseMyListingsResult {
   refetch: () => Promise<void>
   togglePause: (listingId: string) => Promise<{ error: Error | null }>
   markAsSold: (listingId: string) => Promise<{ error: Error | null }>
+  reactivateListing: (listingId: string) => Promise<{ error: Error | null }>
   deleteListing: (listingId: string) => Promise<{ error: Error | null }>
 }
 
@@ -377,6 +381,7 @@ export function useMyListings(userId: string | undefined): UseMyListingsResult {
           created_at,
           is_active,
           sold_at,
+          pending_since,
           view_count,
           product_images(storage_path, sort_order)
         `
@@ -411,6 +416,8 @@ export function useMyListings(userId: string | undefined): UseMyListingsResult {
         let status: ListingStatus = 'active'
         if (product.sold_at) {
           status = 'sold'
+        } else if (product.pending_since) {
+          status = 'pending'
         } else if (!product.is_active) {
           status = 'paused'
         }
@@ -430,6 +437,7 @@ export function useMyListings(userId: string | undefined): UseMyListingsResult {
           viewCount: product.view_count || 0,
           isActive: product.is_active,
           soldAt: product.sold_at,
+          pendingSince: product.pending_since,
         }
       })
 
@@ -476,6 +484,16 @@ export function useMyListings(userId: string | undefined): UseMyListingsResult {
 
   const markAsSold = useCallback(async (listingId: string): Promise<{ error: Error | null }> => {
     try {
+      // Complete the purchase if one exists
+      await supabase
+        .from('purchases')
+        .update({
+          status: 'completed',
+          completed_at: new Date().toISOString()
+        })
+        .eq('product_id', listingId)
+        .eq('status', 'pending')
+
       const { error: updateError } = await supabase
         .from('products')
         .update({
@@ -502,26 +520,91 @@ export function useMyListings(userId: string | undefined): UseMyListingsResult {
     }
   }, [userId])
 
+  const reactivateListing = useCallback(async (listingId: string): Promise<{ error: Error | null }> => {
+    try {
+      // Cancel the pending purchase
+      await supabase
+        .from('purchases')
+        .update({
+          status: 'cancelled',
+          cancelled_at: new Date().toISOString()
+        })
+        .eq('product_id', listingId)
+        .eq('status', 'pending')
+
+      // Reactivate product
+      const { error: updateError } = await supabase
+        .from('products')
+        .update({
+          buyer_id: null,
+          pending_since: null,
+          is_active: true
+        })
+        .eq('id', listingId)
+        .eq('seller_id', userId)
+
+      if (updateError) {
+        throw updateError
+      }
+
+      // Update local state
+      setListings(prev => prev.map(l =>
+        l.id === listingId
+          ? { ...l, status: 'active', isActive: true, pendingSince: null }
+          : l
+      ))
+
+      return { error: null }
+    } catch (err) {
+      return { error: err as Error }
+    }
+  }, [userId])
+
   const deleteListing = useCallback(async (listingId: string): Promise<{ error: Error | null }> => {
     try {
-      // First delete associated images from storage
-      const { data: images } = await supabase
+      // 1. Delete any purchase records for this product
+      const { error: purchaseDeleteError } = await supabase
+        .from('purchases')
+        .delete()
+        .eq('product_id', listingId)
+
+      if (purchaseDeleteError) {
+        console.error('Error deleting purchases:', purchaseDeleteError)
+        throw purchaseDeleteError
+      }
+
+      // 2. Delete associated images from storage
+      const { data: images, error: imagesError } = await supabase
         .from('product_images')
         .select('storage_path')
         .eq('product_id', listingId)
 
-      if (images && images.length > 0) {
-        const paths = images.map(img => img.storage_path)
-        await supabase.storage.from('products').remove(paths)
+      if (imagesError) {
+        console.error('Error fetching images:', imagesError)
+        throw imagesError
       }
 
-      // Delete product images records
-      await supabase
+      if (images && images.length > 0) {
+        const paths = images.map(img => img.storage_path)
+        const { error: storageError } = await supabase.storage.from('products').remove(paths)
+        if (storageError) {
+          console.warn('Warning: Error deleting images from storage:', storageError)
+          // Don't throw - storage deletion is not critical
+        }
+      }
+
+      // 3. Delete product images records
+      const { error: imageRecordsError } = await supabase
         .from('product_images')
         .delete()
         .eq('product_id', listingId)
 
-      // Delete the product
+      if (imageRecordsError) {
+        console.error('Error deleting product image records:', imageRecordsError)
+        throw imageRecordsError
+      }
+
+      // 4. Delete the product
       const { error: deleteError } = await supabase
         .from('products')
         .delete()
@@ -529,14 +612,17 @@ export function useMyListings(userId: string | undefined): UseMyListingsResult {
         .eq('seller_id', userId)
 
       if (deleteError) {
+        console.error('Error deleting product:', deleteError)
         throw deleteError
       }
 
-      // Update local state
+      // 5. Update local state
       setListings(prev => prev.filter(l => l.id !== listingId))
 
       return { error: null }
     } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err)
+      console.error('Error in deleteListing:', errorMessage)
       return { error: err as Error }
     }
   }, [userId])
@@ -552,6 +638,7 @@ export function useMyListings(userId: string | undefined): UseMyListingsResult {
     refetch: fetchListings,
     togglePause,
     markAsSold,
+    reactivateListing,
     deleteListing
   }
 }

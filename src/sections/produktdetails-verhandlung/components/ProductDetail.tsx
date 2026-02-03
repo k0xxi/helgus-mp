@@ -3,7 +3,6 @@ import type { ProductDetailProps } from '@/../product/sections/produktdetails-ve
 import { ImageGallery } from './ImageGallery'
 import { SellerCard } from './SellerCard'
 import { ChatDrawer } from './ChatDrawer'
-import { OfferModal } from './OfferModal'
 
 function formatDate(dateString: string): string {
   const date = new Date(dateString)
@@ -55,7 +54,6 @@ export function ProductDetail({
   onSelectConversation,
 }: ProductDetailProps & { isAuthenticated?: boolean; initialChatOpen?: boolean }) {
   const [isChatOpen, setIsChatOpen] = useState(initialChatOpen)
-  const [isOfferModalOpen, setIsOfferModalOpen] = useState(false)
   const isSeller = currentUser.id === seller.id
   // Determine the "other party" for the chat - if seller viewing, show buyer; if buyer, show seller
   const chatOtherParty = isSeller ? (buyer || seller) : seller
@@ -130,7 +128,7 @@ export function ProductDetail({
             {/* Make Offer Button - only show if price is negotiable and user is authenticated */}
             {isAuthenticated && !isSeller && product.isNegotiable && (
               <button
-                onClick={() => setIsOfferModalOpen(true)}
+                onClick={onMakeOffer}
                 className="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-colors"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -315,15 +313,6 @@ export function ProductDetail({
         productConversations={productConversations}
         selectedConversationId={selectedConversationId}
         onSelectConversation={onSelectConversation}
-      />
-
-      {/* Offer Modal */}
-      <OfferModal
-        isOpen={isOfferModalOpen}
-        onClose={() => setIsOfferModalOpen(false)}
-        productTitle={product.title}
-        originalPrice={product.price}
-        onSubmit={onMakeOffer}
       />
     </div>
   )

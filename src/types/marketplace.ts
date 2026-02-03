@@ -18,6 +18,8 @@ export interface Profile {
   avatarUrl: string | null
   bio: string | null
   phone: string | null
+  street: string | null
+  houseNumber: string | null
   zip: string | null
   city: string | null
   country: string
@@ -97,6 +99,8 @@ export interface Product {
   viewCount: number
   isActive: boolean
   soldAt: Date | null
+  buyerId: string | null
+  pendingSince: Date | null
   createdAt: Date
   updatedAt: Date
   // Joined data
@@ -178,13 +182,40 @@ export interface Offer {
 }
 
 // =============================================================================
+// Purchases
+// =============================================================================
+
+export type PurchaseType = 'direct' | 'offer_accepted'
+export type PurchaseStatus = 'pending' | 'completed' | 'cancelled'
+export type ListingStatus = 'active' | 'paused' | 'pending' | 'sold'
+
+export interface Purchase {
+  id: string
+  productId: string
+  sellerId: string
+  buyerId: string
+  priceAtPurchase: number
+  purchaseType: PurchaseType
+  offerId: string | null
+  status: PurchaseStatus
+  shippingMethod?: 'Abholung' | 'Versand'
+  purchasedAt: Date
+  completedAt: Date | null
+  cancelledAt: Date | null
+  // Joined data
+  product?: Product
+  buyer?: PublicProfile
+  seller?: PublicProfile
+}
+
+// =============================================================================
 // Notifications
 // =============================================================================
 
 export interface Notification {
   id: string
   userId: string
-  type: 'new_message' | 'offer_received' | 'offer_accepted' | 'offer_declined' | 'price_drop'
+  type: 'new_message' | 'offer_received' | 'offer_accepted' | 'offer_declined' | 'price_drop' | 'purchase_initiated' | 'purchase_cancelled' | 'purchase_completed'
   title: string
   message: string
   productId: string | null

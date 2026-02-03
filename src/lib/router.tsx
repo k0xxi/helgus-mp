@@ -12,6 +12,7 @@ import { RootLayout } from '@/lib/RootLayout'
 // Marketplace imports
 import { AuthProvider } from '@/marketplace/context/AuthContext'
 import { MarketplaceLayout } from '@/marketplace/layout/MarketplaceLayout'
+import { PasswordGate } from '@/marketplace/components/PasswordGate'
 import {
   HomePage as MarketplaceHomePage,
   SearchPage,
@@ -30,14 +31,18 @@ import {
   ProductPage as MarketplaceProductPage,
   SellerDashboard,
   MyListingsPage,
+  MyPurchasesPage,
+  MySalesPage,
 } from '@/marketplace/pages'
 
 // Wrapper to provide AuthContext to marketplace routes
 function MarketplaceWrapper() {
   return (
-    <AuthProvider>
-      <MarketplaceLayout />
-    </AuthProvider>
+    <PasswordGate password="Tester$2016">
+      <AuthProvider>
+        <MarketplaceLayout />
+      </AuthProvider>
+    </PasswordGate>
   )
 }
 
@@ -150,6 +155,14 @@ export const router = createBrowserRouter([
           {
             path: 'my-listings',
             element: <MyListingsPage />,
+          },
+          {
+            path: 'my-purchases',
+            element: <MyPurchasesPage />,
+          },
+          {
+            path: 'my-sales',
+            element: <MySalesPage />,
           },
           {
             path: 'notifications',

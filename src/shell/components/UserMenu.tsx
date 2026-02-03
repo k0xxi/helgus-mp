@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { ChevronDown, LayoutDashboard, Package, Settings, LogOut, User as UserIcon } from 'lucide-react'
+import { ChevronDown, LayoutDashboard, Package, Settings, LogOut, User as UserIcon, ShoppingCart, TrendingUp } from 'lucide-react'
+import { useProfileCounts } from '@/marketplace/hooks/useProfileCounts'
 import type { User } from './AppShell'
 
 interface UserMenuProps {
@@ -11,6 +12,7 @@ interface UserMenuProps {
 export function UserMenu({ user, onLogout, onNavigate }: UserMenuProps) {
   const [isOpen, setIsOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
+  const { listingCount, purchaseCount, salesCount } = useProfileCounts(user.id)
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -99,8 +101,26 @@ export function UserMenu({ user, onLogout, onNavigate }: UserMenuProps) {
               className="w-full flex items-center gap-3 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors font-['Inter']"
             >
               <Package className="w-4 h-4" />
-              Meine Anzeigen
+              <span>Meine Anzeigen <span className="text-xs text-slate-500">({listingCount})</span></span>
             </button>
+
+            <button
+              onClick={() => handleMenuItemClick('/my-purchases')}
+              className="w-full flex items-center gap-3 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors font-['Inter']"
+            >
+              <ShoppingCart className="w-4 h-4" />
+              <span>Meine Käufe <span className="text-xs text-slate-500">({purchaseCount})</span></span>
+            </button>
+
+            {user.isSeller && (
+              <button
+                onClick={() => handleMenuItemClick('/my-sales')}
+                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors font-['Inter']"
+              >
+                <TrendingUp className="w-4 h-4" />
+                <span>Meine Verkäufe <span className="text-xs text-slate-500">({salesCount})</span></span>
+              </button>
+            )}
 
             <button
               onClick={() => handleMenuItemClick('/profile')}

@@ -16,7 +16,10 @@
       "Bash(npx tsc:*)",
       "Bash(npm install:*)",
       "Bash(grep:*)",
-      "Bash(test:*)"
+      "Bash(test:*)",
+      "Bash(npm run type-check:*)",
+      "Bash(npm run)",
+      "Bash(tsc:*)"
     ]
   }
 }

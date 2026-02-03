@@ -16,7 +16,7 @@ export type Json =
 export type ProductCondition = 'neu' | 'wie-neu' | 'sehr-gut' | 'gut' | 'akzeptabel'
 export type DeliveryOption = 'abholung' | 'versand'
 export type OfferStatus = 'pending' | 'accepted' | 'declined'
-export type NotificationType = 'new_message' | 'offer_received' | 'offer_accepted' | 'offer_declined' | 'price_drop'
+export type NotificationType = 'new_message' | 'offer_received' | 'offer_accepted' | 'offer_declined' | 'price_drop' | 'purchase_initiated' | 'purchase_cancelled' | 'purchase_completed'
 export type VerificationStatus = 'pending' | 'verified' | 'rejected'
 
 export interface Database {
@@ -29,6 +29,8 @@ export interface Database {
           avatar_url: string | null
           bio: string | null
           phone: string | null
+          street: string | null
+          house_number: string | null
           zip: string | null
           city: string | null
           country: string
@@ -43,6 +45,8 @@ export interface Database {
           avatar_url?: string | null
           bio?: string | null
           phone?: string | null
+          street?: string | null
+          house_number?: string | null
           zip?: string | null
           city?: string | null
           country?: string
@@ -57,6 +61,8 @@ export interface Database {
           avatar_url?: string | null
           bio?: string | null
           phone?: string | null
+          street?: string | null
+          house_number?: string | null
           zip?: string | null
           city?: string | null
           country?: string
@@ -148,12 +154,19 @@ export interface Database {
           condition: ProductCondition
           delivery_options: DeliveryOption[]
           shipping_cost: number | null
+          street: string | null
           zip: string
           city: string
+          country: string
+          latitude: number | null
+          longitude: number | null
+          geocoded_at: string | null
           phone_contact_available: boolean
           view_count: number
           is_active: boolean
           sold_at: string | null
+          buyer_id: string | null
+          pending_since: string | null
           created_at: string
           updated_at: string
         }
@@ -168,12 +181,19 @@ export interface Database {
           condition: ProductCondition
           delivery_options: DeliveryOption[]
           shipping_cost?: number | null
+          street?: string | null
           zip: string
           city: string
+          country?: string
+          latitude?: number | null
+          longitude?: number | null
+          geocoded_at?: string | null
           phone_contact_available?: boolean
           view_count?: number
           is_active?: boolean
           sold_at?: string | null
+          buyer_id?: string | null
+          pending_since?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -188,12 +208,19 @@ export interface Database {
           condition?: ProductCondition
           delivery_options?: DeliveryOption[]
           shipping_cost?: number | null
+          street?: string | null
           zip?: string
           city?: string
+          country?: string
+          latitude?: number | null
+          longitude?: number | null
+          geocoded_at?: string | null
           phone_contact_available?: boolean
           view_count?: number
           is_active?: boolean
           sold_at?: string | null
+          buyer_id?: string | null
+          pending_since?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -296,6 +323,7 @@ export interface Database {
           message: string | null
           status: OfferStatus
           responded_at: string | null
+          shipping_method: string
           created_at: string
         }
         Insert: {
@@ -306,6 +334,7 @@ export interface Database {
           message?: string | null
           status?: OfferStatus
           responded_at?: string | null
+          shipping_method?: string
           created_at?: string
         }
         Update: {
@@ -316,6 +345,7 @@ export interface Database {
           message?: string | null
           status?: OfferStatus
           responded_at?: string | null
+          shipping_method?: string
           created_at?: string
         }
       }
@@ -348,6 +378,50 @@ export interface Database {
           message?: string
           product_id?: string | null
           is_read?: boolean
+          created_at?: string
+        }
+      }
+      purchases: {
+        Row: {
+          id: string
+          product_id: string
+          seller_id: string
+          buyer_id: string
+          price_at_purchase: number
+          purchase_type: 'direct' | 'offer_accepted'
+          offer_id: string | null
+          status: 'pending' | 'completed' | 'cancelled'
+          purchased_at: string
+          completed_at: string | null
+          cancelled_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          product_id: string
+          seller_id: string
+          buyer_id: string
+          price_at_purchase: number
+          purchase_type: 'direct' | 'offer_accepted'
+          offer_id?: string | null
+          status?: 'pending' | 'completed' | 'cancelled'
+          purchased_at?: string
+          completed_at?: string | null
+          cancelled_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          product_id?: string
+          seller_id?: string
+          buyer_id?: string
+          price_at_purchase?: number
+          purchase_type?: 'direct' | 'offer_accepted'
+          offer_id?: string | null
+          status?: 'pending' | 'completed' | 'cancelled'
+          purchased_at?: string
+          completed_at?: string | null
+          cancelled_at?: string | null
           created_at?: string
         }
       }

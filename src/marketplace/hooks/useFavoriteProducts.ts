@@ -87,6 +87,8 @@ export function useFavoriteProducts(userId: string | undefined): UseFavoriteProd
         )
         .in('id', productIds)
         .eq('is_active', true)
+        .is('sold_at', null)
+        .is('pending_since', null)
 
       if (productsError) throw productsError
 

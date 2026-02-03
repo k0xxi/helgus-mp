@@ -8,6 +8,8 @@ export interface ProfileUpdateData {
   name?: string
   bio?: string | null
   phone?: string | null
+  street?: string | null
+  house_number?: string | null
   zip?: string | null
   city?: string | null
   country?: string
@@ -38,6 +40,8 @@ function mapDbProfileToProfile(data: Tables<'profiles'>): Profile {
     avatarUrl: data.avatar_url,
     bio: data.bio,
     phone: data.phone,
+    street: data.street || null,
+    houseNumber: data.house_number || null,
     zip: data.zip,
     city: data.city,
     country: data.country,
@@ -239,6 +243,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (data.name !== undefined) updateData.name = data.name
       if (data.bio !== undefined) updateData.bio = data.bio
       if (data.phone !== undefined) updateData.phone = data.phone
+      if (data.street !== undefined) updateData.street = data.street
+      if (data.house_number !== undefined) updateData.house_number = data.house_number
       if (data.zip !== undefined) updateData.zip = data.zip
       if (data.city !== undefined) updateData.city = data.city
       if (data.country !== undefined) updateData.country = data.country

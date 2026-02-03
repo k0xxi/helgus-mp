@@ -156,6 +156,8 @@ export function useProducts(
         `
         )
         .eq('is_active', true)
+        .is('sold_at', null)
+        .is('pending_since', null)
 
       // Apply filters
       if (filters.searchQuery) {
@@ -189,10 +191,9 @@ export function useProducts(
       if (filters.zipCode) {
         if (filters.radius) {
           // PROXIMITY SEARCH: Geocode user's ZIP and filter by distance
-          // Step 1: Geocode the search ZIP code
+          // Step 1: Geocode the search ZIP code (city is optional, only zip and country needed)
           const { result, error: geocodingError } = await geocodeAddress({
             zip: filters.zipCode,
-            city: '',
             country: 'AT' // TODO: Use user's country from profile
           })
 

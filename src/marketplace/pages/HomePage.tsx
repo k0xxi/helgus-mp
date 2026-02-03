@@ -53,6 +53,8 @@ export function HomePage() {
               .select('id', { count: 'exact', head: true })
               .eq('category_id', category.id)
               .eq('is_active', true)
+              .is('sold_at', null)
+              .is('pending_since', null)
 
             return {
               ...category,

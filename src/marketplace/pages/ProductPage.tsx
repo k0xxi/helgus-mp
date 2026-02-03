@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom'
 import { ArrowLeft, AlertTriangle, Loader2 } from 'lucide-react'
 import { ProductDetail } from '@/sections/produktdetails-verhandlung/components/ProductDetail'
+import { PurchaseModal } from '@/marketplace/components/PurchaseModal'
+import { OfferModal } from '@/marketplace/components/OfferModal'
 import {
   useProductDetail,
   useOffers,
@@ -13,6 +15,7 @@ import {
   useMarkMessagesAsReadMutation,
   useMessagesSubscription,
   useConversationsSubscription,
+  usePurchase,
 } from '@/marketplace/hooks'
 import { useFavorites } from '@/marketplace/hooks/useFavorites'
 import { useAuth } from '@/marketplace/context/AuthContext'
@@ -23,8 +26,19 @@ export function ProductPage() {
   const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
   const { user, profile } = useAuth()
+  const { createDirectPurchase } = usePurchase(user?.id)
   const [isTyping, setIsTyping] = useState(false)
   const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(null)
+
+  // Purchase modal state
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false)
+  const [purchaseLoading, setPurchaseLoading] = useState(false)
+  const [purchaseError, setPurchaseError] = useState<string | null>(null)
+
+  // Offer modal state
+  const [showOfferModal, setShowOfferModal] = useState(false)
+  const [offerLoading, setOfferLoading] = useState(false)
+  const [offerError, setOfferError] = useState<string | null>(null)
 
   // Track whether chat should be open (persists even after URL param is cleared)
   const [shouldInitiallyChatOpen, setShouldInitiallyChatOpen] = useState(false)
@@ -227,15 +241,39 @@ export function ProductPage() {
     }
   }
 
-  const handleMakeOffer = async (amount: number, message?: string) => {
+  const handleMakeOffer = () => {
     if (!user) {
       navigate('/marketplace/auth')
       return
     }
-    const { error } = await createOffer(amount, message)
-    if (error) {
-      console.error('Error creating offer:', error)
-      // Could show a toast notification here
+    setShowOfferModal(true)
+    setOfferError(null)
+  }
+
+  const handleConfirmOffer = async (amount: number, message?: string, shippingMethod?: 'Abholung' | 'Versand') => {
+    setOfferLoading(true)
+    setOfferError(null)
+
+    try {
+      const { error } = await createOffer(amount, message, shippingMethod)
+      if (error) {
+        console.error('Error creating offer:', error)
+        setOfferError('Fehler beim Erstellen des Angebots. Bitte versuchen Sie es erneut.')
+      } else {
+        setShowOfferModal(false)
+      }
+    } catch (err) {
+      console.error('Offer creation error:', err)
+      setOfferError('Fehler beim Erstellen des Angebots. Bitte versuchen Sie es erneut.')
+    } finally {
+      setOfferLoading(false)
+    }
+  }
+
+  const handleCloseOfferModal = () => {
+    if (!offerLoading) {
+      setShowOfferModal(false)
+      setOfferError(null)
     }
   }
 
@@ -244,8 +282,51 @@ export function ProductPage() {
       navigate('/marketplace/auth')
       return
     }
-    // For now, just open chat - actual buy flow can be implemented later
-    // Could also navigate to a checkout page
+
+    if (!productId || !product?.sellerId || !product?.price) {
+      console.error('Missing product information')
+      setPurchaseError('Fehler beim Laden des Produkts. Bitte versuchen Sie es erneut.')
+      return
+    }
+
+    // Open the purchase modal
+    setShowPurchaseModal(true)
+    setPurchaseError(null)
+  }
+
+  const handleConfirmPurchase = async (shippingMethod: 'Abholung' | 'Versand') => {
+    if (!product?.sellerId || !productId || !product?.price) {
+      return
+    }
+
+    setPurchaseLoading(true)
+    setPurchaseError(null)
+
+    try {
+      const { error } = await createDirectPurchase(productId, product.sellerId, product.price, shippingMethod)
+
+      if (error) {
+        console.error('Error creating purchase:', error)
+        setPurchaseError('Fehler beim Kauf. Bitte versuchen Sie es erneut.')
+      } else {
+        setShowPurchaseModal(false)
+        // Show success and navigate
+        alert('Kauf erfolgreich! Der Verkäufer wurde benachrichtigt.')
+        navigate('/marketplace/my-purchases')
+      }
+    } catch (err) {
+      console.error('Purchase error:', err)
+      setPurchaseError('Fehler beim Kauf. Bitte versuchen Sie es erneut.')
+    } finally {
+      setPurchaseLoading(false)
+    }
+  }
+
+  const handleClosePurchaseModal = () => {
+    if (!purchaseLoading) {
+      setShowPurchaseModal(false)
+      setPurchaseError(null)
+    }
   }
 
   const handleToggleFavorite = async () => {
@@ -341,30 +422,83 @@ export function ProductPage() {
   }
 
   return (
-    <ProductDetail
-      product={productWithFavorite}
-      seller={seller}
-      buyer={buyerProfile}
-      category={category}
-      messages={messages}
-      offers={offers}
-      currentUser={currentUser}
-      isAuthenticated={!!user}
-      isTyping={isTyping}
-      onBack={handleBack}
-      onCategoryClick={handleCategoryClick}
-      onMakeOffer={handleMakeOffer}
-      onBuyRequest={handleBuyRequest}
-      onToggleFavorite={handleToggleFavorite}
-      onShare={handleShare}
-      onSendMessage={handleSendMessage}
-      onViewSellerProfile={handleViewSellerProfile}
-      onAcceptOffer={(offerId) => handleRespondToOffer(offerId, 'accepted')}
-      onDeclineOffer={(offerId) => handleRespondToOffer(offerId, 'declined')}
-      initialChatOpen={shouldInitiallyChatOpen}
-      productConversations={productConversations}
-      selectedConversationId={conversation?.id}
-      onSelectConversation={handleSelectConversation}
-    />
+    <>
+      <ProductDetail
+        product={productWithFavorite}
+        seller={seller}
+        buyer={buyerProfile}
+        category={category}
+        messages={messages}
+        offers={offers}
+        currentUser={currentUser}
+        isAuthenticated={!!user}
+        isTyping={isTyping}
+        onBack={handleBack}
+        onCategoryClick={handleCategoryClick}
+        onMakeOffer={handleMakeOffer}
+        onBuyRequest={handleBuyRequest}
+        onToggleFavorite={handleToggleFavorite}
+        onShare={handleShare}
+        onSendMessage={handleSendMessage}
+        onViewSellerProfile={handleViewSellerProfile}
+        onAcceptOffer={(offerId) => handleRespondToOffer(offerId, 'accepted')}
+        onDeclineOffer={(offerId) => handleRespondToOffer(offerId, 'declined')}
+        initialChatOpen={shouldInitiallyChatOpen}
+        productConversations={productConversations}
+        selectedConversationId={conversation?.id}
+        onSelectConversation={handleSelectConversation}
+      />
+
+      {/* Purchase Modal */}
+      <PurchaseModal
+        isOpen={showPurchaseModal}
+        data={
+          product && seller
+            ? {
+                productId: productId || '',
+                productTitle: product.title,
+                price: product.price,
+                shippingCost: product.shippingOptions.shippingCost,
+                productImage: product.images?.[0]?.url,
+                sellerName: seller.name,
+                sellerCity: seller.city,
+                deliveryOptions: [
+                  ...(product.shippingOptions.pickup ? (['abholung'] as const) : []),
+                  ...(product.shippingOptions.shipping ? (['versand'] as const) : []),
+                ] as ('abholung' | 'versand')[],
+              }
+            : undefined
+        }
+        isLoading={purchaseLoading}
+        error={purchaseError ?? undefined}
+        onConfirm={handleConfirmPurchase}
+        onCancel={handleClosePurchaseModal}
+      />
+
+      {/* Offer Modal */}
+      <OfferModal
+        isOpen={showOfferModal}
+        data={
+          product && seller
+            ? {
+                productId: productId || '',
+                productTitle: product.title,
+                productPrice: product.price,
+                shippingCost: product.shippingOptions.shippingCost,
+                productImage: product.images?.[0]?.url,
+                sellerName: seller.name,
+                deliveryOptions: [
+                  ...(product.shippingOptions.pickup ? (['abholung'] as const) : []),
+                  ...(product.shippingOptions.shipping ? (['versand'] as const) : []),
+                ] as ('abholung' | 'versand')[],
+              }
+            : undefined
+        }
+        isLoading={offerLoading}
+        error={offerError ?? undefined}
+        onConfirm={handleConfirmOffer}
+        onCancel={handleCloseOfferModal}
+      />
+    </>
   )
 }

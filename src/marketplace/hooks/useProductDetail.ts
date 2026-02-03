@@ -500,7 +500,7 @@ interface UseOffersResult {
   offers: Offer[]
   loading: boolean
   error: Error | null
-  createOffer: (amount: number, message?: string) => Promise<{ error: Error | null }>
+  createOffer: (amount: number, message?: string, shippingMethod?: 'Abholung' | 'Versand') => Promise<{ error: Error | null }>
   respondToOffer: (offerId: string, status: 'accepted' | 'declined') => Promise<{ error: Error | null }>
   refetch: () => Promise<void>
 }
@@ -590,7 +590,7 @@ export function useOffers(
     }
   }, [productId, originalPrice, userId])
 
-  const createOffer = async (amount: number, message?: string): Promise<{ error: Error | null }> => {
+  const createOffer = async (amount: number, message?: string, shippingMethod?: 'Abholung' | 'Versand'): Promise<{ error: Error | null }> => {
     if (!productId || !userId) {
       return { error: new Error('Bitte melden Sie sich an, um ein Angebot zu machen.') }
     }
@@ -615,6 +615,7 @@ export function useOffers(
         buyer_id: userId,
         amount,
         message: message || null,
+        shipping_method: shippingMethod || 'Versand',
       }
       const { error: insertError } = await supabase
         .from('offers')
@@ -659,16 +660,39 @@ export function useOffers(
     }
 
     try {
-      const { error: updateError } = await supabase
-        .from('offers')
-        .update({
-          status,
-          responded_at: new Date().toISOString(),
+      if (status === 'accepted') {
+        // Call server-side function to handle all offer acceptance operations atomically
+        const { data, error: rpcError } = await supabase.rpc('accept_offer', {
+          p_offer_id: offerId,
+          p_product_id: productId,
+          p_buyer_id: offer.buyerId,
+          p_seller_id: userId,
+          p_offer_amount: offer.amount
         })
-        .eq('id', offerId)
 
-      if (updateError) {
-        throw updateError
+        if (rpcError) {
+          console.error('RPC error in accept_offer:', rpcError)
+          throw rpcError
+        }
+
+        if (data && !data.success) {
+          throw new Error(data.error || 'Failed to accept offer')
+        }
+
+        console.log('Offer accepted successfully:', data)
+      } else {
+        // Just decline the offer
+        const { error: updateError } = await supabase
+          .from('offers')
+          .update({
+            status,
+            responded_at: new Date().toISOString(),
+          })
+          .eq('id', offerId)
+
+        if (updateError) {
+          throw updateError
+        }
       }
 
       // Update local state

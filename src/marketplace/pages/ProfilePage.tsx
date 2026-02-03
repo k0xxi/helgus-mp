@@ -1,10 +1,12 @@
-import { User, Settings, Package, Shield, BadgeCheck, LayoutDashboard } from 'lucide-react'
+import { User, Settings, Package, Shield, BadgeCheck, LayoutDashboard, ShoppingCart, TrendingUp } from 'lucide-react'
 import { useAuth } from '@/marketplace/context/AuthContext'
+import { useProfileCounts } from '@/marketplace/hooks/useProfileCounts'
 import { Link, useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
 
 export function ProfilePage() {
   const { profile, user, loading } = useAuth()
+  const { listingCount, purchaseCount, salesCount } = useProfileCounts(user?.id)
   const navigate = useNavigate()
 
   // Redirect if not authenticated
@@ -108,12 +110,50 @@ export function ProfilePage() {
             <Package className="h-5 w-5 text-slate-600 dark:text-slate-300" />
           </div>
           <div>
-            <h3 className="font-medium text-slate-900 dark:text-white">Meine Anzeigen</h3>
+            <h3 className="font-medium text-slate-900 dark:text-white">
+              Meine Anzeigen <span className="text-slate-500 dark:text-slate-400">({listingCount})</span>
+            </h3>
             <p className="text-sm text-slate-600 dark:text-slate-400">
               Ihre aktiven und verkauften Artikel
             </p>
           </div>
         </Link>
+
+        <Link
+          to="/marketplace/my-purchases"
+          className="flex items-center gap-4 rounded-lg border border-slate-200 bg-white p-4 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700"
+        >
+          <div className="rounded-lg bg-slate-100 p-3 dark:bg-slate-700">
+            <ShoppingCart className="h-5 w-5 text-slate-600 dark:text-slate-300" />
+          </div>
+          <div>
+            <h3 className="font-medium text-slate-900 dark:text-white">
+              Meine Käufe <span className="text-slate-500 dark:text-slate-400">({purchaseCount})</span>
+            </h3>
+            <p className="text-sm text-slate-600 dark:text-slate-400">
+              Ihre gekauften Artikel und Transaktionen
+            </p>
+          </div>
+        </Link>
+
+        {profile?.isVerified && (
+          <Link
+            to="/marketplace/my-sales"
+            className="flex items-center gap-4 rounded-lg border border-slate-200 bg-white p-4 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700"
+          >
+            <div className="rounded-lg bg-slate-100 p-3 dark:bg-slate-700">
+              <TrendingUp className="h-5 w-5 text-slate-600 dark:text-slate-300" />
+            </div>
+            <div>
+              <h3 className="font-medium text-slate-900 dark:text-white">
+                Meine Verkäufe <span className="text-slate-500 dark:text-slate-400">({salesCount})</span>
+              </h3>
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                Ihre ausstehenden und abgeschlossenen Verkäufe
+              </p>
+            </div>
+          </Link>
+        )}
 
         <Link
           to="/marketplace/profile/settings"

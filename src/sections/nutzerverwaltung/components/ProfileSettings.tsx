@@ -3,7 +3,8 @@ import type {
   ProfileSettingsProps,
   User,
   SocialProvider,
-  NotificationSettings
+  NotificationSettings,
+  Address
 } from '@/../product/sections/nutzerverwaltung/types'
 import {
   UserCircleIcon,
@@ -16,6 +17,7 @@ import {
   TrashIcon,
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline'
+import { AddressModal } from './AddressModal'
 
 type TabId = 'personal' | 'address' | 'notifications' | 'security'
 
@@ -46,6 +48,8 @@ export function ProfileSettings({
   const [activeTab, setActiveTab] = useState<TabId>('personal')
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [showAddressModal, setShowAddressModal] = useState(false)
+  const [isEditingAddress, setIsEditingAddress] = useState(false)
 
   // Form state
   const [formData, setFormData] = useState<Partial<User>>({
@@ -61,8 +65,16 @@ export function ProfileSettings({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const handleSave = async () => {
+    console.log('ProfileSettings: handleSave called')
+    console.log('ProfileSettings: Address in formData:', formData.address)
     setIsSaving(true)
-    onSaveProfile?.(formData)
+    try {
+      console.log('ProfileSettings: Calling onSaveProfile callback')
+      await onSaveProfile?.(formData)
+      console.log('ProfileSettings: onSaveProfile completed successfully')
+    } catch (error) {
+      console.error('Error saving profile:', error)
+    }
     // Simulate save
     setTimeout(() => {
       setIsSaving(false)
@@ -82,6 +94,28 @@ export function ProfileSettings({
         [key]: value
       }
     }))
+  }
+
+  const handleAddressSave = async (address: Address) => {
+    console.log('ProfileSettings: handleAddressSave called with address:', address)
+    // Update formData directly with address and immediately save
+    const updatedData = { ...formData, address }
+    console.log('ProfileSettings: Updated formData with address:', updatedData)
+    setFormData(updatedData)
+    setShowAddressModal(false)
+
+    // Save immediately with updated data
+    console.log('ProfileSettings: Calling onSaveProfile with updated address')
+    setIsSaving(true)
+    try {
+      await onSaveProfile?.(updatedData)
+      console.log('ProfileSettings: Address saved successfully')
+    } catch (error) {
+      console.error('Error saving address:', error)
+    }
+    setTimeout(() => {
+      setIsSaving(false)
+    }, 1000)
   }
 
   return (
@@ -306,21 +340,32 @@ export function ProfileSettings({
 
               {user.address ? (
                 <div className="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
-                  <div className="flex items-start gap-4">
-                    <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-xl">
-                      <MapPinIcon className="w-6 h-6 text-red-600 dark:text-red-400" />
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-start gap-4 flex-1">
+                      <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-xl">
+                        <MapPinIcon className="w-6 h-6 text-red-600 dark:text-red-400" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-slate-900 dark:text-white">
+                          {user.address.street} {user.address.houseNumber}
+                        </p>
+                        <p className="text-slate-600 dark:text-slate-400">
+                          {user.address.zip} {user.address.city}
+                        </p>
+                        <p className="text-sm text-slate-500 dark:text-slate-500">
+                          {countries.find(c => c.code === user.address?.country)?.name || user.address.country}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-medium text-slate-900 dark:text-white">
-                        {user.address.street} {user.address.houseNumber}
-                      </p>
-                      <p className="text-slate-600 dark:text-slate-400">
-                        {user.address.zip} {user.address.city}
-                      </p>
-                      <p className="text-sm text-slate-500 dark:text-slate-500">
-                        {countries.find(c => c.code === user.address?.country)?.name || user.address.country}
-                      </p>
-                    </div>
+                    <button
+                      onClick={() => {
+                        setIsEditingAddress(true)
+                        setShowAddressModal(true)
+                      }}
+                      className="px-3 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors whitespace-nowrap"
+                    >
+                      Bearbeiten
+                    </button>
                   </div>
                 </div>
               ) : (
@@ -329,7 +374,13 @@ export function ProfileSettings({
                   <p className="text-slate-500 dark:text-slate-400 mb-4">
                     Keine Adresse hinterlegt
                   </p>
-                  <button className="px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors">
+                  <button
+                    onClick={() => {
+                      setIsEditingAddress(false)
+                      setShowAddressModal(true)
+                    }}
+                    className="px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors"
+                  >
                     Adresse hinzufügen
                   </button>
                 </div>
@@ -575,6 +626,19 @@ export function ProfileSettings({
           )}
         </div>
       </div>
+
+      {/* Address Modal */}
+      <AddressModal
+        isOpen={showAddressModal}
+        onClose={() => {
+          setShowAddressModal(false)
+          setIsEditingAddress(false)
+        }}
+        onSave={handleAddressSave}
+        initialAddress={formData.address}
+        countries={countries}
+        isEditing={isEditingAddress}
+      />
     </div>
   )
 }

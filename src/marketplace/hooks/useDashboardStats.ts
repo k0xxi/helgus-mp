@@ -63,30 +63,39 @@ export function useDashboardStats(userId: string | undefined): UseDashboardStats
       // Calculate total views sum
       const totalViews = products.reduce((sum, p) => sum + (p.view_count || 0), 0)
 
-      // Calculate sold this month
-      const now = new Date()
-      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
-      const soldThisMonth = products.filter((p) => {
-        if (!p.sold_at) return false
-        const soldDate = new Date(p.sold_at)
-        return soldDate >= monthStart && soldDate <= now
-      }).length
-
-      // 2. Get pending offers count
-      // Pending offers are conversations for products owned by this user where the conversation still exists
-      // (implying negotiation is ongoing)
-      const { count: pendingOffersCount, error: offersError } = await supabase
-        .from('conversations')
+      // 2. Get pending purchases count (pending sales)
+      const { count: pendingPurchasesCount, error: pendingError } = await supabase
+        .from('purchases')
         .select('id', { count: 'exact', head: true })
         .eq('seller_id', userId)
+        .eq('status', 'pending')
 
-      if (offersError) {
-        throw offersError
+      if (pendingError) {
+        throw pendingError
       }
 
-      const pendingOffers = pendingOffersCount || 0
+      const pendingOffers = pendingPurchasesCount || 0
 
-      // 3. Calculate monthly sales and revenue
+      // 3. Get completed purchases for stats
+      const now = new Date()
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+
+      const { data: purchasesData, error: purchasesError } = await supabase
+        .from('purchases')
+        .select('price_at_purchase, completed_at')
+        .eq('seller_id', userId)
+        .eq('status', 'completed')
+        .gte('completed_at', monthStart.toISOString())
+        .lte('completed_at', now.toISOString())
+
+      if (purchasesError) {
+        throw purchasesError
+      }
+
+      // Calculate sold this month from purchases
+      const soldThisMonth = (purchasesData || []).length
+
+      // 4. Calculate monthly sales and revenue
       const monthNames = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez']
       const currentYear = new Date().getFullYear()
 
@@ -97,16 +106,26 @@ export function useDashboardStats(userId: string | undefined): UseDashboardStats
         monthlyData[i] = { sales: 0, revenue: 0 }
       }
 
-      // Aggregate sold products by month
-      products.forEach((product) => {
-        if (product.sold_at) {
-          const soldDate = new Date(product.sold_at)
-          // Only count products sold in the current year
-          if (soldDate.getFullYear() === currentYear) {
-            const month = soldDate.getMonth()
-            monthlyData[month].sales += 1
-            monthlyData[month].revenue += product.price
-          }
+      // Fetch all completed purchases for the year
+      const { data: yearPurchasesData, error: yearPurchasesError } = await supabase
+        .from('purchases')
+        .select('price_at_purchase, completed_at')
+        .eq('seller_id', userId)
+        .eq('status', 'completed')
+        .gte('completed_at', `${currentYear}-01-01`)
+        .lte('completed_at', `${currentYear}-12-31`)
+
+      if (yearPurchasesError) {
+        throw yearPurchasesError
+      }
+
+      // Aggregate completed purchases by month
+      (yearPurchasesData || []).forEach((purchase) => {
+        if (purchase.completed_at) {
+          const completedDate = new Date(purchase.completed_at)
+          const month = completedDate.getMonth()
+          monthlyData[month].sales += 1
+          monthlyData[month].revenue += Number(purchase.price_at_purchase)
         }
       })
 

@@ -34,23 +34,23 @@ const MIN_REQUEST_INTERVAL = 1000 // 1 second in milliseconds
 /**
  * Geocode an address using OpenStreetMap Nominatim API
  *
- * @param params - Address components (street is optional, others required)
+ * @param params - Address components (street and city are optional, zip and country required)
  * @returns { result, error } - Either coordinates or error description
  */
 export async function geocodeAddress(params: {
   street?: string
   zip: string
-  city: string
+  city?: string
   country: string
 }): Promise<GeocodingResponse> {
   const { street, zip, city, country } = params
 
-  // Validate input
-  if (!zip || !city || !country) {
+  // Validate input (only zip and country are required)
+  if (!zip || !country) {
     return {
       error: {
         type: 'INVALID_INPUT',
-        message: 'ZIP, Stadt und Land sind erforderlich für Geocoding'
+        message: 'PLZ und Land sind erforderlich für Geocoding'
       }
     }
   }
@@ -66,8 +66,9 @@ export async function geocodeAddress(params: {
   lastRequestTime = Date.now()
 
   // Build address query string
-  // Format: "street, zip city, country"
-  const addressParts = [street, `${zip} ${city}`, country].filter(Boolean)
+  // Format: "street, zip city, country" or "zip, country" if city not provided
+  const zipCityPart = city ? `${zip} ${city}` : zip
+  const addressParts = [street, zipCityPart, country].filter(Boolean)
   const addressQuery = addressParts.join(', ')
 
   // Construct Nominatim API URL

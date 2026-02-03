@@ -40,8 +40,8 @@ export function ProfileSettingsPage() {
     bio: profile.bio ?? undefined,
     phone: profile.phone ?? undefined,
     address: profile.zip && profile.city ? {
-      street: '',
-      houseNumber: '',
+      street: profile.street ?? '',
+      houseNumber: profile.houseNumber ?? '',
       zip: profile.zip,
       city: profile.city,
       country: profile.country,
@@ -62,14 +62,25 @@ export function ProfileSettingsPage() {
   const connectedAccounts: ConnectedAccount[] = []
 
   const handleSaveProfile = async (data: Partial<DesignOSUser>) => {
-    await updateProfile({
+    console.log('ProfileSettingsPage: handleSaveProfile called')
+    console.log('ProfileSettingsPage: Address from data:', data.address)
+    const updateData = {
       name: data.name,
       bio: data.bio,
       phone: data.phone,
+      street: data.address?.street,
+      house_number: data.address?.houseNumber,
       zip: data.address?.zip,
       city: data.address?.city,
       country: data.address?.country,
-    })
+    }
+    console.log('ProfileSettingsPage: Sending to updateProfile:', updateData)
+    const { error } = await updateProfile(updateData)
+    if (error) {
+      console.error('ProfileSettingsPage: Failed to save profile:', error)
+    } else {
+      console.log('ProfileSettingsPage: Profile saved successfully')
+    }
   }
 
   const handleChangePassword = () => {
