@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
+import { geocodeAddress, calculateDistance } from '@/marketplace/utils/geocoding'
 import type { Tables } from '@/types/database'
 import type {
   Product,
@@ -81,8 +82,12 @@ interface ProductQueryResult {
   condition: string
   delivery_options: string[]
   shipping_cost: number | null
+  street: string | null
   zip: string
   city: string
+  latitude: number | null
+  longitude: number | null
+  geocoded_at: string | null
   phone_contact_available: boolean
   view_count: number
   is_active: boolean
@@ -126,6 +131,7 @@ export function useProducts(
 
     try {
       let categoryId: string | null = null
+      let searchLocation: { latitude: number; longitude: number } | null = null
 
       // If category filter is applied, find the category ID first
       if (filters.category) {
@@ -179,9 +185,31 @@ export function useProducts(
         query = query.contains('delivery_options', [filters.deliveryOption])
       }
 
+      // Handle ZIP code filtering (exact match or radius search)
       if (filters.zipCode) {
-        // For MVP: exact ZIP match (radius search requires geolocation)
-        query = query.eq('zip', filters.zipCode)
+        if (filters.radius) {
+          // PROXIMITY SEARCH: Geocode user's ZIP and filter by distance
+          // Step 1: Geocode the search ZIP code
+          const { result, error: geocodingError } = await geocodeAddress({
+            zip: filters.zipCode,
+            city: '',
+            country: 'AT' // TODO: Use user's country from profile
+          })
+
+          if (geocodingError) {
+            console.error('Failed to geocode search location:', geocodingError.message)
+            // Fallback to exact ZIP match if geocoding fails
+            query = query.eq('zip', filters.zipCode)
+          } else if (result) {
+            // Step 2: Fetch ALL products with coordinates for distance calculation
+            // (We will filter by distance client-side below)
+            searchLocation = result
+            query = query.not('latitude', 'is', null).not('longitude', 'is', null)
+          }
+        } else {
+          // Exact ZIP match (no radius)
+          query = query.eq('zip', filters.zipCode)
+        }
       }
 
       // Apply sorting
@@ -217,6 +245,17 @@ export function useProducts(
           (img) => supabase.storage.from('products').getPublicUrl(img.storage_path).data.publicUrl
         )
 
+        // Calculate distance if radius search is active
+        let distance: number | undefined
+        if (searchLocation && product.latitude && product.longitude) {
+          distance = calculateDistance(
+            searchLocation.latitude,
+            searchLocation.longitude,
+            product.latitude,
+            product.longitude
+          )
+        }
+
         return {
           id: product.id,
           title: product.title,
@@ -229,6 +268,9 @@ export function useProducts(
           location: {
             zip: product.zip,
             city: product.city,
+            street: product.street || undefined,
+            latitude: product.latitude || undefined,
+            longitude: product.longitude || undefined,
           },
           seller: {
             id: profile?.id ?? product.seller_id,
@@ -241,10 +283,20 @@ export function useProducts(
           phoneContactAvailable: product.phone_contact_available,
           isFavorited: favoriteIdsRef.current.has(product.id),
           isOwn: userId === product.seller_id,
+          distance,
         }
       })
 
-      setProducts(mappedProducts)
+      // Filter by distance if radius search is active
+      let filteredProducts = mappedProducts
+      if (searchLocation && filters.radius) {
+        filteredProducts = mappedProducts.filter((product) => {
+          // Only include products with calculated distance within the radius
+          return product.distance !== undefined && product.distance <= filters.radius!
+        })
+      }
+
+      setProducts(filteredProducts)
     } catch (err) {
       setError(err as Error)
       setProducts([])

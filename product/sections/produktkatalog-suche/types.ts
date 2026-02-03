@@ -5,6 +5,9 @@
 export interface Location {
   zip: string
   city: string
+  street?: string
+  latitude?: number
+  longitude?: number
 }
 
 export interface Seller {
@@ -30,6 +33,7 @@ export interface Product {
   phoneContactAvailable: boolean
   isFavorited: boolean
   isOwn: boolean
+  distance?: number
 }
 
 export interface Category {

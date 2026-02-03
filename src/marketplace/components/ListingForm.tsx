@@ -69,6 +69,7 @@ export function ListingForm() {
     price: 0,
     negotiable: false,
     images: [],
+    street: '',
     zip: profile?.zip || '',
     city: profile?.city || '',
     country: profile?.country || 'AT',
@@ -539,6 +540,23 @@ export function ListingForm() {
                   </option>
                 ))}
               </select>
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                Straße und Hausnummer{' '}
+                <span className="text-slate-400 font-normal">(optional, verbessert Genauigkeit)</span>
+              </label>
+              <input
+                type="text"
+                value={formData.street || ''}
+                onChange={(e) => updateForm('street', e.target.value)}
+                placeholder="z.B. Mariahilfer Straße 123"
+                className="w-full rounded-lg border border-slate-200 px-4 py-2.5 text-slate-900 placeholder:text-slate-400 focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+              />
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                Die Straße wird nur für die Umkreissuche verwendet und wird Käufern nicht angezeigt.
+              </p>
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">

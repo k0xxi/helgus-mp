@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
+import { geocodeAddress } from '@/marketplace/utils/geocoding'
 import type { PublicProfile, SellerVerification } from '@/types/marketplace'
 import type { Tables } from '@/types/database'
 
@@ -588,6 +589,7 @@ export interface ListingFormData {
   price: number
   negotiable: boolean
   images: ListingImage[]
+  street?: string
   zip: string
   city: string
   country: string
@@ -711,7 +713,22 @@ export function useListing(listingId?: string): UseListingResult {
     userId: string
   ): Promise<{ id: string | null; error: Error | null }> => {
     try {
-      // Create product first
+      // Geocode address before creating product
+      let geocodingResult = null
+      const { result, error: geocodingError } = await geocodeAddress({
+        street: data.street,
+        zip: data.zip,
+        city: data.city,
+        country: data.country
+      })
+
+      if (geocodingError) {
+        console.warn('Geocoding failed during product creation:', geocodingError.message)
+      } else if (result) {
+        geocodingResult = result
+      }
+
+      // Create product with geocoded coordinates
       const { data: product, error: productError } = await supabase
         .from('products')
         .insert({
@@ -724,8 +741,12 @@ export function useListing(listingId?: string): UseListingResult {
           condition: data.condition,
           delivery_options: data.deliveryOptions,
           shipping_cost: data.shippingCost,
+          street: data.street || null,
           zip: data.zip,
           city: data.city,
+          latitude: geocodingResult?.latitude || null,
+          longitude: geocodingResult?.longitude || null,
+          geocoded_at: geocodingResult ? new Date().toISOString() : null,
           phone_contact_available: data.phoneContactAvailable,
           is_active: true,
         })
@@ -775,22 +796,63 @@ export function useListing(listingId?: string): UseListingResult {
     userId: string
   ): Promise<{ error: Error | null }> => {
     try {
+      // Fetch existing product to check if location changed
+      const { data: existingProduct } = await supabase
+        .from('products')
+        .select('street, zip, city')
+        .eq('id', listingId)
+        .single()
+
+      // Geocode only if location changed
+      let geocodingResult = null
+      const locationChanged =
+        existingProduct &&
+        (existingProduct.street !== data.street ||
+         existingProduct.zip !== data.zip ||
+         existingProduct.city !== data.city)
+
+      if (locationChanged) {
+        const { result, error: geocodingError } = await geocodeAddress({
+          street: data.street,
+          zip: data.zip,
+          city: data.city,
+          country: data.country
+        })
+
+        if (geocodingError) {
+          console.warn('Geocoding failed during product update:', geocodingError.message)
+        } else if (result) {
+          geocodingResult = result
+        }
+      }
+
+      // Build update object
+      const updateData: any = {
+        category_id: data.categoryId,
+        title: data.title,
+        description: data.description,
+        price: data.price,
+        is_negotiable: data.negotiable,
+        condition: data.condition,
+        delivery_options: data.deliveryOptions,
+        shipping_cost: data.shippingCost,
+        street: data.street || null,
+        zip: data.zip,
+        city: data.city,
+        phone_contact_available: data.phoneContactAvailable,
+      }
+
+      // Add geocoding data only if location changed and geocoding succeeded
+      if (geocodingResult) {
+        updateData.latitude = geocodingResult.latitude
+        updateData.longitude = geocodingResult.longitude
+        updateData.geocoded_at = new Date().toISOString()
+      }
+
       // Update product
       const { error: productError } = await supabase
         .from('products')
-        .update({
-          category_id: data.categoryId,
-          title: data.title,
-          description: data.description,
-          price: data.price,
-          is_negotiable: data.negotiable,
-          condition: data.condition,
-          delivery_options: data.deliveryOptions,
-          shipping_cost: data.shippingCost,
-          zip: data.zip,
-          city: data.city,
-          phone_contact_available: data.phoneContactAvailable,
-        })
+        .update(updateData)
         .eq('id', listingId)
         .eq('seller_id', userId)
 

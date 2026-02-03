@@ -185,9 +185,16 @@ export function ProductCard({
 
         {/* Location & Time */}
         <div className="flex items-center justify-between text-sm text-slate-500 dark:text-slate-400 pt-4 mt-auto border-t border-slate-100 dark:border-slate-700">
-          <div className="flex items-center gap-1">
-            <MapPin className="w-4 h-4" />
-            <span className="font-['Inter']">{product.location.zip}</span>
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-1">
+              <MapPin className="w-4 h-4" />
+              <span className="font-['Inter']">{product.location.zip}</span>
+            </div>
+            {product.distance && (
+              <span className="text-xs text-slate-500 dark:text-slate-500 ml-5">
+                ~{Math.round(product.distance)} km entfernt
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-1">
             <Clock className="w-3 h-3" />
