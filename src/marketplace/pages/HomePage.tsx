@@ -30,8 +30,10 @@ export function HomePage() {
 
   // Fetch categories whenever component mounts or user changes
   useEffect(() => {
+    console.log('[HomePage] useEffect triggered')
     async function fetchCategoriesWithCounts() {
       try {
+        console.log('[HomePage] Starting to fetch categories...')
         setLoading(true)
         const { data, error } = await supabase
           .from('categories')
@@ -40,10 +42,13 @@ export function HomePage() {
           .order('sort_order')
 
         if (error || !data) {
-          console.error('Error fetching categories:', error)
+          console.error('[HomePage] Error fetching categories:', error)
+          console.log('[HomePage] data:', data)
           setLoading(false)
           return
         }
+
+        console.log('[HomePage] Successfully fetched categories:', data?.length)
 
         // Fetch product counts for each category
         const categoriesWithCounts = await Promise.all(
