@@ -13,5 +13,12 @@ export default defineConfig({
   },
   server: {
     port: 3000,
+    // Disable caching for development server
+    middlewareMode: false,
+    headers: {
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+    },
   },
 })
