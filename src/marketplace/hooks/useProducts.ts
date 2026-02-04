@@ -310,6 +310,27 @@ export function useProducts(
     fetchProducts()
   }, [fetchProducts])
 
+  // Auto-refetch on window focus and periodically
+  useEffect(() => {
+    // Refetch when window regains focus
+    const handleFocus = () => {
+      console.log('[Products] Window focused, refetching...')
+      fetchProducts()
+    }
+
+    // Periodic refetch every 15 seconds (fallback for when Realtime fails)
+    const pollInterval = setInterval(() => {
+      fetchProducts()
+    }, 1000 * 15)
+
+    window.addEventListener('focus', handleFocus)
+
+    return () => {
+      window.removeEventListener('focus', handleFocus)
+      clearInterval(pollInterval)
+    }
+  }, [fetchProducts])
+
   // Update isFavorited status when favoriteIds changes
   useEffect(() => {
     setProducts((prevProducts) =>

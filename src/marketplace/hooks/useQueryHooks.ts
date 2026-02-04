@@ -202,8 +202,12 @@ export function useConversationsQuery(userId: string | undefined) {
       return conversationsWithMessages
     },
     enabled: !!userId,
-    staleTime: 1000 * 30, // 30 seconds
-    refetchInterval: 1000 * 60, // Fallback: refetch every 60 seconds if subscriptions fail
+    staleTime: 0, // Data is always stale - refetch when component mounts or becomes visible
+    gcTime: 1000 * 60 * 5, // Keep in cache for 5 minutes
+    refetchOnMount: true, // Refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when window regains focus
+    refetchOnReconnect: true, // Refetch when reconnecting to internet
+    refetchInterval: 1000 * 10, // Poll every 10 seconds (fallback)
   })
 }
 
@@ -529,8 +533,12 @@ export function useConversationMessagesQuery(
       return mappedMessages
     },
     enabled: !!conversationId && !!userId,
-    staleTime: 1000 * 30, // 30 seconds - let Realtime handle updates
-    refetchInterval: 1000 * 60, // Only fallback polling every 60 seconds
+    staleTime: 0, // Data is always stale - refetch when component mounts or becomes visible
+    gcTime: 1000 * 60 * 5, // Keep in cache for 5 minutes
+    refetchOnMount: true, // Refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when window regains focus
+    refetchOnReconnect: true, // Refetch when reconnecting to internet
+    refetchInterval: 1000 * 10, // Poll every 10 seconds (fallback)
   })
 }
 

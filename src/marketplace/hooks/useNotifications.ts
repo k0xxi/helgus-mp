@@ -69,8 +69,12 @@ export function useNotifications(userId: string | undefined): UseNotificationsRe
       }))
     },
     enabled: !!userId,
-    staleTime: 1000 * 30, // 30 seconds
-    refetchInterval: 1000 * 60, // Fallback: refetch every 60 seconds if subscriptions fail
+    staleTime: 0, // Data is always stale - refetch when component mounts or becomes visible
+    gcTime: 1000 * 60 * 5, // Keep in cache for 5 minutes
+    refetchOnMount: true, // Refetch when component mounts
+    refetchOnWindowFocus: true, // Refetch when window regains focus
+    refetchOnReconnect: true, // Refetch when reconnecting to internet
+    refetchInterval: 1000 * 10, // Poll every 10 seconds (fallback)
   })
 
   // Mark single notification as read
