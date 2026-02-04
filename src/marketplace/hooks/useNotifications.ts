@@ -74,7 +74,7 @@ export function useNotifications(userId: string | undefined): UseNotificationsRe
     refetchOnMount: true, // Refetch when component mounts
     refetchOnWindowFocus: true, // Refetch when window regains focus
     refetchOnReconnect: true, // Refetch when reconnecting to internet
-    refetchInterval: 1000 * 10, // Poll every 10 seconds (fallback)
+    // NO refetchInterval - prevents app hanging from constant polling
   })
 
   // Mark single notification as read

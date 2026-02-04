@@ -310,7 +310,7 @@ export function useProducts(
     fetchProducts()
   }, [fetchProducts])
 
-  // Auto-refetch on window focus and periodically
+  // Auto-refetch on window focus and visibility change
   useEffect(() => {
     // Refetch when window regains focus
     const handleFocus = () => {
@@ -318,16 +318,20 @@ export function useProducts(
       fetchProducts()
     }
 
-    // Periodic refetch every 15 seconds (fallback for when Realtime fails)
-    const pollInterval = setInterval(() => {
-      fetchProducts()
-    }, 1000 * 15)
+    // Handle visibility change (tab became visible)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('[Products] Page became visible, refetching...')
+        fetchProducts()
+      }
+    }
 
     window.addEventListener('focus', handleFocus)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
 
     return () => {
       window.removeEventListener('focus', handleFocus)
-      clearInterval(pollInterval)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   }, [fetchProducts])
 

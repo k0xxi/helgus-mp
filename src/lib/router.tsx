@@ -49,7 +49,90 @@ function MarketplaceWrapper() {
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <Navigate to="/marketplace" replace />,
+    element: <MarketplaceWrapper />,
+    children: [
+      {
+        index: true,
+        element: <MarketplaceHomePage />,
+      },
+      {
+        path: 'search',
+        element: <SearchPage />,
+      },
+      {
+        path: 'auth',
+        element: <AuthPage />,
+      },
+      {
+        path: 'auth/callback',
+        element: <AuthCallbackPage />,
+      },
+      {
+        path: 'auth/reset-password',
+        element: <PasswordResetPage />,
+      },
+      {
+        path: 'favorites',
+        element: <FavoritesPage />,
+      },
+      {
+        path: 'messages',
+        element: <MessagesPage />,
+      },
+      {
+        path: 'profile',
+        element: <ProfilePage />,
+      },
+      {
+        path: 'seller-dashboard',
+        element: <SellerDashboard />,
+      },
+      {
+        path: 'profile/settings',
+        element: <ProfileSettingsPage />,
+      },
+      {
+        path: 'profile/verification',
+        element: <SellerVerificationPage />,
+      },
+      {
+        path: 'profile/change-password',
+        element: <ChangePasswordPage />,
+      },
+      {
+        path: 'user/:userId',
+        element: <PublicProfilePage />,
+      },
+      {
+        path: 'sell',
+        element: <SellPage />,
+      },
+      {
+        path: 'my-listings',
+        element: <MyListingsPage />,
+      },
+      {
+        path: 'my-purchases',
+        element: <MyPurchasesPage />,
+      },
+      {
+        path: 'my-sales',
+        element: <MySalesPage />,
+      },
+      {
+        path: 'notifications',
+        element: <NotificationsPage />,
+      },
+      {
+        path: 'product/:productId',
+        element: <MarketplaceProductPage />,
+      },
+    ],
+  },
+  // Keep marketplace path as legacy redirect
+  {
+    path: 'marketplace',
+    element: <Navigate to="/" replace />,
   },
   {
     path: 'design-os',
@@ -96,87 +179,5 @@ export const router = createBrowserRouter([
         element: <ExportPage />,
       },
     ],
-  },
-  {
-    path: 'marketplace',
-    element: <MarketplaceWrapper />,
-    children: [
-          {
-            index: true,
-            element: <MarketplaceHomePage />,
-          },
-          {
-            path: 'search',
-            element: <SearchPage />,
-          },
-          {
-            path: 'auth',
-            element: <AuthPage />,
-          },
-          {
-            path: 'auth/callback',
-            element: <AuthCallbackPage />,
-          },
-          {
-            path: 'auth/reset-password',
-            element: <PasswordResetPage />,
-          },
-          {
-            path: 'favorites',
-            element: <FavoritesPage />,
-          },
-          {
-            path: 'messages',
-            element: <MessagesPage />,
-          },
-          {
-            path: 'profile',
-            element: <ProfilePage />,
-          },
-          {
-            path: 'seller-dashboard',
-            element: <SellerDashboard />,
-          },
-          {
-            path: 'profile/settings',
-            element: <ProfileSettingsPage />,
-          },
-          {
-            path: 'profile/verification',
-            element: <SellerVerificationPage />,
-          },
-          {
-            path: 'profile/change-password',
-            element: <ChangePasswordPage />,
-          },
-          {
-            path: 'user/:userId',
-            element: <PublicProfilePage />,
-          },
-          {
-            path: 'sell',
-            element: <SellPage />,
-          },
-          {
-            path: 'my-listings',
-            element: <MyListingsPage />,
-          },
-          {
-            path: 'my-purchases',
-            element: <MyPurchasesPage />,
-          },
-          {
-            path: 'my-sales',
-            element: <MySalesPage />,
-          },
-          {
-            path: 'notifications',
-            element: <NotificationsPage />,
-          },
-          {
-            path: 'product/:productId',
-            element: <MarketplaceProductPage />,
-          },
-        ],
   },
 ])
