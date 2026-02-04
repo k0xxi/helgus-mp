@@ -1,6 +1,6 @@
 import { User, Settings, Package, Shield, BadgeCheck, LayoutDashboard, ShoppingCart, TrendingUp } from 'lucide-react'
-import { useAuth } from '@/context/AuthContext'
-import { useProfileCounts } from '@/hooks/useProfileCounts'
+import { useAuth } from '@/marketplace/context/AuthContext'
+import { useProfileCounts } from '@/marketplace/hooks/useProfileCounts'
 import { Link, useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
 

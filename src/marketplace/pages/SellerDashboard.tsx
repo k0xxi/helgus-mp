@@ -1,8 +1,8 @@
 import { TrendingUp, Package, MessageSquare, ShoppingCart } from 'lucide-react'
-import { useAuth } from '@/context/AuthContext'
-import { useDashboardStats } from '@/hooks/useDashboardStats'
-import { SalesChart } from '@/components/SalesChart'
-import { RevenueChart } from '@/components/RevenueChart'
+import { useAuth } from '@/marketplace/context/AuthContext'
+import { useDashboardStats } from '@/marketplace/hooks/useDashboardStats'
+import { SalesChart } from '@/marketplace/components/SalesChart'
+import { RevenueChart } from '@/marketplace/components/RevenueChart'
 import { useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
 
