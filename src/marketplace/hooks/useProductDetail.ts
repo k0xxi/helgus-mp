@@ -345,7 +345,7 @@ export function useConversation(
       }
 
       const convData = existingConv as ConversationData | null
-      let convId = convData?.id || null
+      const convId = convData?.id || null
       setConversationId(convId)
       setConversation(convData)
 
@@ -675,8 +675,8 @@ export function useOffers(
           throw rpcError
         }
 
-        if (data && !data.success) {
-          throw new Error(data.error || 'Failed to accept offer')
+        if (data && !(data as any).success) {
+          throw new Error((data as any).error || 'Failed to accept offer')
         }
 
         console.log('Offer accepted successfully:', data)

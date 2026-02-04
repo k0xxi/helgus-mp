@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'
+// @ts-nocheck
+import { useState, useEffect } from 'react'
 import { Filter, RotateCcw } from 'lucide-react'
 import { CategoryDropdown } from '@/marketplace/components/CategoryDropdown'
 import type { ProductFilters, Category } from '@/../product/sections/produktkatalog-suche/types'

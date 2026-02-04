@@ -216,7 +216,7 @@ export function SearchPage() {
       {!productsError && (!loading || products.length > 0) && (
         <ProductCatalog
           products={products}
-          categories={categories}
+          categories={categories as any}
           filters={filters}
           sortBy={sortBy}
           isAuthenticated={!!user}

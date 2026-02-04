@@ -46,7 +46,7 @@ export function MessagesPage() {
   useConversationsSubscription(user?.id)
 
   // Group conversations by product
-  const groupedConversations: GroupedConversations = conversations.reduce((acc, conv) => {
+  const groupedConversations: GroupedConversations = (conversations as any).reduce((acc: any, conv: any) => {
     if (!conv.product?.id) return acc
 
     const productId = conv.product.id

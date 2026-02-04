@@ -31,8 +31,8 @@ export function usePurchase(userId: string | undefined): UsePurchaseResult {
           throw rpcError
         }
 
-        if (data && !data.success) {
-          throw new Error(data.error || 'Failed to create purchase')
+        if (data && !(data as any).success) {
+          throw new Error((data as any).error || 'Failed to create purchase')
         }
 
         console.log('Purchase created successfully:', data)

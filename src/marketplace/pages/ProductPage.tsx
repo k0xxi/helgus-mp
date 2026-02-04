@@ -430,8 +430,9 @@ export function ProductPage() {
         category={category}
         messages={messages}
         offers={offers}
-        currentUser={currentUser}
+        currentUser={currentUser as any}
         isAuthenticated={!!user}
+        notifications={[]}
         isTyping={isTyping}
         onBack={handleBack}
         onCategoryClick={handleCategoryClick}

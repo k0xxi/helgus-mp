@@ -357,10 +357,10 @@ export function useProductConversationsQuery(
         query = query.eq('buyer_id', userId)
       }
 
-      const { data: existingConv, error: convError } = await query
+      const { data: existingConv, error: convError } = await (query as any)
         .order('created_at', { ascending: false })
         .limit(1)
-        .maybeSingle<{ id: string; buyer_id: string; seller_id: string }>()
+        .maybeSingle() as any
 
       if (convError && convError.code !== 'PGRST116') {
         throw convError

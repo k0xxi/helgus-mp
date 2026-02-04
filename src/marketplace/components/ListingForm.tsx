@@ -5,7 +5,6 @@ import {
   ArrowRight,
   Check,
   X,
-  Upload,
   GripVertical,
   Trash2,
   ImagePlus,

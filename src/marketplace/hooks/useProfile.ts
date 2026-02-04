@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { geocodeAddress } from '@/marketplace/utils/geocoding'
 import type { PublicProfile, SellerVerification } from '@/types/marketplace'
-import type { Tables } from '@/types/database'
+import type { VerificationStatus, ProductCondition, DeliveryOption, Tables } from '@/types/database'
 
 // =============================================================================
 // usePublicProfile - Fetch public profile by user ID
@@ -56,11 +56,11 @@ export function usePublicProfile(userId: string | undefined): UsePublicProfileRe
       const publicProfile: PublicProfile = {
         id: profileData.id,
         name: profileData.name,
-        avatarUrl: profileData.avatar_url,
-        bio: profileData.bio,
-        city: profileData.city,
+        avatarUrl: profileData.avatar_url ?? '',
+        bio: profileData.bio ?? '',
+        city: profileData.city ?? '',
         country: profileData.country,
-        isVerified: profileData.is_verified,
+        isVerified: profileData.is_verified ?? false,
         memberSince: new Date(profileData.created_at),
         listingsCount: listingsCount ?? 0,
         responseTime: null, // Could be calculated from messages later
@@ -660,7 +660,7 @@ function mapDbVerificationToVerification(data: Tables<'seller_verifications'>): 
     iban: data.iban,
     bic: data.bic,
     acceptedTerms: data.accepted_terms,
-    status: data.status,
+    status: data.status as VerificationStatus,
     createdAt: new Date(data.created_at),
   }
 }
@@ -746,8 +746,8 @@ export function useListing(listingId?: string): UseListingResult {
         zip: product.zip,
         city: product.city,
         country: 'AT', // Default, could be fetched from profile
-        condition: product.condition,
-        deliveryOptions: product.delivery_options,
+        condition: product.condition as ProductCondition,
+        deliveryOptions: product.delivery_options as DeliveryOption[],
         shippingCost: product.shipping_cost,
         phoneContactAvailable: product.phone_contact_available,
       })

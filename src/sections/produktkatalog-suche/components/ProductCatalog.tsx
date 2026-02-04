@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Package, Filter, X } from 'lucide-react'
 import { ProductCard } from './ProductCard'
 import { FilterSidebar } from './FilterSidebar'
