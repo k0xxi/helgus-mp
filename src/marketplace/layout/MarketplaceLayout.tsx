@@ -1,7 +1,7 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
-import { useAuth } from '@/context/AuthContext'
-import { useConversationsQuery, useUserNotifications, useNotificationsSubscription, useConversationsSubscription, useNavigationRefresh, useProductRealtimeSync, useProfileRealtimeSync } from '@/hooks'
-import { NotificationDropdown } from '@/components/NotificationDropdown'
+import { useAuth } from '@/marketplace/context/AuthContext'
+import { useConversationsQuery, useUserNotifications, useNotificationsSubscription, useConversationsSubscription, useNavigationRefresh, useProductRealtimeSync, useProfileRealtimeSync } from '@/marketplace/hooks'
+import { NotificationDropdown } from '@/marketplace/components/NotificationDropdown'
 import {
   Home,
   Search,
@@ -45,7 +45,7 @@ export function MarketplaceLayout() {
 
   const handleLogout = async () => {
     await signOut()
-    navigate('/marketplace')
+    navigate('/')
   }
 
   const handleSellClick = () => {
@@ -61,7 +61,7 @@ export function MarketplaceLayout() {
   }
 
   const navItems = [
-    { path: '/marketplace', icon: Home, label: 'Start' },
+    { path: '/', icon: Home, label: 'Start' },
     { path: '/search', icon: Search, label: 'Suchen' },
     { path: '/favorites', icon: Heart, label: 'Favoriten', auth: true },
     { path: '/messages', icon: MessageCircle, label: 'Nachrichten', auth: true },
