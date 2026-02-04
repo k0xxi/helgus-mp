@@ -1,8 +1,8 @@
 import { TrendingUp, Package, MessageSquare, ShoppingCart } from 'lucide-react'
-import { useAuth } from '@/marketplace/context/AuthContext'
-import { useDashboardStats } from '@/marketplace/hooks/useDashboardStats'
-import { SalesChart } from '@/marketplace/components/SalesChart'
-import { RevenueChart } from '@/marketplace/components/RevenueChart'
+import { useAuth } from '@/context/AuthContext'
+import { useDashboardStats } from '@/hooks/useDashboardStats'
+import { SalesChart } from '@/components/SalesChart'
+import { RevenueChart } from '@/components/RevenueChart'
 import { useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
 
@@ -14,9 +14,9 @@ export function SellerDashboard() {
   // Redirect if not authenticated or not verified
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/marketplace/auth')
+      navigate('/auth')
     } else if (!authLoading && profile && !profile.isVerified) {
-      navigate('/marketplace/profile')
+      navigate('/profile')
     }
   }, [user, authLoading, profile, navigate])
 
@@ -134,14 +134,14 @@ export function SellerDashboard() {
         </h2>
         <div className="grid gap-3 md:grid-cols-2">
           <a
-            href="/marketplace/sell"
+            href="/sell"
             className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-700 transition-colors dark:hover:bg-blue-700"
           >
             <Package className="h-4 w-4" />
             Neues Produkt hinzufügen
           </a>
           <a
-            href="/marketplace/messages"
+            href="/messages"
             className="inline-flex items-center justify-center gap-2 rounded-lg bg-slate-200 px-4 py-2 font-medium text-slate-900 hover:bg-slate-300 transition-colors dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600"
           >
             <MessageSquare className="h-4 w-4" />

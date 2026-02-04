@@ -1,6 +1,6 @@
 import { User, Settings, Package, Shield, BadgeCheck, LayoutDashboard, ShoppingCart, TrendingUp } from 'lucide-react'
-import { useAuth } from '@/marketplace/context/AuthContext'
-import { useProfileCounts } from '@/marketplace/hooks/useProfileCounts'
+import { useAuth } from '@/context/AuthContext'
+import { useProfileCounts } from '@/hooks/useProfileCounts'
 import { Link, useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
 
@@ -12,7 +12,7 @@ export function ProfilePage() {
   // Redirect if not authenticated
   useEffect(() => {
     if (!loading && !user) {
-      navigate('/marketplace/auth')
+      navigate('/auth')
     }
   }, [user, loading, navigate])
 
@@ -72,7 +72,7 @@ export function ProfilePage() {
               </span>
             ) : (
               <Link
-                to="/marketplace/profile/verification"
+                to="/profile/verification"
                 className="mt-2 inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-400 dark:hover:bg-slate-600 transition-colors"
               >
                 <BadgeCheck className="h-3 w-3" />
@@ -87,7 +87,7 @@ export function ProfilePage() {
       <div className="grid gap-4 md:grid-cols-2">
         {profile?.isVerified && (
           <Link
-            to="/marketplace/seller-dashboard"
+            to="/seller-dashboard"
             className="flex items-center gap-4 rounded-lg border border-slate-200 bg-white p-4 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700"
           >
             <div className="rounded-lg bg-slate-100 p-3 dark:bg-slate-700">
@@ -103,7 +103,7 @@ export function ProfilePage() {
         )}
 
         <Link
-          to="/marketplace/my-listings"
+          to="/my-listings"
           className="flex items-center gap-4 rounded-lg border border-slate-200 bg-white p-4 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700"
         >
           <div className="rounded-lg bg-slate-100 p-3 dark:bg-slate-700">
@@ -120,7 +120,7 @@ export function ProfilePage() {
         </Link>
 
         <Link
-          to="/marketplace/my-purchases"
+          to="/my-purchases"
           className="flex items-center gap-4 rounded-lg border border-slate-200 bg-white p-4 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700"
         >
           <div className="rounded-lg bg-slate-100 p-3 dark:bg-slate-700">
@@ -138,7 +138,7 @@ export function ProfilePage() {
 
         {profile?.isVerified && (
           <Link
-            to="/marketplace/my-sales"
+            to="/my-sales"
             className="flex items-center gap-4 rounded-lg border border-slate-200 bg-white p-4 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700"
           >
             <div className="rounded-lg bg-slate-100 p-3 dark:bg-slate-700">
@@ -156,7 +156,7 @@ export function ProfilePage() {
         )}
 
         <Link
-          to="/marketplace/profile/settings"
+          to="/profile/settings"
           className="flex items-center gap-4 rounded-lg border border-slate-200 bg-white p-4 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700"
         >
           <div className="rounded-lg bg-slate-100 p-3 dark:bg-slate-700">
@@ -172,7 +172,7 @@ export function ProfilePage() {
 
         {!profile?.isVerified && (
           <Link
-            to="/marketplace/profile/verification"
+            to="/profile/verification"
             className="flex items-center gap-4 rounded-lg border border-blue-200 bg-blue-50 p-4 transition-colors hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-900/20 dark:hover:bg-blue-900/30"
           >
             <div className="rounded-lg bg-blue-100 p-3 dark:bg-blue-900/30">
