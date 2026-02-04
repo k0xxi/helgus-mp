@@ -510,9 +510,12 @@ export function useConversationMessagesQuery(
         .eq('conversation_id', conversationId)
         .order('created_at', { ascending: true }) as any)
 
-      if (msgError) throw msgError
+      if (msgError) {
+        console.error('[Messages] Query error:', msgError)
+        throw msgError
+      }
 
-      return ((messagesData || []).map((msg: any) => ({
+      const mappedMessages = ((messagesData || []).map((msg: any) => ({
         id: msg.id,
         senderId: msg.sender_id,
         senderName: msg.profiles.name,
@@ -521,10 +524,13 @@ export function useConversationMessagesQuery(
         isOwn: msg.sender_id === userId,
         isRead: msg.is_read,
       }))) as Message[]
+
+      console.log('[Messages] Fetched', mappedMessages.length, 'messages for conversation', conversationId)
+      return mappedMessages
     },
     enabled: !!conversationId && !!userId,
-    staleTime: 1000 * 2, // 2 seconds - very fresh
-    refetchInterval: 1000 * 3, // Refetch every 3 seconds to catch new messages
+    staleTime: 1000 * 30, // 30 seconds - let Realtime handle updates
+    refetchInterval: 1000 * 60, // Only fallback polling every 60 seconds
   })
 }
 
