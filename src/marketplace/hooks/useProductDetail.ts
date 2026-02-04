@@ -350,7 +350,7 @@ export function useConversation(
   const [error, setError] = useState<Error | null>(null)
 
   const fetchConversation = useCallback(async () => {
-    if (!productId || !userId || !sellerId) {
+    if (!productId || !userId) {
       setLoading(false)
       return
     }
@@ -364,9 +364,12 @@ export function useConversation(
         .select('id, buyer_id, seller_id')
         .eq('product_id', productId)
 
-      // If user is the buyer, find conversation where they're the buyer
-      // If user is the seller, find the most recent conversation
-      if (userId !== sellerId) {
+      // If we know user is not the seller (i.e., they're the buyer), filter by buyer_id
+      // Otherwise, get all conversations for this product (seller can have multiple conversations)
+      if (sellerId && userId !== sellerId) {
+        query = query.eq('buyer_id', userId)
+      } else if (!sellerId && userId) {
+        // If sellerId not available yet, just get conversations where user is buyer
         query = query.eq('buyer_id', userId)
       }
 
@@ -504,15 +507,41 @@ export function useConversation(
       setMessages((prev) => [...prev, newMessage])
 
       // Create notification for recipient
-      // If user is seller, notify the buyer; if user is buyer, notify the seller
-      const recipientId = userId === sellerId ? conversation?.buyer_id : sellerId
+      // Determine recipient from conversation data (more reliable than sellerId parameter)
+      let recipientId: string | null = null
+
+      if (conversation) {
+        // If user is the buyer, notify the seller
+        // If user is the seller, notify the buyer
+        if (userId === conversation.buyer_id) {
+          recipientId = conversation.seller_id
+        } else if (userId === conversation.seller_id) {
+          recipientId = conversation.buyer_id
+        }
+      }
+
+      console.log('[Messages] Creating notification:', {
+        userId,
+        conversationSellerId: conversation?.seller_id,
+        conversationBuyerId: conversation?.buyer_id,
+        isBuyer: userId === conversation?.buyer_id,
+        isSeller: userId === conversation?.seller_id,
+        recipientId,
+      })
+
       if (recipientId) {
+        console.log('[Messages] Notifying recipient:', recipientId)
         await createNotification({
           userId: recipientId,
           type: 'new_message',
           title: 'Neue Nachricht',
           message: content.length > 50 ? content.substring(0, 50) + '...' : content,
           productId,
+        })
+      } else {
+        console.warn('[Messages] No recipient ID found for notification', {
+          hasConversation: !!conversation,
+          userId,
         })
       }
 
