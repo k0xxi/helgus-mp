@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Package, MessageSquare } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
-import { useAuth } from '@/context/AuthContext'
+import { useAuth } from '@/marketplace/context/AuthContext'
 import type { Purchase } from '@/types/marketplace'
 
 interface PurchaseWithDetails extends Purchase {

@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { MessageCircle, Search, X, ChevronDown, MessageSquare, Package } from 'lucide-react'
-import { useAuth } from '@/context/AuthContext'
+import { useAuth } from '@/marketplace/context/AuthContext'
 import { useNavigate } from 'react-router-dom'
-import { useConversationsQuery, useConversationsSubscription } from '@/hooks'
+import { useConversationsQuery, useConversationsSubscription } from '@/marketplace/hooks'
 import type { Conversation } from '@/types/marketplace'
 
 interface GroupedConversations {

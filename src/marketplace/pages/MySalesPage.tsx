@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ShoppingCart, CheckCircle, Clock, MapPin, MessageSquare } from 'lucide-react'
-import { useAuth } from '@/context/AuthContext'
-import { useMySales } from '@/hooks/useMySales'
-import { useMyListings } from '@/hooks/useProfile'
+import { useAuth } from '@/marketplace/context/AuthContext'
+import { useMySales } from '@/marketplace/hooks/useMySales'
+import { useMyListings } from '@/marketplace/hooks/useProfile'
 
 export function MySalesPage() {
   const { user, loading: authLoading } = useAuth()

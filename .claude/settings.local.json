@@ -22,7 +22,9 @@
       "Bash(tsc:*)",
       "Bash(supabase --version:*)",
       "Bash(npx eslint:*)",
-      "Bash(__NEW_LINE_c3cc0e7ef6f7d3e7__ npx eslint --fix src/marketplace/hooks/useProductDetail.ts src/marketplace/hooks/useProfile.ts src/marketplace/hooks/useQueryHooks.ts src/marketplace/pages/ProductPage.tsx src/marketplace/pages/AuthCallbackPage.tsx src/marketplace/pages/ProfileSettingsPage.tsx src/marketplace/pages/SearchPage.tsx)"
+      "Bash(__NEW_LINE_c3cc0e7ef6f7d3e7__ npx eslint --fix src/marketplace/hooks/useProductDetail.ts src/marketplace/hooks/useProfile.ts src/marketplace/hooks/useQueryHooks.ts src/marketplace/pages/ProductPage.tsx src/marketplace/pages/AuthCallbackPage.tsx src/marketplace/pages/ProfileSettingsPage.tsx src/marketplace/pages/SearchPage.tsx)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }

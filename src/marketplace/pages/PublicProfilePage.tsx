@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { usePublicProfile, useUserListings } from '@/hooks'
+import { usePublicProfile, useUserListings } from '@/marketplace/hooks'
 import { PublicProfile } from '@/sections/nutzerverwaltung/components'
 import type { PublicProfile as DesignOSProfile, UserListing } from '@/../product/sections/nutzerverwaltung/types'
 import { UserCircleIcon } from '@heroicons/react/24/outline'

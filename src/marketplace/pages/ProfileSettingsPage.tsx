@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Settings } from 'lucide-react'
-import { useAuth } from '@/context/AuthContext'
+import { useAuth } from '@/marketplace/context/AuthContext'
 import { ProfileSettings } from '@/sections/nutzerverwaltung/components'
 import type { User as DesignOSUser, Country, ConnectedAccount } from '@/../product/sections/nutzerverwaltung/types'
 

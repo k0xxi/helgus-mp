@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '@/context/AuthContext'
-import { ListingForm } from '@/components/ListingForm'
+import { useAuth } from '@/marketplace/context/AuthContext'
+import { ListingForm } from '@/marketplace/components/ListingForm'
 
 export function SellPage() {
   const navigate = useNavigate()

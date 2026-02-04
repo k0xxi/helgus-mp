@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
-import { useAuth } from '@/context/AuthContext'
+import { useAuth } from '@/marketplace/context/AuthContext'
 import { PasswordReset } from '@/sections/nutzerverwaltung/components'
 
 export function PasswordResetPage() {

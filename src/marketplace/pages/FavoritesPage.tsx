@@ -1,9 +1,9 @@
 import { useEffect } from 'react'
 import { Heart, Loader2, AlertTriangle } from 'lucide-react'
-import { useAuth } from '@/context/AuthContext'
+import { useAuth } from '@/marketplace/context/AuthContext'
 import { useNavigate } from 'react-router-dom'
-import { useFavoriteProducts } from '@/hooks/useFavoriteProducts'
-import { useFavorites } from '@/hooks/useFavorites'
+import { useFavoriteProducts } from '@/marketplace/hooks/useFavoriteProducts'
+import { useFavorites } from '@/marketplace/hooks/useFavorites'
 import { ProductCard } from '@/sections/produktkatalog-suche/components/ProductCard'
 
 export function FavoritesPage() {

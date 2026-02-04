@@ -10,9 +10,9 @@ import {
   ImagePlus,
   Loader2,
 } from 'lucide-react'
-import { useAuth } from '@/context/AuthContext'
-import { useCategories } from '@/hooks/useProducts'
-import { useListing, type ListingFormData, type ListingImage } from '@/hooks'
+import { useAuth } from '@/marketplace/context/AuthContext'
+import { useCategories } from '@/marketplace/hooks/useProducts'
+import { useListing, type ListingFormData, type ListingImage } from '@/marketplace/hooks'
 
 const STEPS = [
   { id: 1, title: 'Basis-Infos', description: 'Titel, Beschreibung & Preis' },

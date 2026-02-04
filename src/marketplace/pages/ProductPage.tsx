@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom'
 import { ArrowLeft, AlertTriangle, Loader2 } from 'lucide-react'
 import { ProductDetail } from '@/sections/produktdetails-verhandlung/components/ProductDetail'
-import { PurchaseModal } from '@/components/PurchaseModal'
-import { OfferModal } from '@/components/OfferModal'
+import { PurchaseModal } from '@/marketplace/components/PurchaseModal'
+import { OfferModal } from '@/marketplace/components/OfferModal'
 import {
   useProductDetail,
   useOffers,
@@ -16,9 +16,9 @@ import {
   useMessagesSubscription,
   useConversationsSubscription,
   usePurchase,
-} from '@/hooks'
-import { useFavorites } from '@/hooks/useFavorites'
-import { useAuth } from '@/context/AuthContext'
+} from '@/marketplace/hooks'
+import { useFavorites } from '@/marketplace/hooks/useFavorites'
+import { useAuth } from '@/marketplace/context/AuthContext'
 
 export function ProductPage() {
   const { productId } = useParams()

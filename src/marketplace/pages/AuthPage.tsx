@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
-import { useAuth } from '@/context/AuthContext'
+import { useAuth } from '@/marketplace/context/AuthContext'
 import { AuthPage as DesignOSAuthPage } from '@/sections/nutzerverwaltung/components'
 import type { SocialProvider, RegistrationData } from '@/../product/sections/nutzerverwaltung/types'
 
