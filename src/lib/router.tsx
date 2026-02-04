@@ -33,6 +33,7 @@ import {
   MyListingsPage,
   MyPurchasesPage,
   MySalesPage,
+  NotFoundPage,
 } from '@/marketplace/pages'
 
 // Wrapper to provide AuthContext to marketplace routes
@@ -129,10 +130,15 @@ export const router = createBrowserRouter([
       },
     ],
   },
-  // Keep marketplace path as legacy redirect
+  // Keep marketplace paths as legacy redirect (for /marketplace/* routes)
   {
     path: 'marketplace',
-    element: <Navigate to="/" replace />,
+    children: [
+      {
+        path: '*',
+        element: <Navigate to="/" replace />,
+      },
+    ],
   },
   {
     path: 'design-os',
@@ -179,5 +185,10 @@ export const router = createBrowserRouter([
         element: <ExportPage />,
       },
     ],
+  },
+  // Catch-all for 404 Not Found
+  {
+    path: '*',
+    element: <NotFoundPage />,
   },
 ])

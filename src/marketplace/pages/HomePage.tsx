@@ -18,14 +18,14 @@ export function HomePage() {
   const handleSellClick = (e: React.MouseEvent) => {
     e.preventDefault()
     if (!user) {
-      navigate('/marketplace/auth')
+      navigate('/auth')
       return
     }
     if (!profile?.isVerified) {
-      navigate('/marketplace/profile/verification')
+      navigate('/profile/verification')
       return
     }
-    navigate('/marketplace/sell')
+    navigate('/sell')
   }
 
   // Fetch categories whenever component mounts or user changes
@@ -87,7 +87,7 @@ export function HomePage() {
           </p>
           <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:justify-center">
             <Link
-              to="/marketplace/search"
+              to="/search"
               className="inline-flex items-center justify-center gap-2 rounded-lg bg-white px-6 py-3 font-medium text-red-600 transition-colors hover:bg-red-50"
             >
               <Search className="h-5 w-5" />
@@ -122,7 +122,7 @@ export function HomePage() {
             {categories.map((category) => (
               <Link
                 key={category.id}
-                to={`/marketplace/search?category=${category.slug}`}
+                to={`/search?category=${category.slug}`}
                 className="group rounded-lg border border-slate-200 bg-white p-4 text-center transition-all hover:border-red-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-red-600"
               >
                 <span className="text-sm font-medium text-slate-900 group-hover:text-red-600 dark:text-white dark:group-hover:text-red-400">
