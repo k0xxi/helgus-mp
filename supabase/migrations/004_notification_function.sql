@@ -1,7 +1,10 @@
+-- Drop existing function if it exists
+DROP FUNCTION IF EXISTS create_notification(UUID, TEXT, TEXT, TEXT, UUID) CASCADE;
+DROP FUNCTION IF EXISTS create_notification(UUID, TEXT, TEXT, TEXT) CASCADE;
+
 -- Create a function to insert notifications that bypasses RLS
 -- This ensures notifications are created reliably and real-time subscriptions work
-
-CREATE OR REPLACE FUNCTION create_notification(
+CREATE FUNCTION create_notification(
   p_user_id UUID,
   p_type TEXT,
   p_title TEXT,

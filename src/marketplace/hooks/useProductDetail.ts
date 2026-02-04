@@ -78,17 +78,54 @@ async function createNotification(params: {
   message: string
   productId?: string
 }): Promise<void> {
+  // Validate userId is provided and not null/undefined
+  if (!params.userId) {
+    console.warn('[Notifications] Cannot create notification: userId is missing or invalid')
+    return
+  }
+
   try {
+    console.log('[Notifications] Creating notification:', {
+      userId: params.userId,
+      type: params.type,
+      title: params.title,
+      message: params.message,
+      productId: params.productId,
+    })
+
     // Use database function to bypass RLS and ensure real-time subscriptions work
-    await supabase.rpc('create_notification', {
+    const rpcParams = {
       p_user_id: params.userId,
       p_type: params.type,
       p_title: params.title,
       p_message: params.message,
-      p_product_id: params.productId || null,
-    } as never)
+    }
+
+    // Only include p_product_id if provided
+    if (params.productId) {
+      ;(rpcParams as any).p_product_id = params.productId
+    }
+
+    console.log('[Notifications] RPC params:', rpcParams)
+
+    const { data, error } = await supabase.rpc('create_notification', rpcParams as never)
+
+    if (error) {
+      console.error('[Notifications] RPC error:', {
+        code: (error as any).code,
+        message: (error as any).message,
+        hint: (error as any).hint,
+        details: (error as any).details,
+      })
+      return
+    }
+
+    console.log('[Notifications] Notification created successfully:', data)
   } catch (err) {
-    console.error('Failed to create notification:', err)
+    console.error('[Notifications] Exception while creating notification:', {
+      message: (err as any).message,
+      stack: (err as any).stack,
+    })
   }
 }
 

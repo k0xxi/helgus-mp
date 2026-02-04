@@ -71,10 +71,12 @@ ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 -- ============================================================================
 
 -- Users can view conversations they are part of
+DROP POLICY IF EXISTS "Users can view own conversations" ON conversations;
 CREATE POLICY "Users can view own conversations" ON conversations
   FOR SELECT USING (auth.uid() = buyer_id OR auth.uid() = seller_id);
 
 -- Users can create conversations as buyer
+DROP POLICY IF EXISTS "Users can create conversations as buyer" ON conversations;
 CREATE POLICY "Users can create conversations as buyer" ON conversations
   FOR INSERT WITH CHECK (auth.uid() = buyer_id);
 
@@ -83,6 +85,7 @@ CREATE POLICY "Users can create conversations as buyer" ON conversations
 -- ============================================================================
 
 -- Users can view messages in their conversations
+DROP POLICY IF EXISTS "Users can view messages in own conversations" ON messages;
 CREATE POLICY "Users can view messages in own conversations" ON messages
   FOR SELECT USING (
     EXISTS (
@@ -93,6 +96,7 @@ CREATE POLICY "Users can view messages in own conversations" ON messages
   );
 
 -- Users can send messages in their conversations
+DROP POLICY IF EXISTS "Users can send messages in own conversations" ON messages;
 CREATE POLICY "Users can send messages in own conversations" ON messages
   FOR INSERT WITH CHECK (
     auth.uid() = sender_id AND
@@ -104,6 +108,7 @@ CREATE POLICY "Users can send messages in own conversations" ON messages
   );
 
 -- Users can mark messages as read in their conversations
+DROP POLICY IF EXISTS "Users can update messages in own conversations" ON messages;
 CREATE POLICY "Users can update messages in own conversations" ON messages
   FOR UPDATE USING (
     EXISTS (
@@ -118,6 +123,7 @@ CREATE POLICY "Users can update messages in own conversations" ON messages
 -- ============================================================================
 
 -- Buyers can view their own offers, sellers can view offers on their products
+DROP POLICY IF EXISTS "Users can view relevant offers" ON offers;
 CREATE POLICY "Users can view relevant offers" ON offers
   FOR SELECT USING (
     auth.uid() = buyer_id OR
@@ -129,10 +135,12 @@ CREATE POLICY "Users can view relevant offers" ON offers
   );
 
 -- Users can create offers as buyer
+DROP POLICY IF EXISTS "Users can create offers" ON offers;
 CREATE POLICY "Users can create offers" ON offers
   FOR INSERT WITH CHECK (auth.uid() = buyer_id);
 
 -- Sellers can update offer status on their products
+DROP POLICY IF EXISTS "Sellers can respond to offers" ON offers;
 CREATE POLICY "Sellers can respond to offers" ON offers
   FOR UPDATE USING (
     EXISTS (
@@ -147,19 +155,24 @@ CREATE POLICY "Sellers can respond to offers" ON offers
 -- ============================================================================
 
 -- Users can view their own notifications
+DROP POLICY IF EXISTS "Users can view own notifications" ON notifications;
 CREATE POLICY "Users can view own notifications" ON notifications
   FOR SELECT USING (auth.uid() = user_id);
 
--- System can create notifications (via service role)
--- For now, allow authenticated users to create notifications for themselves or others
-CREATE POLICY "Authenticated users can create notifications" ON notifications
-  FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+-- System can create notifications (via RPC with SECURITY DEFINER)
+-- The RPC function create_notification bypasses RLS, so no policy needed here
+-- This policy is not actually used since the RPC bypasses it, but kept for clarity
+DROP POLICY IF EXISTS "System can create notifications via RPC" ON notifications;
+CREATE POLICY "System can create notifications via RPC" ON notifications
+  FOR INSERT WITH CHECK (true);
 
 -- Users can mark their own notifications as read
+DROP POLICY IF EXISTS "Users can update own notifications" ON notifications;
 CREATE POLICY "Users can update own notifications" ON notifications
   FOR UPDATE USING (auth.uid() = user_id);
 
 -- Users can delete their own notifications
+DROP POLICY IF EXISTS "Users can delete own notifications" ON notifications;
 CREATE POLICY "Users can delete own notifications" ON notifications
   FOR DELETE USING (auth.uid() = user_id);
 
