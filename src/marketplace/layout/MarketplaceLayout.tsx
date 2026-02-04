@@ -1,7 +1,7 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
-import { useAuth } from '@/marketplace/context/AuthContext'
-import { useConversationsQuery, useUserNotifications, useNotificationsSubscription, useConversationsSubscription, useNavigationRefresh, useProductRealtimeSync, useProfileRealtimeSync } from '@/marketplace/hooks'
-import { NotificationDropdown } from '@/marketplace/components/NotificationDropdown'
+import { useAuth } from '@/context/AuthContext'
+import { useConversationsQuery, useUserNotifications, useNotificationsSubscription, useConversationsSubscription, useNavigationRefresh, useProductRealtimeSync, useProfileRealtimeSync } from '@/hooks'
+import { NotificationDropdown } from '@/components/NotificationDropdown'
 import {
   Home,
   Search,
@@ -50,21 +50,21 @@ export function MarketplaceLayout() {
 
   const handleSellClick = () => {
     if (!user) {
-      navigate('/marketplace/auth')
+      navigate('/auth')
       return
     }
     if (!profile?.isVerified) {
-      navigate('/marketplace/profile/verification')
+      navigate('/profile/verification')
       return
     }
-    navigate('/marketplace/sell')
+    navigate('/sell')
   }
 
   const navItems = [
     { path: '/marketplace', icon: Home, label: 'Start' },
-    { path: '/marketplace/search', icon: Search, label: 'Suchen' },
-    { path: '/marketplace/favorites', icon: Heart, label: 'Favoriten', auth: true },
-    { path: '/marketplace/messages', icon: MessageCircle, label: 'Nachrichten', auth: true },
+    { path: '/search', icon: Search, label: 'Suchen' },
+    { path: '/favorites', icon: Heart, label: 'Favoriten', auth: true },
+    { path: '/messages', icon: MessageCircle, label: 'Nachrichten', auth: true },
   ]
 
   const filteredNavItems = navItems.filter((item) => !item.auth || user)
@@ -75,7 +75,7 @@ export function MarketplaceLayout() {
       <header className="sticky top-0 z-50 border-b border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
           {/* Logo */}
-          <Link to="/marketplace" className="flex items-center gap-2 cursor-pointer">
+          <Link to="/" className="flex items-center gap-2 cursor-pointer">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-600 text-white font-bold">
               H
             </div>
@@ -99,7 +99,7 @@ export function MarketplaceLayout() {
                   <item.icon className="h-4 w-4" />
                   {item.label}
                 </Link>
-                {item.path === '/marketplace/messages' && totalUnreadMessages > 0 && (
+                {item.path === '/messages' && totalUnreadMessages > 0 && (
                   <span className="absolute -top-2 -right-2 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-medium text-white bg-red-600 rounded-full">
                     {totalUnreadMessages}
                   </span>
@@ -125,7 +125,7 @@ export function MarketplaceLayout() {
                       if (unreadNotifications > 0) {
                         setNotificationDropdownOpen(!notificationDropdownOpen)
                       } else {
-                        navigate('/marketplace/notifications')
+                        navigate('/notifications')
                       }
                     }}
                     className="relative rounded-lg p-2 text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700 cursor-pointer"
@@ -146,7 +146,7 @@ export function MarketplaceLayout() {
                   )}
                 </div>
                 <Link
-                  to="/marketplace/profile"
+                  to="/profile"
                   className="rounded-lg p-2 text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700 cursor-pointer"
                 >
                   <User className="h-5 w-5" />
@@ -161,13 +161,13 @@ export function MarketplaceLayout() {
             ) : (
               <>
                 <Link
-                  to="/marketplace/auth"
+                  to="/auth"
                   className="rounded-lg px-4 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700 cursor-pointer"
                 >
                   Anmelden
                 </Link>
                 <Link
-                  to="/marketplace/auth?mode=register"
+                  to="/auth?mode=register"
                   className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 cursor-pointer"
                 >
                   Registrieren
@@ -203,7 +203,7 @@ export function MarketplaceLayout() {
                     <item.icon className="h-5 w-5" />
                     {item.label}
                   </Link>
-                  {item.path === '/marketplace/messages' && totalUnreadMessages > 0 && (
+                  {item.path === '/messages' && totalUnreadMessages > 0 && (
                     <span className="absolute -top-1 -right-1 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-medium text-white bg-red-600 rounded-full">
                       {totalUnreadMessages}
                     </span>
@@ -213,7 +213,7 @@ export function MarketplaceLayout() {
               {user && (
                 <>
                   <Link
-                    to="/marketplace/sell"
+                    to="/sell"
                     onClick={() => setMobileMenuOpen(false)}
                     className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700 cursor-pointer"
                   >
@@ -259,13 +259,13 @@ export function MarketplaceLayout() {
               <span>HELGUS Marktplatz</span>
             </div>
             <div className="flex gap-6">
-              <Link to="/marketplace/impressum" className="hover:text-slate-900 dark:hover:text-white cursor-pointer">
+              <Link to="/impressum" className="hover:text-slate-900 dark:hover:text-white cursor-pointer">
                 Impressum
               </Link>
-              <Link to="/marketplace/datenschutz" className="hover:text-slate-900 dark:hover:text-white cursor-pointer">
+              <Link to="/datenschutz" className="hover:text-slate-900 dark:hover:text-white cursor-pointer">
                 Datenschutz
               </Link>
-              <Link to="/marketplace/agb" className="hover:text-slate-900 dark:hover:text-white cursor-pointer">
+              <Link to="/agb" className="hover:text-slate-900 dark:hover:text-white cursor-pointer">
                 AGB
               </Link>
             </div>
