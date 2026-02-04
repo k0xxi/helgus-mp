@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '@/marketplace/context/AuthContext'
+import { useAuth } from '@/context/AuthContext'
 import { ChangePassword } from '@/sections/nutzerverwaltung/components'
 import { supabase } from '@/lib/supabase'
 
@@ -13,7 +13,7 @@ export function ChangePasswordPage() {
   // Redirect if not authenticated
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/marketplace/auth')
+      navigate('/auth')
     }
   }, [user, authLoading, navigate])
 
@@ -54,7 +54,7 @@ export function ChangePasswordPage() {
       }
 
       // Success - redirect to profile settings
-      navigate('/marketplace/profile/settings?passwordChanged=success')
+      navigate('/profile/settings?passwordChanged=success')
     } catch (err) {
       setError('Ein unerwarteter Fehler ist aufgetreten.')
     } finally {
@@ -63,7 +63,7 @@ export function ChangePasswordPage() {
   }
 
   const handleCancel = () => {
-    navigate('/marketplace/profile/settings')
+    navigate('/profile/settings')
   }
 
   return (

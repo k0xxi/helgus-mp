@@ -2,10 +2,10 @@ import { useState, useCallback, useMemo } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { AlertTriangle, Loader2 } from 'lucide-react'
 import { ProductCatalog } from '@/sections/produktkatalog-suche/components/ProductCatalog'
-import { useProducts, useCategories, useDeleteProduct } from '@/marketplace/hooks/useProducts'
-import { useCategoriesWithCounts } from '@/marketplace/hooks/useCategoriesWithCounts'
-import { useFavorites } from '@/marketplace/hooks/useFavorites'
-import { useAuth } from '@/marketplace/context/AuthContext'
+import { useProducts, useCategories, useDeleteProduct } from '@/hooks/useProducts'
+import { useCategoriesWithCounts } from '@/hooks/useCategoriesWithCounts'
+import { useFavorites } from '@/hooks/useFavorites'
+import { useAuth } from '@/context/AuthContext'
 import type { ProductFilters, SortOption } from '@/../product/sections/produktkatalog-suche/types'
 
 export function SearchPage() {
@@ -109,7 +109,7 @@ export function SearchPage() {
   // Navigate to product detail
   const handleViewProduct = useCallback(
     (productId: string) => {
-      navigate(`/marketplace/product/${productId}`)
+      navigate(`/product/${productId}`)
     },
     [navigate]
   )
@@ -119,7 +119,7 @@ export function SearchPage() {
     async (productId: string) => {
       if (!user) {
         // Redirect to login if not authenticated
-        navigate('/marketplace/auth')
+        navigate('/auth')
         return
       }
       const { error } = await toggleFavorite(productId)
@@ -133,7 +133,7 @@ export function SearchPage() {
   // Navigate to edit product
   const handleEditProduct = useCallback(
     (productId: string) => {
-      navigate(`/marketplace/sell?edit=${productId}`)
+      navigate(`/sell?edit=${productId}`)
     },
     [navigate]
   )

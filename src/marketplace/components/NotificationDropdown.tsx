@@ -89,7 +89,7 @@ export function NotificationDropdown({
 
     // Navigate to product (offer/message notifications)
     if (notification.productId) {
-      navigate(`/marketplace/product/${notification.productId}`)
+      navigate(`/product/${notification.productId}`)
     }
   }
 
@@ -138,7 +138,7 @@ export function NotificationDropdown({
             <button
               onClick={() => {
                 onClose()
-                navigate('/marketplace/notifications')
+                navigate('/notifications')
               }}
               className="flex items-center justify-center gap-2 w-full text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors"
             >

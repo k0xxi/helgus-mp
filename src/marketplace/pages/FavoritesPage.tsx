@@ -1,9 +1,9 @@
 import { useEffect } from 'react'
 import { Heart, Loader2, AlertTriangle } from 'lucide-react'
-import { useAuth } from '@/marketplace/context/AuthContext'
+import { useAuth } from '@/context/AuthContext'
 import { useNavigate } from 'react-router-dom'
-import { useFavoriteProducts } from '@/marketplace/hooks/useFavoriteProducts'
-import { useFavorites } from '@/marketplace/hooks/useFavorites'
+import { useFavoriteProducts } from '@/hooks/useFavoriteProducts'
+import { useFavorites } from '@/hooks/useFavorites'
 import { ProductCard } from '@/sections/produktkatalog-suche/components/ProductCard'
 
 export function FavoritesPage() {
@@ -25,7 +25,7 @@ export function FavoritesPage() {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/marketplace/auth')
+      navigate('/auth')
     }
   }, [user, authLoading, navigate])
 
@@ -175,7 +175,7 @@ export function FavoritesPage() {
           <ProductCard
             key={product.id}
             product={product}
-            onView={() => navigate(`/marketplace/product/${product.id}`)}
+            onView={() => navigate(`/product/${product.id}`)}
             onToggleFavorite={() => handleRemoveFavorite(product.id)}
           />
         ))}

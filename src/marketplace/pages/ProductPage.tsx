@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom'
 import { ArrowLeft, AlertTriangle, Loader2 } from 'lucide-react'
 import { ProductDetail } from '@/sections/produktdetails-verhandlung/components/ProductDetail'
-import { PurchaseModal } from '@/marketplace/components/PurchaseModal'
-import { OfferModal } from '@/marketplace/components/OfferModal'
+import { PurchaseModal } from '@/components/PurchaseModal'
+import { OfferModal } from '@/components/OfferModal'
 import {
   useProductDetail,
   useOffers,
@@ -16,9 +16,9 @@ import {
   useMessagesSubscription,
   useConversationsSubscription,
   usePurchase,
-} from '@/marketplace/hooks'
-import { useFavorites } from '@/marketplace/hooks/useFavorites'
-import { useAuth } from '@/marketplace/context/AuthContext'
+} from '@/hooks'
+import { useFavorites } from '@/hooks/useFavorites'
+import { useAuth } from '@/context/AuthContext'
 
 export function ProductPage() {
   const { productId } = useParams()
@@ -186,7 +186,7 @@ export function ProductPage() {
     return (
       <div className="space-y-6 p-6">
         <button
-          onClick={() => navigate('/marketplace/search')}
+          onClick={() => navigate('/search')}
           className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -202,7 +202,7 @@ export function ProductPage() {
             {productError?.message || 'Das gewünschte Produkt konnte nicht gefunden werden.'}
           </p>
           <button
-            onClick={() => navigate('/marketplace/search')}
+            onClick={() => navigate('/search')}
             className="mt-4 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
           >
             Zur Produktsuche
@@ -229,21 +229,21 @@ export function ProductPage() {
     if (window.history.length > 1) {
       navigate(-1)
     } else {
-      navigate('/marketplace/search')
+      navigate('/search')
     }
   }
 
   const handleCategoryClick = (slug: string) => {
     if (slug === 'alle-produkte') {
-      navigate('/marketplace/search')
+      navigate('/search')
     } else {
-      navigate(`/marketplace/search?category=${encodeURIComponent(category.main.name)}`)
+      navigate(`/search?category=${encodeURIComponent(category.main.name)}`)
     }
   }
 
   const handleMakeOffer = () => {
     if (!user) {
-      navigate('/marketplace/auth')
+      navigate('/auth')
       return
     }
     setShowOfferModal(true)
@@ -279,7 +279,7 @@ export function ProductPage() {
 
   const handleBuyRequest = () => {
     if (!user) {
-      navigate('/marketplace/auth')
+      navigate('/auth')
       return
     }
 
@@ -312,7 +312,7 @@ export function ProductPage() {
         setShowPurchaseModal(false)
         // Show success and navigate
         alert('Kauf erfolgreich! Der Verkäufer wurde benachrichtigt.')
-        navigate('/marketplace/my-purchases')
+        navigate('/my-purchases')
       }
     } catch (err) {
       console.error('Purchase error:', err)
@@ -331,7 +331,7 @@ export function ProductPage() {
 
   const handleToggleFavorite = async () => {
     if (!user) {
-      navigate('/marketplace/auth')
+      navigate('/auth')
       return
     }
     if (productId) {
@@ -365,7 +365,7 @@ export function ProductPage() {
 
   const handleSendMessage = async (content: string) => {
     if (!user) {
-      navigate('/marketplace/auth')
+      navigate('/auth')
       return
     }
 
@@ -395,12 +395,12 @@ export function ProductPage() {
   }
 
   const handleViewSellerProfile = (sellerId: string) => {
-    navigate(`/marketplace/profile/${sellerId}`)
+    navigate(`/profile/${sellerId}`)
   }
 
   const handleRespondToOffer = async (offerId: string, status: 'accepted' | 'declined') => {
     if (!user) {
-      navigate('/marketplace/auth')
+      navigate('/auth')
       return
     }
     const { error } = await respondToOffer(offerId, status)

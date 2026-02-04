@@ -101,11 +101,11 @@ export function MyListingsPage() {
   }
 
   const handleView = (listingId: string) => {
-    navigate(`/marketplace/product/${listingId}`)
+    navigate(`/product/${listingId}`)
   }
 
   const handleEdit = (listingId: string) => {
-    navigate(`/marketplace/sell?edit=${listingId}`)
+    navigate(`/sell?edit=${listingId}`)
   }
 
   if (loading) {
@@ -131,7 +131,7 @@ export function MyListingsPage() {
             </h1>
           </div>
           <button
-            onClick={() => navigate('/marketplace/sell')}
+            onClick={() => navigate('/sell')}
             className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 transition-colors whitespace-nowrap flex-shrink-0"
           >
             <Plus className="h-4 w-4" />
@@ -177,7 +177,7 @@ export function MyListingsPage() {
           </p>
           {statusFilter === 'all' && (
             <button
-              onClick={() => navigate('/marketplace/sell')}
+              onClick={() => navigate('/sell')}
               className="mt-4 inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 transition-colors"
             >
               <Plus className="h-4 w-4" />

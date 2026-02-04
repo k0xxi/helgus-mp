@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ShoppingCart, CheckCircle, Clock, MapPin, MessageSquare } from 'lucide-react'
-import { useAuth } from '@/marketplace/context/AuthContext'
-import { useMySales } from '@/marketplace/hooks/useMySales'
-import { useMyListings } from '@/marketplace/hooks/useProfile'
+import { useAuth } from '@/context/AuthContext'
+import { useMySales } from '@/hooks/useMySales'
+import { useMyListings } from '@/hooks/useProfile'
 
 export function MySalesPage() {
   const { user, loading: authLoading } = useAuth()
@@ -16,7 +16,7 @@ export function MySalesPage() {
   // Redirect if not authenticated
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/marketplace/auth')
+      navigate('/auth')
     }
   }, [user, authLoading, navigate])
 
@@ -40,7 +40,7 @@ export function MySalesPage() {
   }
 
   const handleContactBuyer = (buyerId: string) => {
-    navigate(`/marketplace/messages?buyerId=${buyerId}`)
+    navigate(`/messages?buyerId=${buyerId}`)
   }
 
   const loading = authLoading || salesLoading

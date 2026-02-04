@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { MessageCircle, Search, X, ChevronDown, MessageSquare, Package } from 'lucide-react'
-import { useAuth } from '@/marketplace/context/AuthContext'
+import { useAuth } from '@/context/AuthContext'
 import { useNavigate } from 'react-router-dom'
-import { useConversationsQuery, useConversationsSubscription } from '@/marketplace/hooks'
+import { useConversationsQuery, useConversationsSubscription } from '@/hooks'
 import type { Conversation } from '@/types/marketplace'
 
 interface GroupedConversations {
@@ -89,7 +89,7 @@ export function MessagesPage() {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/marketplace/auth')
+      navigate('/auth')
     }
   }, [user, authLoading, navigate])
 
@@ -108,7 +108,7 @@ export function MessagesPage() {
   const handleConversationClick = (conversation: Conversation) => {
     // Navigate to product page with openChat parameter
     navigate({
-      pathname: `/marketplace/product/${conversation.productId}`,
+      pathname: `/product/${conversation.productId}`,
       search: `?openChat=true&conversationId=${conversation.id}`,
     })
   }

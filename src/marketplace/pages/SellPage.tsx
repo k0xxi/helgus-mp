@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '@/marketplace/context/AuthContext'
-import { ListingForm } from '@/marketplace/components/ListingForm'
+import { useAuth } from '@/context/AuthContext'
+import { ListingForm } from '@/components/ListingForm'
 
 export function SellPage() {
   const navigate = useNavigate()
@@ -10,14 +10,14 @@ export function SellPage() {
   // Redirect if not authenticated
   useEffect(() => {
     if (!loading && !user) {
-      navigate('/marketplace/auth')
+      navigate('/auth')
     }
   }, [user, loading, navigate])
 
   // Redirect if not verified seller
   useEffect(() => {
     if (!loading && profile && !profile.isVerified) {
-      navigate('/marketplace/profile/verification')
+      navigate('/profile/verification')
     }
   }, [profile, loading, navigate])
 

@@ -22,15 +22,15 @@ export function NotificationsPage() {
     // Navigate based on type
     if (type === 'offer_received' || type === 'offer_accepted' || type === 'offer_declined') {
       if (productId) {
-        navigate(`/marketplace/product/${productId}#gegenangebote`)
+        navigate(`/product/${productId}#gegenangebote`)
       }
     } else if (type === 'new_message') {
       if (productId) {
-        navigate(`/marketplace/product/${productId}?openChat=true`)
+        navigate(`/product/${productId}?openChat=true`)
       }
     } else if (type === 'price_drop') {
       if (productId) {
-        navigate(`/marketplace/product/${productId}`)
+        navigate(`/product/${productId}`)
       }
     }
   }

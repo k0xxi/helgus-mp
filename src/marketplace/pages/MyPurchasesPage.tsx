@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Package, MessageSquare } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
-import { useAuth } from '@/marketplace/context/AuthContext'
+import { useAuth } from '@/context/AuthContext'
 import type { Purchase } from '@/types/marketplace'
 
 interface PurchaseWithDetails extends Purchase {
@@ -20,7 +20,7 @@ export function MyPurchasesPage() {
 
   useEffect(() => {
     if (!user?.id) {
-      navigate('/marketplace/auth')
+      navigate('/auth')
       return
     }
 
@@ -170,7 +170,7 @@ export function MyPurchasesPage() {
           </p>
           {statusFilter === 'all' && (
             <button
-              onClick={() => navigate('/marketplace/search')}
+              onClick={() => navigate('/search')}
               className="mt-4 inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 transition-colors"
             >
               <Package className="h-4 w-4" />
@@ -229,13 +229,13 @@ export function MyPurchasesPage() {
                   {purchase.status === 'pending' && (
                     <div className="mt-4 flex gap-2">
                       <button
-                        onClick={() => navigate(`/marketplace/product/${purchase.productId}`)}
+                        onClick={() => navigate(`/product/${purchase.productId}`)}
                         className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
                       >
                         Produktdetails
                       </button>
                       <button
-                        onClick={() => navigate(`/marketplace/product/${purchase.productId}?openChat=true`)}
+                        onClick={() => navigate(`/product/${purchase.productId}?openChat=true`)}
                         className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
                       >
                         <MessageSquare className="h-4 w-4" />

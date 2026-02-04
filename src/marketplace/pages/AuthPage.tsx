@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
-import { useAuth } from '@/marketplace/context/AuthContext'
+import { useAuth } from '@/context/AuthContext'
 import { AuthPage as DesignOSAuthPage } from '@/sections/nutzerverwaltung/components'
 import type { SocialProvider, RegistrationData } from '@/../product/sections/nutzerverwaltung/types'
 
@@ -15,7 +15,7 @@ export function AuthPage() {
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
-      navigate('/marketplace')
+      navigate('/')
     }
   }, [user, navigate])
 
@@ -28,7 +28,7 @@ export function AuthPage() {
       if (error) {
         setError(error.message)
       } else {
-        navigate('/marketplace')
+        navigate('/')
       }
     } finally {
       setLoading(false)
@@ -48,7 +48,7 @@ export function AuthPage() {
       if (error) {
         setError(error.message)
       } else {
-        navigate('/marketplace')
+        navigate('/')
       }
     } finally {
       setLoading(false)
@@ -73,7 +73,7 @@ export function AuthPage() {
   }
 
   const handleForgotPassword = () => {
-    navigate('/marketplace/auth/reset-password')
+    navigate('/auth/reset-password')
   }
 
   const initialMode = searchParams.get('mode') === 'register' ? 'register' : 'login'

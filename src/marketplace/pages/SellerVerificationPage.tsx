@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '@/marketplace/context/AuthContext'
-import { useSellerVerification } from '@/marketplace/hooks'
+import { useAuth } from '@/context/AuthContext'
+import { useSellerVerification } from '@/hooks'
 import { SellerVerificationForm } from '@/sections/nutzerverwaltung/components'
 import type { SellerVerification, Country, VerificationStep } from '@/../product/sections/nutzerverwaltung/types'
 import { CheckBadgeIcon, ClockIcon, XCircleIcon } from '@heroicons/react/24/outline'
@@ -22,7 +22,7 @@ export function SellerVerificationPage() {
   // Redirect if not authenticated
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/marketplace/auth')
+      navigate('/auth')
     }
   }, [user, authLoading, navigate])
 
@@ -50,7 +50,7 @@ export function SellerVerificationPage() {
           Dein Verkäuferstatus wurde bestätigt. Du kannst jetzt alle Vorteile nutzen.
         </p>
         <button
-          onClick={() => navigate('/marketplace/profile')}
+          onClick={() => navigate('/profile')}
           className="px-6 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-white font-medium rounded-xl transition-colors"
         >
           Zurück zum Profil
@@ -73,7 +73,7 @@ export function SellerVerificationPage() {
           Deine Daten werden überprüft. Du erhältst eine Benachrichtigung, sobald die Prüfung abgeschlossen ist.
         </p>
         <button
-          onClick={() => navigate('/marketplace/profile')}
+          onClick={() => navigate('/profile')}
           className="px-6 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-white font-medium rounded-xl transition-colors"
         >
           Zurück zum Profil
@@ -129,7 +129,7 @@ export function SellerVerificationPage() {
   }
 
   const handleCancel = () => {
-    navigate('/marketplace/profile')
+    navigate('/profile')
   }
 
   const handleNextStep = (step: VerificationStep) => {

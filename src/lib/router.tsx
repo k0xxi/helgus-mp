@@ -130,13 +130,13 @@ export const router = createBrowserRouter([
       },
     ],
   },
-  // Keep marketplace paths as legacy redirect (for /marketplace/* routes)
+  // Show 404 for old /marketplace/* paths
   {
     path: 'marketplace',
     children: [
       {
         path: '*',
-        element: <Navigate to="/" replace />,
+        element: <NotFoundPage />,
       },
     ],
   },

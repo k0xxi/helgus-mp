@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Settings } from 'lucide-react'
-import { useAuth } from '@/marketplace/context/AuthContext'
+import { useAuth } from '@/context/AuthContext'
 import { ProfileSettings } from '@/sections/nutzerverwaltung/components'
 import type { User as DesignOSUser, Country, ConnectedAccount } from '@/../product/sections/nutzerverwaltung/types'
 
@@ -19,7 +19,7 @@ export function ProfileSettingsPage() {
   // Redirect if not authenticated
   useEffect(() => {
     if (!loading && !user) {
-      navigate('/marketplace/auth')
+      navigate('/auth')
     }
   }, [user, loading, navigate])
 
@@ -84,11 +84,11 @@ export function ProfileSettingsPage() {
   }
 
   const handleChangePassword = () => {
-    navigate('/marketplace/profile/change-password')
+    navigate('/profile/change-password')
   }
 
   const handleStartVerification = () => {
-    navigate('/marketplace/profile/verification')
+    navigate('/profile/verification')
   }
 
   const handleConnectAccount = async (provider: 'google' | 'apple') => {
@@ -104,7 +104,7 @@ export function ProfileSettingsPage() {
     // For now, just sign out
     if (confirm('Bist du sicher, dass du dein Konto löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden.')) {
       await signOut()
-      navigate('/marketplace')
+      navigate('/')
     }
   }
 

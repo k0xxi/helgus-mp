@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { usePublicProfile, useUserListings } from '@/marketplace/hooks'
+import { usePublicProfile, useUserListings } from '@/hooks'
 import { PublicProfile } from '@/sections/nutzerverwaltung/components'
 import type { PublicProfile as DesignOSProfile, UserListing } from '@/../product/sections/nutzerverwaltung/types'
 import { UserCircleIcon } from '@heroicons/react/24/outline'
@@ -33,7 +33,7 @@ export function PublicProfilePage() {
           Das gesuchte Profil existiert nicht oder wurde gelöscht.
         </p>
         <button
-          onClick={() => navigate('/marketplace')}
+          onClick={() => navigate('/')}
           className="px-6 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-white font-medium rounded-xl transition-colors"
         >
           Zurück zum Marktplatz
@@ -69,15 +69,15 @@ export function PublicProfilePage() {
 
   const handleSendMessage = (sellerId: string) => {
     // Navigate to messages with this user
-    navigate(`/marketplace/messages?user=${sellerId}`)
+    navigate(`/messages?user=${sellerId}`)
   }
 
   const handleViewListing = (listingId: string) => {
-    navigate(`/marketplace/product/${listingId}`)
+    navigate(`/product/${listingId}`)
   }
 
   const handleViewAllListings = (sellerId: string) => {
-    navigate(`/marketplace/search?seller=${sellerId}`)
+    navigate(`/search?seller=${sellerId}`)
   }
 
   return (
