@@ -41,7 +41,7 @@ export function EmailPreferences() {
         if (error) {
           // Wenn die Spalte nicht existiert, ist das ok - Migration nicht angewendet
           console.warn('[EmailPreferences] Spalte existiert möglicherweise noch nicht:', error.message)
-        } else if (data && typeof data === 'object' && 'email_preferences' in data) {
+        } else if (data !== null && typeof data === 'object' && 'email_preferences' in data) {
           const prefs = (data as any).email_preferences
           if (prefs && typeof prefs === 'object') {
             setPreferences(prefs)
@@ -69,7 +69,7 @@ export function EmailPreferences() {
 
       const { error } = await supabase
         .from('profiles')
-        .update({ email_preferences: newPrefs as any })
+        .update({ email_preferences: newPrefs } as any)
         .eq('id', user.id)
 
       if (error) {
