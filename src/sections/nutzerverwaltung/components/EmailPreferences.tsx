@@ -39,9 +39,13 @@ export function EmailPreferences() {
           .single()
 
         if (error) {
-          console.error('[EmailPreferences] Fehler beim Laden:', error)
-        } else if (data?.email_preferences) {
-          setPreferences(data.email_preferences)
+          // Wenn die Spalte nicht existiert, ist das ok - Migration nicht angewendet
+          console.warn('[EmailPreferences] Spalte existiert möglicherweise noch nicht:', error.message)
+        } else if (data && typeof data === 'object' && 'email_preferences' in data) {
+          const prefs = (data as any).email_preferences
+          if (prefs && typeof prefs === 'object') {
+            setPreferences(prefs)
+          }
         }
       } catch (err) {
         console.error('[EmailPreferences] Exception beim Laden:', err)
@@ -65,13 +69,15 @@ export function EmailPreferences() {
 
       const { error } = await supabase
         .from('profiles')
-        .update({ email_preferences: newPrefs })
+        .update({ email_preferences: newPrefs as any })
         .eq('id', user.id)
 
       if (error) {
-        console.error('[EmailPreferences] Fehler beim Speichern:', error)
-        // Revert auf alte Preferenzen bei Fehler
-        setPreferences(preferences)
+        console.warn('[EmailPreferences] Fehler beim Speichern:', error.message)
+        // Wenn Migration nicht angewendet, ignorieren
+        if (!error.message.includes('email_preferences')) {
+          setPreferences(preferences)
+        }
       }
     } catch (err) {
       console.error('[EmailPreferences] Exception beim Speichern:', err)

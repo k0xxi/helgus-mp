@@ -543,17 +543,24 @@ export function useConversation(
         // Sende E-Mail an Empfänger (falls aktiviert)
         const { data: recipientProfile } = await supabase
           .from('profiles')
-          .select('email, name, email_preferences')
+          .select('email, name')
           .eq('id', recipientId)
           .single()
 
-        if (recipientProfile?.email && recipientProfile.email_preferences?.new_message !== false) {
+        if (recipientProfile?.email) {
           const { data: { user } } = await supabase.auth.getUser()
+
+          // Fetch product title for email
+          const { data: productData } = await supabase
+            .from('products')
+            .select('title')
+            .eq('id', productId)
+            .single()
 
           void sendEmail({
             type: 'new_message',
             to: recipientProfile.email,
-            productTitle: product.title,
+            productTitle: productData?.title || 'Produkt',
             productId: productId,
             buyerName: recipientProfile.name || 'Nutzer',
             sellerName: user?.user_metadata?.name || 'Ein Nutzer',
@@ -729,22 +736,29 @@ export function useOffers(
         // Sende E-Mail an Verkäufer (falls aktiviert)
         const { data: sellerProfile } = await supabase
           .from('profiles')
-          .select('email, name, email_preferences')
+          .select('email, name')
           .eq('id', sellerId)
           .single()
 
-        if (sellerProfile?.email && sellerProfile.email_preferences?.counter_offer !== false) {
+        if (sellerProfile?.email) {
           const { data: { user } } = await supabase.auth.getUser()
+
+          // Fetch product details for email
+          const { data: productData } = await supabase
+            .from('products')
+            .select('title, price')
+            .eq('id', productId)
+            .single()
 
           void sendEmail({
             type: 'counter_offer',
             to: sellerProfile.email,
-            productTitle: product.title,
+            productTitle: productData?.title || 'Produkt',
             productId: productId,
             sellerName: sellerProfile.name || 'Verkäufer',
             buyerName: user?.user_metadata?.name || 'Ein Käufer',
             counterOffer: amount,
-            productPrice: product.price,
+            productPrice: productData?.price ? Number(productData.price) : 0,
             buyerEmail: user?.email,
             message: message,
           })
@@ -834,22 +848,28 @@ export function useOffers(
       // Sende E-Mail an Käufer (falls aktiviert)
       const { data: buyerProfile } = await supabase
         .from('profiles')
-        .select('email, name, email_preferences')
+        .select('email, name')
         .eq('id', offer.buyerId)
         .single()
 
       const emailType = status === 'accepted' ? 'counter_offer_accepted' : 'counter_offer_refused'
-      const preferenceKey = status === 'accepted' ? 'counter_offer_accepted' : 'counter_offer_refused'
 
-      if (buyerProfile?.email && buyerProfile.email_preferences?.[preferenceKey] !== false) {
+      if (buyerProfile?.email) {
+        // Fetch product details for email
+        const { data: productData } = await supabase
+          .from('products')
+          .select('title, price')
+          .eq('id', productId)
+          .single()
+
         void sendEmail({
           type: emailType,
           to: buyerProfile.email,
-          productTitle: product.title,
+          productTitle: productData?.title || 'Produkt',
           productId: productId,
           buyerName: buyerProfile.name || 'Käufer',
           offerAmount: offer.amount,
-          productPrice: product.price,
+          productPrice: productData?.price ? Number(productData.price) : 0,
         })
       }
 

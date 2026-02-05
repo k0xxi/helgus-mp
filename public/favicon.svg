@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <style>
+      .favicon-bg { fill: #ef4444; }
+      .favicon-text { fill: white; font-family: Arial, sans-serif; font-size: 160px; font-weight: bold; text-anchor: middle; dominant-baseline: middle; }
+    </style>
+  </defs>
+
+  <!-- Red background rounded square -->
+  <rect class="favicon-bg" x="0" y="0" width="256" height="256" rx="40" ry="40"/>
+
+  <!-- White "H" text -->
+  <text class="favicon-text" x="128" y="135">H</text>
+</svg>
