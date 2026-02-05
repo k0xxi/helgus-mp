@@ -21,26 +21,10 @@ export function AuthPage({
 }: AuthPageProps) {
   const [mode, setMode] = useState<AuthMode>(initialMode)
 
-  // Sync with URL query parameters
+  // Update mode when initialMode prop changes (from URL query params)
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const urlMode = params.get('mode')
-    if (urlMode === 'login' || urlMode === 'register') {
-      setMode(urlMode)
-    }
-
-    // Listen for popstate events (browser back/forward)
-    const handlePopState = () => {
-      const newParams = new URLSearchParams(window.location.search)
-      const newMode = newParams.get('mode')
-      if (newMode === 'login' || newMode === 'register') {
-        setMode(newMode)
-      }
-    }
-
-    window.addEventListener('popstate', handlePopState)
-    return () => window.removeEventListener('popstate', handlePopState)
-  }, [])
+    setMode(initialMode)
+  }, [initialMode])
 
   return (
     <div className="flex flex-col">
