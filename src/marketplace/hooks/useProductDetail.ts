@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
+import { sendEmail } from '@/lib/email'
 import type { Tables } from '@/types/database'
 import type {
   Product,
@@ -538,6 +539,27 @@ export function useConversation(
           message: content.length > 50 ? content.substring(0, 50) + '...' : content,
           productId,
         })
+
+        // Sende E-Mail an Empfänger (falls aktiviert)
+        const { data: recipientProfile } = await supabase
+          .from('profiles')
+          .select('email, name, email_preferences')
+          .eq('id', recipientId)
+          .single()
+
+        if (recipientProfile?.email && recipientProfile.email_preferences?.new_message !== false) {
+          const { data: { user } } = await supabase.auth.getUser()
+
+          void sendEmail({
+            type: 'new_message',
+            to: recipientProfile.email,
+            productTitle: product.title,
+            productId: productId,
+            buyerName: recipientProfile.name || 'Nutzer',
+            sellerName: user?.user_metadata?.name || 'Ein Nutzer',
+            message: content.substring(0, 150),
+          })
+        }
       } else {
         console.warn('[Messages] No recipient ID found for notification', {
           hasConversation: !!conversation,
@@ -703,6 +725,30 @@ export function useOffers(
           message: `Angebot über ${amount.toLocaleString('de-AT')} € erhalten`,
           productId,
         })
+
+        // Sende E-Mail an Verkäufer (falls aktiviert)
+        const { data: sellerProfile } = await supabase
+          .from('profiles')
+          .select('email, name, email_preferences')
+          .eq('id', sellerId)
+          .single()
+
+        if (sellerProfile?.email && sellerProfile.email_preferences?.counter_offer !== false) {
+          const { data: { user } } = await supabase.auth.getUser()
+
+          void sendEmail({
+            type: 'counter_offer',
+            to: sellerProfile.email,
+            productTitle: product.title,
+            productId: productId,
+            sellerName: sellerProfile.name || 'Verkäufer',
+            buyerName: user?.user_metadata?.name || 'Ein Käufer',
+            counterOffer: amount,
+            productPrice: product.price,
+            buyerEmail: user?.email,
+            message: message,
+          })
+        }
       }
 
       return { error: null }
@@ -784,6 +830,29 @@ export function useOffers(
         message: notificationMessage,
         productId,
       })
+
+      // Sende E-Mail an Käufer (falls aktiviert)
+      const { data: buyerProfile } = await supabase
+        .from('profiles')
+        .select('email, name, email_preferences')
+        .eq('id', offer.buyerId)
+        .single()
+
+      const emailType = status === 'accepted' ? 'counter_offer_accepted' : 'counter_offer_refused'
+      const preferenceKey = status === 'accepted' ? 'counter_offer_accepted' : 'counter_offer_refused'
+
+      if (buyerProfile?.email && buyerProfile.email_preferences?.[preferenceKey] !== false) {
+        void sendEmail({
+          type: emailType,
+          to: buyerProfile.email,
+          productTitle: product.title,
+          productId: productId,
+          buyerName: buyerProfile.name || 'Käufer',
+          offerAmount: offer.amount,
+          productPrice: product.price,
+        })
+      }
+
       // Invalidate buyer's notifications cache
       queryClient.invalidateQueries({
         queryKey: ['notifications', 'list', offer.buyerId],

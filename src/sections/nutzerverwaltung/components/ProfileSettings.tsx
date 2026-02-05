@@ -18,6 +18,7 @@ import {
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline'
 import { AddressModal } from './AddressModal'
+import { EmailPreferences } from './EmailPreferences'
 
 type TabId = 'personal' | 'address' | 'notifications' | 'security'
 
@@ -454,13 +455,9 @@ export function ProfileSettings({
                 </div>
               </div>
 
-              <div className="pt-4">
-                <button
-                  onClick={() => onSaveProfile?.(formData)}
-                  className="px-6 py-2.5 bg-red-500 hover:bg-red-600 text-white font-medium rounded-xl transition-colors"
-                >
-                  Einstellungen speichern
-                </button>
+              {/* Email Preferences from Database */}
+              <div className="pt-6 border-t border-slate-200 dark:border-slate-700">
+                <EmailPreferences />
               </div>
             </div>
           )}
