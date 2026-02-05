@@ -54,7 +54,7 @@ export function PasswordResetPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 flex items-center justify-center py-12 px-4">
+    <div className="flex items-start justify-center pt-8 px-4">
       <div className="w-full max-w-md">
         <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-200/50 dark:border-slate-800 p-8">
           <PasswordReset
