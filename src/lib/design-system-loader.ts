@@ -5,7 +5,7 @@
 import type { DesignSystem, ColorTokens, TypographyTokens } from '@/types/product'
 
 // Load JSON files from product/design-system at build time
-const designSystemFiles = import.meta.glob('/product/design-system/*.json', {
+const designSystemFiles = import.meta.glob('../../../product/design-system/*.json', {
   eager: true,
 }) as Record<string, { default: Record<string, string> }>
 
@@ -20,7 +20,7 @@ const designSystemFiles = import.meta.glob('/product/design-system/*.json', {
  * }
  */
 export function loadColorTokens(): ColorTokens | null {
-  const colorsModule = designSystemFiles['/product/design-system/colors.json']
+  const colorsModule = designSystemFiles['../../../product/design-system/colors.json']
   if (!colorsModule?.default) return null
 
   const colors = colorsModule.default
@@ -46,7 +46,7 @@ export function loadColorTokens(): ColorTokens | null {
  * }
  */
 export function loadTypographyTokens(): TypographyTokens | null {
-  const typographyModule = designSystemFiles['/product/design-system/typography.json']
+  const typographyModule = designSystemFiles['../../../product/design-system/typography.json']
   if (!typographyModule?.default) return null
 
   const typography = typographyModule.default
@@ -81,8 +81,8 @@ export function loadDesignSystem(): DesignSystem | null {
  */
 export function hasDesignSystem(): boolean {
   return (
-    '/product/design-system/colors.json' in designSystemFiles ||
-    '/product/design-system/typography.json' in designSystemFiles
+    '../../../product/design-system/colors.json' in designSystemFiles ||
+    '../../../product/design-system/typography.json' in designSystemFiles
   )
 }
 
@@ -90,12 +90,12 @@ export function hasDesignSystem(): boolean {
  * Check if colors have been defined
  */
 export function hasColors(): boolean {
-  return '/product/design-system/colors.json' in designSystemFiles
+  return '../../../product/design-system/colors.json' in designSystemFiles
 }
 
 /**
  * Check if typography has been defined
  */
 export function hasTypography(): boolean {
-  return '/product/design-system/typography.json' in designSystemFiles
+  return '../../../product/design-system/typography.json' in designSystemFiles
 }

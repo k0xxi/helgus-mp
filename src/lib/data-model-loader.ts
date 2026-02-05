@@ -5,7 +5,7 @@
 import type { DataModel, Entity } from '@/types/product'
 
 // Load data model markdown file at build time
-const dataModelFiles = import.meta.glob('/product/data-model/*.md', {
+const dataModelFiles = import.meta.glob('../../../product/data-model/*.md', {
   query: '?raw',
   import: 'default',
   eager: true,
@@ -79,7 +79,7 @@ export function parseDataModel(md: string): DataModel | null {
  * Load the data model from markdown file
  */
 export function loadDataModel(): DataModel | null {
-  const content = dataModelFiles['/product/data-model/data-model.md']
+  const content = dataModelFiles['../../../product/data-model/data-model.md']
   return content ? parseDataModel(content) : null
 }
 
@@ -87,5 +87,5 @@ export function loadDataModel(): DataModel | null {
  * Check if data model has been defined
  */
 export function hasDataModel(): boolean {
-  return '/product/data-model/data-model.md' in dataModelFiles
+  return '../../../product/data-model/data-model.md' in dataModelFiles
 }

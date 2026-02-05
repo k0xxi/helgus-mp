@@ -11,25 +11,25 @@ import type { SectionData, ParsedSpec, ScreenDesignInfo, ScreenshotInfo } from '
 import type { ComponentType } from 'react'
 
 // Load spec.md files from product/sections at build time
-const specFiles = import.meta.glob('/product/sections/*/spec.md', {
+const specFiles = import.meta.glob('../../../product/sections/*/spec.md', {
   query: '?raw',
   import: 'default',
   eager: true,
 }) as Record<string, string>
 
 // Load data.json files from product/sections at build time
-const dataFiles = import.meta.glob('/product/sections/*/data.json', {
+const dataFiles = import.meta.glob('../../../product/sections/*/data.json', {
   eager: true,
 }) as Record<string, { default: Record<string, unknown> }>
 
 // Load screen design components from src/sections lazily
-const screenDesignModules = import.meta.glob('/src/sections/*/*.tsx') as Record<
+const screenDesignModules = import.meta.glob('../../sections/*/*.tsx') as Record<
   string,
   () => Promise<{ default: ComponentType }>
 >
 
 // Load screenshot files from product/sections at build time
-const screenshotFiles = import.meta.glob('/product/sections/*/*.png', {
+const screenshotFiles = import.meta.glob('../../../product/sections/*/*.png', {
   query: '?url',
   import: 'default',
   eager: true,
@@ -43,37 +43,37 @@ console.log('[Section Loader] Screenshot files:', Object.keys(screenshotFiles))
 
 /**
  * Extract section ID from a product/sections file path
- * e.g., "/product/sections/invoices/spec.md" -> "invoices"
+ * e.g., "../../../product/sections/invoices/spec.md" -> "invoices"
  */
 function extractSectionIdFromProduct(path: string): string | null {
-  const match = path.match(/\/product\/sections\/([^/]+)\//)
+  const match = path.match(/sections\/([^/]+)\//)
   return match?.[1] || null
 }
 
 /**
  * Extract section ID from a src/sections file path
- * e.g., "/src/sections/invoices/InvoiceList.tsx" -> "invoices"
+ * e.g., "../../sections/invoices/InvoiceList.tsx" -> "invoices"
  */
 function extractSectionIdFromSrc(path: string): string | null {
-  const match = path.match(/\/src\/sections\/([^/]+)\//)
+  const match = path.match(/sections\/([^/]+)\//)
   return match?.[1] || null
 }
 
 /**
  * Extract screen design name from a file path
- * e.g., "/src/sections/invoices/InvoiceList.tsx" -> "InvoiceList"
+ * e.g., "../../sections/invoices/InvoiceList.tsx" -> "InvoiceList"
  */
 function extractScreenDesignName(path: string): string | null {
-  const match = path.match(/\/src\/sections\/[^/]+\/([^/]+)\.tsx$/)
+  const match = path.match(/sections\/[^/]+\/([^/]+)\.tsx$/)
   return match?.[1] || null
 }
 
 /**
  * Extract screenshot name from a file path
- * e.g., "/product/sections/invoices/invoice-list.png" -> "invoice-list"
+ * e.g., "../../../product/sections/invoices/invoice-list.png" -> "invoice-list"
  */
 function extractScreenshotName(path: string): string | null {
-  const match = path.match(/\/product\/sections\/[^/]+\/([^/]+)\.png$/)
+  const match = path.match(/sections\/[^/]+\/([^/]+)\.png$/)
   return match?.[1] || null
 }
 

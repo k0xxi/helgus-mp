@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '../../../lib/supabase'
 
 interface EmailPrefs {
   new_message: boolean
@@ -41,10 +41,13 @@ export function EmailPreferences() {
         if (error) {
           // Wenn die Spalte nicht existiert, ist das ok - Migration nicht angewendet
           console.warn('[EmailPreferences] Spalte existiert möglicherweise noch nicht:', error.message)
-        } else if (data !== null && typeof data === 'object' && 'email_preferences' in data) {
-          const prefs = (data as any).email_preferences
-          if (prefs && typeof prefs === 'object') {
-            setPreferences(prefs)
+        } else if (data !== null && typeof data === 'object') {
+          const profileData = data as Record<string, any>
+          if ('email_preferences' in profileData) {
+            const prefs = profileData.email_preferences
+            if (prefs && typeof prefs === 'object') {
+              setPreferences(prefs)
+            }
           }
         }
       } catch (err) {
