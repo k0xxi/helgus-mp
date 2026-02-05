@@ -34,7 +34,7 @@ export function AuthPage({
       <main className="relative z-10 flex items-start justify-center pt-8 px-4">
         <div className="w-full max-w-md">
           {/* Card */}
-          <div className="rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-200/50 dark:border-slate-800 p-8">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-200/50 dark:border-slate-800 p-8">
             {/* Tab Switcher */}
             <div className="flex bg-slate-100 dark:bg-slate-800 rounded-xl p-1 mb-8">
               <button
