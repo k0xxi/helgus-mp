@@ -1,19 +1,12 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { Search, TrendingUp, Tag, Shield } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/marketplace/context/AuthContext'
-import type { Tables } from '@/types/database'
-
-interface CategoryWithCount extends Tables<'categories'> {
-  productCount?: number
-}
+import { useCategoriesWithCounts } from '@/marketplace/hooks/useCategoriesWithCounts'
 
 export function HomePage() {
   const navigate = useNavigate()
   const { user, profile } = useAuth()
-  const [categories, setCategories] = useState<CategoryWithCount[]>([])
-  const [loading, setLoading] = useState(true)
+  const { categories, loading } = useCategoriesWithCounts()
 
   const handleSellClick = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -28,56 +21,6 @@ export function HomePage() {
     navigate('/sell')
   }
 
-  // Fetch categories whenever component mounts or user changes
-  useEffect(() => {
-    console.log('[HomePage] useEffect triggered')
-    async function fetchCategoriesWithCounts() {
-      try {
-        console.log('[HomePage] Starting to fetch categories...')
-        setLoading(true)
-        const { data, error } = await supabase
-          .from('categories')
-          .select('*')
-          .is('parent_id', null)
-          .order('sort_order')
-
-        if (error || !data) {
-          console.error('[HomePage] Error fetching categories:', error)
-          console.log('[HomePage] data:', data)
-          setLoading(false)
-          return
-        }
-
-        console.log('[HomePage] Successfully fetched categories:', data?.length)
-
-        // Fetch product counts for each category
-        const categoriesWithCounts = await Promise.all(
-          (data as Tables<'categories'>[]).map(async (category) => {
-            const { count, error: countError } = await supabase
-              .from('products')
-              .select('id', { count: 'exact', head: true })
-              .eq('category_id', category.id)
-              .eq('is_active', true)
-              .is('sold_at', null)
-              .is('pending_since', null)
-
-            return {
-              ...category,
-              productCount: countError ? 0 : (count || 0),
-            }
-          })
-        )
-
-        setCategories(categoriesWithCounts)
-      } catch (err) {
-        console.error('Exception fetching categories:', err)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchCategoriesWithCounts()
-  }, [user])
 
   return (
     <div className="space-y-12">
