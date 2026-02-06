@@ -74,7 +74,7 @@ const conditionDisplayMap: Record<string, Product['condition']> = {
 
 async function createNotification(params: {
   userId: string
-  type: 'new_message' | 'offer_received' | 'offer_accepted' | 'offer_declined' | 'price_drop'
+  type: 'new_message' | 'offer_received' | 'offer_accepted' | 'offer_declined' | 'price_drop' | 'purchase_completed'
   title: string
   message: string
   productId?: string

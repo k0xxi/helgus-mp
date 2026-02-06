@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { Bell, MessageSquare, TrendingUp, Check, X, TrendingDown, ArrowRight } from 'lucide-react'
+import { Bell, MessageSquare, TrendingUp, Check, X, TrendingDown, ArrowRight, ShoppingCart } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import type { Notification } from '@/types/marketplace'
 
@@ -44,6 +44,8 @@ export function NotificationDropdown({
         return <X className="h-5 w-5 text-red-600" />
       case 'price_drop':
         return <TrendingDown className="h-5 w-5 text-emerald-600" />
+      case 'purchase_completed':
+        return <ShoppingCart className="h-5 w-5 text-red-600" />
       default:
         return <Bell className="h-5 w-5 text-slate-600" />
     }
@@ -61,6 +63,8 @@ export function NotificationDropdown({
         return 'Gegenangebot abgelehnt'
       case 'price_drop':
         return 'Preisfall'
+      case 'purchase_completed':
+        return 'Verkauf getätigt'
       default:
         return 'Benachrichtigung'
     }
@@ -87,8 +91,12 @@ export function NotificationDropdown({
     // Close dropdown
     onClose()
 
-    // Navigate to product (offer/message notifications)
-    if (notification.productId) {
+    // Navigate based on notification type
+    if (notification.type === 'purchase_completed') {
+      // For purchase notifications, go to my sales page
+      navigate('/my-sales')
+    } else if (notification.productId) {
+      // For other notifications with product, go to product page
       navigate(`/product/${notification.productId}`)
     }
   }

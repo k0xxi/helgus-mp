@@ -1,6 +1,44 @@
 import { useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 
+// Helper: Create notification
+async function createNotification(params: {
+  userId: string
+  type: 'purchase_completed'
+  title: string
+  message: string
+  productId?: string
+}): Promise<void> {
+  if (!params.userId) {
+    console.warn('[Notifications] Cannot create notification: userId is missing')
+    return
+  }
+
+  try {
+    const rpcParams = {
+      p_user_id: params.userId,
+      p_type: params.type,
+      p_title: params.title,
+      p_message: params.message,
+    }
+
+    if (params.productId) {
+      ;(rpcParams as any).p_product_id = params.productId
+    }
+
+    const { data, error } = await supabase.rpc('create_notification', rpcParams as never)
+
+    if (error) {
+      console.error('[Notifications] RPC error:', error)
+      return
+    }
+
+    console.log('[Notifications] Created notification:', data)
+  } catch (err) {
+    console.error('[Notifications] Error creating notification:', err)
+  }
+}
+
 // =============================================================================
 // usePurchase - Handle product purchases and transactions
 // =============================================================================
@@ -36,6 +74,15 @@ export function usePurchase(userId: string | undefined): UsePurchaseResult {
         }
 
         console.log('Purchase created successfully:', data)
+
+        // Create notification for seller
+        await createNotification({
+          userId: sellerId,
+          type: 'purchase_completed',
+          title: '🎉 Neuer Verkauf',
+          message: 'Ein Produkt wurde gerade gekauft.',
+          productId: productId
+        })
 
         return { error: null }
       } catch (err) {
