@@ -13,18 +13,6 @@ export function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const { user } = useAuth()
   const [deleteModalProductId, setDeleteModalProductId] = useState<string | null>(null)
-  const [loadingTimeout, setLoadingTimeout] = useState(false)
-
-  // Auto-reload if loading takes too long (> 5 seconds)
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      console.warn('[SearchPage] Loading took too long, triggering reload...')
-      setLoadingTimeout(true)
-      window.location.reload()
-    }, 5000)
-
-    return () => clearTimeout(timer)
-  }, [])
 
   // Parse filters from URL
   const filters: ProductFilters = useMemo(
