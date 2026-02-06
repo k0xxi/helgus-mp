@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { RealtimeChannel } from '@supabase/supabase-js'
 
@@ -16,6 +16,12 @@ export function useRealtimeSubscription<T>(
 ) {
   const [isConnected, setIsConnected] = useState(false)
   const [error, setError] = useState<Error | null>(null)
+  const onEventRef = useRef(onEvent)
+
+  // Keep ref up to date without causing subscription recreate
+  useEffect(() => {
+    onEventRef.current = onEvent
+  }, [onEvent])
 
   useEffect(() => {
     let channel: RealtimeChannel | null = null
@@ -32,7 +38,7 @@ export function useRealtimeSubscription<T>(
               table: tableName,
             },
             (payload) => {
-              onEvent?.({
+              onEventRef.current?.({
                 type: payload.eventType as 'INSERT' | 'UPDATE' | 'DELETE',
                 new: payload.new as T,
                 old: payload.old as T,
@@ -55,7 +61,7 @@ export function useRealtimeSubscription<T>(
         supabase.removeChannel(channel)
       }
     }
-  }, [tableName, onEvent])
+  }, [tableName]) // Only recreate subscription if table changes, not if callback changes
 
   return { isConnected, error }
 }
