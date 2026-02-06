@@ -60,6 +60,13 @@ export function useMySales(userId: string | undefined): UseMySalesResult {
       const transformedSales: SaleProduct[] = (purchases || []).map(purchase => {
         const product = purchase.products as any
         const buyer = purchase.buyer as any
+
+        // Convert storage_path to public URL
+        const imagePath = product?.product_images?.[0]?.storage_path
+        const productImageUrl = imagePath
+          ? supabase.storage.from('products').getPublicUrl(imagePath).data.publicUrl
+          : undefined
+
         return {
           id: purchase.product_id,
           title: product?.title || 'Unbekanntes Produkt',
@@ -71,7 +78,7 @@ export function useMySales(userId: string | undefined): UseMySalesResult {
           pendingSince: product?.pending_since,
           soldAt: product?.sold_at,
           status: purchase.status === 'completed' || product?.sold_at ? 'sold' : 'pending',
-          productImage: product?.product_images?.[0]?.storage_path,
+          productImage: productImageUrl,
           shippingMethod: purchase.shipping_method as 'Abholung' | 'Versand' | undefined
         }
       })
