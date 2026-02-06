@@ -507,11 +507,20 @@ export function useMyListings(userId: string | undefined): UseMyListingsResult {
         throw updateError
       }
 
-      // Delete all notifications for this product
-      await supabase
-        .from('notifications')
-        .delete()
-        .eq('product_id', listingId)
+      // Delete buyer's notifications for this product
+      const { data: productData } = await supabase
+        .from('products')
+        .select('buyer_id')
+        .eq('id', listingId)
+        .single()
+
+      if (productData?.buyer_id) {
+        await supabase
+          .from('notifications')
+          .delete()
+          .eq('product_id', listingId)
+          .eq('user_id', productData.buyer_id)
+      }
 
       // Update local state
       setListings(prev => prev.map(l =>

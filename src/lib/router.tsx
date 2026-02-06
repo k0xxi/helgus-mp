@@ -12,7 +12,6 @@ import { RootLayout } from '@/lib/RootLayout'
 // Marketplace imports
 import { AuthProvider } from '@/marketplace/context/AuthContext'
 import { MarketplaceLayout } from '@/marketplace/layout/MarketplaceLayout'
-import { PasswordGate } from '@/marketplace/components/PasswordGate'
 import {
   HomePage as MarketplaceHomePage,
   SearchPage,
@@ -39,11 +38,9 @@ import {
 // Wrapper to provide AuthContext to marketplace routes
 function MarketplaceWrapper() {
   return (
-    <PasswordGate password="Tester$2016">
-      <AuthProvider>
-        <MarketplaceLayout />
-      </AuthProvider>
-    </PasswordGate>
+    <AuthProvider>
+      <MarketplaceLayout />
+    </AuthProvider>
   )
 }
 
