@@ -36,10 +36,17 @@ export interface Product {
   distance?: number
 }
 
+export interface SubCategory {
+  id: string
+  name: string
+  slug: string
+}
+
 export interface Category {
   id: string
   name: string
-  subcategories: string[]
+  slug: string
+  subcategories: SubCategory[]
 }
 
 // =============================================================================

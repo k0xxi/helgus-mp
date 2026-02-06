@@ -40,7 +40,7 @@ export function FilterSidebar({
   // Get subcategories for selected category
   const getSubcategories = () => {
     if (!filters.category) return []
-    const category = categories.find((cat) => cat.slug === filters.category)
+    const category = categories.find((cat: any) => cat.slug === filters.category)
     return category?.subcategories || []
   }
 
@@ -93,13 +93,13 @@ export function FilterSidebar({
             </label>
             <select
               value={filters.subcategory || ''}
-              onChange={(e) => updateFilter('subcategory', e.target.value)}
+              onChange={(e) => updateFilter('subcategory', e.target.value || undefined)}
               className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 focus:border-transparent font-['Inter']"
             >
               <option value="">Alle</option>
-              {getSubcategories().map((subcategory) => (
-                <option key={subcategory} value={subcategory}>
-                  {subcategory}
+              {getSubcategories().map((sub: any) => (
+                <option key={sub.slug || sub} value={sub.slug || sub}>
+                  {sub.name || sub}
                 </option>
               ))}
             </select>

@@ -27,6 +27,7 @@ export function useCategories(): UseCategoriesResult {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
+        // Fetch ALL categories (parents + children) in one query
         const { data, error: fetchError } = await supabase
           .from('categories')
           .select('*')
@@ -36,14 +37,24 @@ export function useCategories(): UseCategoriesResult {
           throw fetchError
         }
 
-        // Map to Category type (no subcategories for now - DB only has top-level)
-        const mappedCategories: Category[] = ((data || []) as Tables<'categories'>[]).map(
-          (cat) => ({
-            id: cat.id,
-            name: cat.name,
-            subcategories: [], // Subcategories not implemented yet
-          })
-        )
+        const allCategories = (data || []) as Tables<'categories'>[]
+
+        // Build hierarchical structure: parent categories with subcategories
+        const parentCategories = allCategories.filter(cat => !cat.parent_id)
+        const childCategories = allCategories.filter(cat => cat.parent_id)
+
+        const mappedCategories: Category[] = parentCategories.map(parent => ({
+          id: parent.id,
+          name: parent.name,
+          slug: parent.slug,
+          subcategories: childCategories
+            .filter(child => child.parent_id === parent.id)
+            .map(child => ({
+              id: child.id,
+              name: child.name,
+              slug: child.slug,
+            })),
+        }))
 
         setCategories(mappedCategories)
       } catch (err) {
@@ -103,6 +114,7 @@ interface ProductQueryResult {
     id: string
     name: string
     slug: string
+    parent_id: string | null
   }
   product_images: {
     id: string
@@ -130,18 +142,39 @@ export function useProducts(
     setError(null)
 
     try {
-      let categoryId: string | null = null
+      let categoryIds: string[] = []
       let searchLocation: { latitude: number; longitude: number } | null = null
 
-      // If category filter is applied, find the category ID first
-      if (filters.category) {
-        const { data: categoryData } = await supabase
+      // If category filter is applied, find the category IDs
+      if (filters.subcategory) {
+        // Specific subcategory selected - filter by that subcategory ID
+        const { data: subData } = await supabase
+          .from('categories')
+          .select('id')
+          .eq('slug', filters.subcategory)
+          .single()
+
+        if (subData) {
+          categoryIds = [subData.id]
+        }
+      } else if (filters.category) {
+        // Only main category selected - filter by all its subcategories
+        const { data: parentData } = await supabase
           .from('categories')
           .select('id')
           .eq('slug', filters.category)
           .single()
 
-        categoryId = categoryData?.id || null
+        if (parentData) {
+          const { data: childData } = await supabase
+            .from('categories')
+            .select('id')
+            .eq('parent_id', parentData.id)
+
+          categoryIds = (childData || []).map(c => c.id)
+          // Also include the parent itself in case products are directly assigned to it
+          categoryIds.push(parentData.id)
+        }
       }
 
       // Build query
@@ -151,7 +184,7 @@ export function useProducts(
           `
           *,
           profiles!seller_id(id, name, is_verified),
-          categories!category_id(id, name, slug),
+          categories!category_id(id, name, slug, parent_id),
           product_images(id, storage_path, sort_order)
         `
         )
@@ -166,9 +199,9 @@ export function useProducts(
         )
       }
 
-      if (categoryId) {
-        // Filter by category_id (direct column filter)
-        query = query.eq('category_id', categoryId)
+      if (categoryIds.length > 0) {
+        // Filter by category_id(s)
+        query = query.in('category_id', categoryIds)
       }
 
       if (filters.priceMin !== undefined) {
@@ -279,7 +312,7 @@ export function useProducts(
             rating: 5, // Placeholder - ratings not implemented yet
           },
           category: category?.name ?? 'Uncategorized',
-          subcategory: '', // Subcategories not implemented yet
+          subcategory: category?.parent_id ? category.name : '',
           createdAt: product.created_at,
           phoneContactAvailable: product.phone_contact_available,
           isFavorited: favoriteIdsRef.current.has(product.id),

@@ -82,8 +82,17 @@ export function ListingForm() {
   useEffect(() => {
     if (existingListing) {
       setFormData(existingListing)
+      // Find the main category for the existing subcategory
+      if (existingListing.categoryId) {
+        const parentCat = categories.find(cat =>
+          cat.subcategories.some(sub => sub.id === existingListing.categoryId)
+        )
+        if (parentCat) {
+          setMainCategoryId(parentCat.id)
+        }
+      }
     }
-  }, [existingListing])
+  }, [existingListing, categories])
 
   // Update location from profile when loaded
   useEffect(() => {
@@ -97,8 +106,15 @@ export function ListingForm() {
     }
   }, [profile, editId])
 
+  // Track selected main category for cascading dropdown
+  const [mainCategoryId, setMainCategoryId] = useState('')
+
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
+
+  // Get subcategories for the currently selected main category
+  const selectedMainCategory = categories.find(cat => cat.id === mainCategoryId)
+  const subcategories = selectedMainCategory?.subcategories || []
 
   const updateForm = <K extends keyof ListingFormData>(key: K, value: ListingFormData[K]) => {
     setFormData(prev => ({ ...prev, [key]: value }))
@@ -358,28 +374,58 @@ export function ListingForm() {
               <p className="mt-1 text-xs text-slate-500">{formData.description.length} / 2000 Zeichen</p>
             </div>
 
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
-                Kategorie *
-              </label>
-              <select
-                value={formData.categoryId}
-                onChange={(e) => updateForm('categoryId', e.target.value)}
-                className={`w-full rounded-lg border px-4 py-2.5 text-slate-900 focus:outline-none focus:ring-2 dark:bg-slate-900 dark:text-white ${
-                  errors.categoryId
-                    ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
-                    : 'border-slate-200 focus:border-red-500 focus:ring-red-500/20 dark:border-slate-700'
-                }`}
-              >
-                <option value="">Kategorie wählen...</option>
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                  Kategorie *
+                </label>
+                <select
+                  value={mainCategoryId}
+                  onChange={(e) => {
+                    setMainCategoryId(e.target.value)
+                    updateForm('categoryId', '') // Reset subcategory when main category changes
+                  }}
+                  className={`w-full rounded-lg border px-4 py-2.5 text-slate-900 focus:outline-none focus:ring-2 dark:bg-slate-900 dark:text-white ${
+                    errors.categoryId && !mainCategoryId
+                      ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
+                      : 'border-slate-200 focus:border-red-500 focus:ring-red-500/20 dark:border-slate-700'
+                  }`}
+                >
+                  <option value="">Kategorie wählen...</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                  Unterkategorie *
+                </label>
+                <select
+                  value={formData.categoryId}
+                  onChange={(e) => updateForm('categoryId', e.target.value)}
+                  disabled={!mainCategoryId}
+                  className={`w-full rounded-lg border px-4 py-2.5 text-slate-900 focus:outline-none focus:ring-2 dark:bg-slate-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed ${
+                    errors.categoryId && mainCategoryId
+                      ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
+                      : 'border-slate-200 focus:border-red-500 focus:ring-red-500/20 dark:border-slate-700'
+                  }`}
+                >
+                  <option value="">
+                    {mainCategoryId ? 'Unterkategorie wählen...' : 'Erst Kategorie wählen'}
                   </option>
-                ))}
-              </select>
+                  {subcategories.map((sub) => (
+                    <option key={sub.id} value={sub.id}>
+                      {sub.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
               {errors.categoryId && (
-                <p className="mt-1 text-sm text-red-500">{errors.categoryId}</p>
+                <p className="mt-1 text-sm text-red-500 sm:col-span-2">{errors.categoryId}</p>
               )}
             </div>
 

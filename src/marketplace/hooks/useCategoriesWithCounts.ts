@@ -4,6 +4,7 @@ import type { Tables } from '@/types/database'
 
 export interface CategoryWithCount extends Tables<'categories'> {
   productCount: number
+  subcategories: { id: string; name: string; slug: string }[]
 }
 
 interface UseCategoriesWithCountsResult {
@@ -20,18 +21,29 @@ export function useCategoriesWithCounts(): UseCategoriesWithCountsResult {
   useEffect(() => {
     async function fetchCategoriesWithCounts() {
       try {
-        // OPTIMIZED: Fetch all categories in 1 query
-        const { data: categoriesData, error: categoriesError } = await supabase
+        // Fetch ALL categories (parents + children) in 1 query
+        const { data: allCategoriesData, error: categoriesError } = await supabase
           .from('categories')
           .select('*')
-          .is('parent_id', null)
           .order('sort_order')
 
         if (categoriesError) {
           throw categoriesError
         }
 
-        // OPTIMIZED: Fetch ALL products that match criteria in 1 query (not per category)
+        const allCategories = allCategoriesData || []
+        const parentCategories = allCategories.filter(c => !c.parent_id)
+        const childCategories = allCategories.filter(c => c.parent_id)
+
+        // Build a map: parent_id → [child_ids]
+        const childIdsByParent = new Map<string, string[]>()
+        for (const child of childCategories) {
+          const existing = childIdsByParent.get(child.parent_id!) || []
+          existing.push(child.id)
+          childIdsByParent.set(child.parent_id!, existing)
+        }
+
+        // Fetch ALL active products' category_ids in 1 query
         const { data: productsData, error: productsError } = await supabase
           .from('products')
           .select('id, category_id')
@@ -43,7 +55,7 @@ export function useCategoriesWithCounts(): UseCategoriesWithCountsResult {
           throw productsError
         }
 
-        // OPTIMIZED: Count products per category in JavaScript (O(n) instead of N+1 queries)
+        // Count products per category_id
         const productsByCategory = new Map<string, number>()
         if (productsData) {
           for (const product of productsData) {
@@ -52,11 +64,24 @@ export function useCategoriesWithCounts(): UseCategoriesWithCountsResult {
           }
         }
 
-        // Combine categories with their product counts
-        const categoriesWithCounts = (categoriesData || []).map((category) => ({
-          ...category,
-          productCount: productsByCategory.get(category.id) || 0,
-        }))
+        // For each parent, sum up counts from all its children + direct assignments
+        const categoriesWithCounts = parentCategories.map((category) => {
+          const childIds = childIdsByParent.get(category.id) || []
+          let totalCount = productsByCategory.get(category.id) || 0
+          for (const childId of childIds) {
+            totalCount += productsByCategory.get(childId) || 0
+          }
+          // Get subcategories for this parent
+          const subs = childCategories
+            .filter(c => c.parent_id === category.id)
+            .map(c => ({ id: c.id, name: c.name, slug: c.slug }))
+
+          return {
+            ...category,
+            productCount: totalCount,
+            subcategories: subs,
+          }
+        })
 
         setCategories(categoriesWithCounts)
       } catch (err) {
