@@ -21,6 +21,7 @@ interface EmailRequest {
   offerAmount?: number;
   productPrice?: number;
   buyerEmail?: string;
+  sellerEmail?: string;
 }
 
 Deno.serve(async (req): Promise<Response> => {
@@ -189,8 +190,10 @@ Deno.serve(async (req): Promise<Response> => {
               },
             },
           };
-          if (replyTo) {
+          // Only set reply_to if we have a valid email address
+          if (replyTo && isValidEmail(replyTo)) {
             templatePayload.reply_to = replyTo;
+            console.log('[send-email] Setting reply_to:', replyTo);
           }
           console.log('[send-email] Sending email via Resend (template):', { to, templateId });
           const res = await fetch("https://api.resend.com/emails", {
@@ -280,8 +283,10 @@ Deno.serve(async (req): Promise<Response> => {
               },
             },
           };
-          if (replyTo) {
+          // Only set reply_to if we have a valid email address
+          if (replyTo && isValidEmail(replyTo)) {
             templatePayload.reply_to = replyTo;
+            console.log('[send-email] Setting reply_to:', replyTo);
           }
           console.log('[send-email] Sending email via Resend (template):', { to, templateId });
           const res = await fetch("https://api.resend.com/emails", {
@@ -342,8 +347,10 @@ Deno.serve(async (req): Promise<Response> => {
               },
             },
           };
-          if (replyTo) {
+          // Only set reply_to if we have a valid email address
+          if (replyTo && isValidEmail(replyTo)) {
             templatePayload.reply_to = replyTo;
+            console.log('[send-email] Setting reply_to:', replyTo);
           }
           console.log('[send-email] Sending email via Resend (template):', { to, templateId });
           const res = await fetch("https://api.resend.com/emails", {
@@ -400,12 +407,12 @@ Deno.serve(async (req): Promise<Response> => {
                 productTitle: productTitle || "",
                 productPrice: productPrice?.toString() || "",
                 productUrl: productUrl,
+                email: body.sellerEmail || "", // Seller email for reply_to
               },
             },
           };
-          if (replyTo) {
-            templatePayload.reply_to = replyTo;
-          }
+          // Note: reply_to is set via template variable {{email}}
+          console.log('[send-email] Template reply_to will use sellerEmail:', body.sellerEmail);
           console.log('[send-email] Sending email via Resend (template):', { to, templateId });
           const res = await fetch("https://api.resend.com/emails", {
             method: "POST",
@@ -494,12 +501,12 @@ Deno.serve(async (req): Promise<Response> => {
                 productPrice: productPrice?.toString() || "",
                 productUrl: productUrl,
                 buyerName: buyerName || "Der Käufer",
+                email: buyerEmail || "", // Buyer email for reply_to
               },
             },
           };
-          if (replyTo) {
-            templatePayload.reply_to = replyTo;
-          }
+          // Note: reply_to is set via template variable {{email}}
+          console.log('[send-email] Template reply_to will use buyerEmail:', buyerEmail);
           console.log('[send-email] Sending email via Resend (template):', { to, templateId });
           const res = await fetch("https://api.resend.com/emails", {
             method: "POST",

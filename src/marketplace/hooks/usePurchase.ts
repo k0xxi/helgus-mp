@@ -108,7 +108,7 @@ export function usePurchase(userId: string | undefined): UsePurchaseResult {
             if (seller_email && product) {
               console.log('[usePurchase] Sending emails to seller and buyer...')
 
-              // Send email to seller (purchase_seller)
+              // Send email to seller (purchase_seller) with buyer email for reply
               await sendEmail({
                 type: 'purchase_seller',
                 to: seller_email,
@@ -117,9 +117,10 @@ export function usePurchase(userId: string | undefined): UsePurchaseResult {
                 productPrice: price,
                 sellerName: seller_name,
                 buyerName: buyer_name,
+                buyerEmail: buyer_email, // For reply_to in template
               })
 
-              // Send email to buyer (purchase_buyer)
+              // Send email to buyer (purchase_buyer) with seller email for reply
               if (buyer_email) {
                 await sendEmail({
                   type: 'purchase_buyer',
@@ -128,6 +129,7 @@ export function usePurchase(userId: string | undefined): UsePurchaseResult {
                   productId: productId,
                   productPrice: price,
                   buyerName: buyer_name,
+                  sellerEmail: seller_email, // For reply_to in template
                 })
               }
 

@@ -16,6 +16,7 @@ export interface SendEmailParams {
   offerAmount?: number
   productPrice?: number
   buyerEmail?: string
+  sellerEmail?: string
 }
 
 /**
