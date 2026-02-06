@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ShoppingCart, CheckCircle, Clock, RotateCcw } from 'lucide-react'
+import { ShoppingCart, CheckCircle, Clock, MapPin, RotateCcw } from 'lucide-react'
 import { useAuth } from '@/marketplace/context/AuthContext'
 import { useMySales } from '@/marketplace/hooks/useMySales'
 import { useMyListings } from '@/marketplace/hooks/useProfile'
