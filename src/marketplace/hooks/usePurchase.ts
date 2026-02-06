@@ -85,10 +85,61 @@ export function usePurchase(userId: string | undefined): UsePurchaseResult {
           productId: productId
         })
 
-        // TODO: Send purchase emails via RPC function
-        // Note: Email sending requires a backend RPC function since auth.users.email
-        // is not accessible from frontend. Notifications are sent above instead.
-        console.log('[usePurchase] Purchase completed - notification sent to seller')
+        // Send purchase emails via RPC function
+        try {
+          const { data: emailData, error: rpcError } = await supabase.rpc('send_purchase_emails', {
+            p_product_id: productId,
+            p_seller_id: sellerId,
+            p_buyer_id: userId,
+            p_price: price,
+            p_product_title: ''
+          })
+
+          if (!rpcError && emailData) {
+            const { seller_email, buyer_email, seller_name, buyer_name } = emailData
+
+            // Fetch product title
+            const { data: product } = await supabase
+              .from('products')
+              .select('title')
+              .eq('id', productId)
+              .single()
+
+            if (seller_email && product) {
+              console.log('[usePurchase] Sending emails to seller and buyer...')
+
+              // Send email to seller (purchase_seller)
+              await sendEmail({
+                type: 'purchase_seller',
+                to: seller_email,
+                productTitle: product.title,
+                productId: productId,
+                productPrice: price,
+                sellerName: seller_name,
+                buyerName: buyer_name,
+              })
+
+              // Send email to buyer (purchase_buyer)
+              if (buyer_email) {
+                await sendEmail({
+                  type: 'purchase_buyer',
+                  to: buyer_email,
+                  productTitle: product.title,
+                  productId: productId,
+                  productPrice: price,
+                  buyerName: buyer_name,
+                })
+              }
+
+              console.log('[usePurchase] Purchase emails sent successfully')
+            }
+          } else if (rpcError) {
+            console.warn('[usePurchase] RPC error getting emails:', rpcError)
+          }
+        } catch (emailErr) {
+          console.warn('[usePurchase] Email sending failed (non-blocking):', emailErr)
+          // Don't throw - email sending is fire-and-forget
+        }
 
         return { error: null }
       } catch (err) {
