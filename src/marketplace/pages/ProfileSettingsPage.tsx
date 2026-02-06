@@ -1,8 +1,9 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Settings } from 'lucide-react'
 import { useAuth } from '@/marketplace/context/AuthContext'
 import { ProfileSettings } from '@/sections/nutzerverwaltung/components'
+import { ConfirmDialog } from '@/marketplace/components/ConfirmDialog'
 import type { User as DesignOSUser, Country, ConnectedAccount } from '@/../product/sections/nutzerverwaltung/types'
 
 // Default countries for the form
@@ -15,6 +16,7 @@ const COUNTRIES: Country[] = [
 export function ProfileSettingsPage() {
   const navigate = useNavigate()
   const { user, profile, updateProfile, signOut, loading } = useAuth()
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -102,10 +104,12 @@ export function ProfileSettingsPage() {
   const handleDeleteAccount = async () => {
     // Account deletion would need to be handled server-side
     // For now, just sign out
-    if (confirm('Bist du sicher, dass du dein Konto löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden.')) {
-      await signOut()
-      navigate('/')
-    }
+    setShowDeleteConfirm(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    await signOut()
+    navigate('/')
   }
 
   return (
@@ -135,6 +139,18 @@ export function ProfileSettingsPage() {
         onConnectAccount={handleConnectAccount}
         onDisconnectAccount={handleDisconnectAccount}
         onDeleteAccount={handleDeleteAccount}
+      />
+
+      {/* Delete Account Confirmation */}
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        title="Konto löschen"
+        message="Bist du sicher, dass du dein Konto löschen möchtest? Diese Aktion kann nicht rückgängig gemacht werden."
+        confirmText="Ja, Konto löschen"
+        cancelText="Abbrechen"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setShowDeleteConfirm(false)}
+        variant="danger"
       />
     </div>
   )

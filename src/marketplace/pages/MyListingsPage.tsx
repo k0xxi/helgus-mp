@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { useAuth } from '@/marketplace/context/AuthContext'
 import { useMyListings, type ListingStatus } from '@/marketplace/hooks'
+import { ConfirmDialog } from '@/marketplace/components/ConfirmDialog'
 
 const STATUS_LABELS: Record<ListingStatus, string> = {
   active: 'Aktiv',
@@ -45,6 +46,7 @@ export function MyListingsPage() {
   const [statusFilter, setStatusFilter] = useState<ListingStatus | 'all'>('all')
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
   const [confirmSold, setConfirmSold] = useState<string | null>(null)
+  const [confirmReactivate, setConfirmReactivate] = useState<string | null>(null)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
 
   const filteredListings = statusFilter === 'all'
@@ -79,15 +81,18 @@ export function MyListingsPage() {
   }
 
   const handleReactivate = async (listingId: string) => {
-    if (!confirm('Möchtest du diesen Verkauf abbrechen? Der Käufer wird benachrichtigt.')) {
-      return
-    }
-    setActionLoading(listingId)
-    const { error } = await reactivateListing(listingId)
+    setConfirmReactivate(listingId)
+  }
+
+  const handleConfirmReactivate = async () => {
+    if (!confirmReactivate) return
+    setActionLoading(confirmReactivate)
+    const { error } = await reactivateListing(confirmReactivate)
     if (error) {
       console.error('Error reactivating listing:', error)
     }
     setActionLoading(null)
+    setConfirmReactivate(null)
   }
 
   const handleDelete = async (listingId: string) => {
@@ -395,6 +400,18 @@ export function MyListingsPage() {
           </div>
         </div>
       )}
+
+      {/* Reactivate Confirmation */}
+      <ConfirmDialog
+        isOpen={!!confirmReactivate}
+        title="Verkauf abbrechen"
+        message="Möchtest du diesen Verkauf abbrechen? Der Käufer wird benachrichtigt und das Produkt wird wieder freigegeben."
+        confirmText="Ja, abbrechen"
+        cancelText="Zurück"
+        onConfirm={handleConfirmReactivate}
+        onCancel={() => setConfirmReactivate(null)}
+        variant="warning"
+      />
     </div>
   )
 }

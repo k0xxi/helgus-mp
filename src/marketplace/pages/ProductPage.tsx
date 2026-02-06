@@ -4,6 +4,7 @@ import { ArrowLeft, AlertTriangle, Loader2 } from 'lucide-react'
 import { ProductDetail } from '@/sections/produktdetails-verhandlung/components/ProductDetail'
 import { PurchaseModal } from '@/marketplace/components/PurchaseModal'
 import { OfferModal } from '@/marketplace/components/OfferModal'
+import { AlertDialog } from '@/marketplace/components/AlertDialog'
 import {
   useProductDetail,
   useOffers,
@@ -34,6 +35,7 @@ export function ProductPage() {
   const [showPurchaseModal, setShowPurchaseModal] = useState(false)
   const [purchaseLoading, setPurchaseLoading] = useState(false)
   const [purchaseError, setPurchaseError] = useState<string | null>(null)
+  const [purchaseSuccess, setPurchaseSuccess] = useState(false)
 
   // Offer modal state
   const [showOfferModal, setShowOfferModal] = useState(false)
@@ -310,9 +312,8 @@ export function ProductPage() {
         setPurchaseError('Fehler beim Kauf. Bitte versuchen Sie es erneut.')
       } else {
         setShowPurchaseModal(false)
-        // Show success and navigate
-        alert('Kauf erfolgreich! Der Verkäufer wurde benachrichtigt.')
-        navigate('/my-purchases')
+        // Show success dialog
+        setPurchaseSuccess(true)
       }
     } catch (err) {
       console.error('Purchase error:', err)
@@ -499,6 +500,18 @@ export function ProductPage() {
         error={offerError ?? undefined}
         onConfirm={handleConfirmOffer}
         onCancel={handleCloseOfferModal}
+      />
+
+      {/* Success Dialog */}
+      <AlertDialog
+        isOpen={purchaseSuccess}
+        title="Kauf erfolgreich"
+        message="Der Verkäufer wurde benachrichtigt und Sie werden zu Ihren Käufen weitergeleitet."
+        onClose={() => {
+          setPurchaseSuccess(false)
+          navigate('/my-purchases')
+        }}
+        variant="success"
       />
     </>
   )

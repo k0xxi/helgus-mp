@@ -4,6 +4,7 @@ import { useAuth } from '@/marketplace/context/AuthContext'
 import { useUserNotifications, useDeleteNotificationMutation } from '@/marketplace/hooks'
 import { useNavigate } from 'react-router-dom'
 import { DeleteConfirmModal } from '@/marketplace/components/DeleteConfirmModal'
+import { AlertDialog } from '@/marketplace/components/AlertDialog'
 import type { Notification } from '@/types/marketplace'
 
 export function NotificationsPage() {
@@ -14,6 +15,7 @@ export function NotificationsPage() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const handleNotificationClick = async (notificationId: string, productId: string | null, type: string) => {
     // Mark as read
@@ -51,7 +53,7 @@ export function NotificationsPage() {
       setSelectedNotification(null)
     } catch (error) {
       console.error('Error deleting notification:', error)
-      alert('Fehler beim Löschen der Benachrichtigung. Bitte versuchen Sie es später erneut.')
+      setErrorMessage('Fehler beim Löschen der Benachrichtigung. Bitte versuchen Sie es später erneut.')
     } finally {
       setIsDeleting(false)
     }
@@ -211,6 +213,15 @@ export function NotificationsPage() {
           setDeleteModalOpen(false)
           setSelectedNotification(null)
         }}
+      />
+
+      {/* Error Dialog */}
+      <AlertDialog
+        isOpen={!!errorMessage}
+        title="Fehler"
+        message={errorMessage || ''}
+        onClose={() => setErrorMessage(null)}
+        variant="error"
       />
     </div>
   )
