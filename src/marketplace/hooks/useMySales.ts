@@ -49,7 +49,7 @@ export function useMySales(userId: string | undefined): UseMySalesResult {
           shipping_method,
           status,
           products(id, title, pending_since, sold_at, product_images(storage_path)),
-          buyer:profiles(id, name, city, avatar_url)
+          buyer:profiles!buyer_id(id, name, city, avatar_url)
         `)
         .eq('seller_id', userId)
         .order('purchased_at', { ascending: false })
