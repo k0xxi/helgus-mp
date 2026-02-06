@@ -507,6 +507,12 @@ export function useMyListings(userId: string | undefined): UseMyListingsResult {
         throw updateError
       }
 
+      // Delete all notifications for this product
+      await supabase
+        .from('notifications')
+        .delete()
+        .eq('product_id', listingId)
+
       // Update local state
       setListings(prev => prev.map(l =>
         l.id === listingId
