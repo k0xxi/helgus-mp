@@ -524,20 +524,40 @@ export function useMyListings(userId: string | undefined): UseMyListingsResult {
     try {
       console.log('[reactivateListing] Starting reactivation for product:', listingId)
 
-      // Delete the purchase record (regardless of status)
-      const { error: deleteError } = await supabase
+      // First, check how many purchase records exist for this product
+      const { data: purchasesToDelete, count, error: countError } = await supabase
         .from('purchases')
-        .delete()
+        .select('*', { count: 'exact', head: true })
         .eq('product_id', listingId)
 
-      console.log('[reactivateListing] Delete result:', { deleteError })
+      console.log('[reactivateListing] Purchase records found:', { count, countError })
 
-      if (deleteError) {
-        console.error('[reactivateListing] Delete error:', deleteError)
-        throw deleteError
+      if (count === null || count === 0) {
+        console.log('[reactivateListing] No purchase records found to delete')
+      } else {
+        // Delete the purchase record(s)
+        const { error: deleteError } = await supabase
+          .from('purchases')
+          .delete()
+          .eq('product_id', listingId)
+
+        console.log('[reactivateListing] Delete result:', { deleteError })
+
+        if (deleteError) {
+          console.error('[reactivateListing] Delete error:', deleteError)
+          throw deleteError
+        }
+
+        console.log('[reactivateListing] Attempted to delete', count, 'purchase record(s)')
+
+        // Verify deletion
+        const { count: countAfter, error: countAfterError } = await supabase
+          .from('purchases')
+          .select('*', { count: 'exact', head: true })
+          .eq('product_id', listingId)
+
+        console.log('[reactivateListing] Purchase records after delete:', { countAfter, countAfterError })
       }
-
-      console.log('[reactivateListing] Purchase record deleted successfully')
 
       // Reactivate product
       const { error: updateError } = await supabase
