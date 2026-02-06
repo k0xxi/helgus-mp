@@ -29,6 +29,9 @@ export interface Product {
   isFavorite: boolean
   viewCount: number
   sellerId: string
+  pendingSince?: string | null
+  soldAt?: string | null
+  buyerId?: string | null
 }
 
 export interface Seller {

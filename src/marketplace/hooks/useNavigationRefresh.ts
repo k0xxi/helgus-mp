@@ -1,36 +1,37 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { useLocation } from 'react-router-dom'
-import { useQueryClient } from '@tanstack/react-query'
 
 /**
- * Hook that invalidates all React Query caches and shows a brief
- * loading spinner when navigating between pages.
- * This ensures fresh data on every page without a full page reload.
+ * Hook that triggers a full page reload when navigating between pages.
+ * Uses sessionStorage to prevent infinite reload loops:
+ * 1. User navigates → pathname changes → set flag → reload
+ * 2. After reload → flag matches current path → clear flag, no reload
  */
 export function useNavigationRefresh() {
   const location = useLocation()
-  const queryClient = useQueryClient()
   const isFirstRender = useRef(true)
-  const [isTransitioning, setIsTransitioning] = useState(false)
 
   useEffect(() => {
     // Skip the very first render (initial page load)
     if (isFirstRender.current) {
       isFirstRender.current = false
+      // Clear any stale flag
+      sessionStorage.removeItem('nav_reload_path')
       return
     }
 
-    // Show spinner and invalidate all caches
-    setIsTransitioning(true)
-    queryClient.invalidateQueries()
+    const reloadedPath = sessionStorage.getItem('nav_reload_path')
 
-    // Hide spinner after 500ms
-    const timer = setTimeout(() => {
-      setIsTransitioning(false)
-    }, 500)
+    // Already reloaded for this path → clear flag, done
+    if (reloadedPath === location.pathname) {
+      sessionStorage.removeItem('nav_reload_path')
+      return
+    }
 
-    return () => clearTimeout(timer)
-  }, [location.pathname, queryClient])
+    // Set flag and reload
+    sessionStorage.setItem('nav_reload_path', location.pathname)
+    window.location.reload()
+  }, [location.pathname])
 
-  return { isTransitioning }
+  return { isTransitioning: false }
 }

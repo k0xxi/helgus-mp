@@ -33,6 +33,8 @@ interface ProductDetailQueryResult {
   view_count: number
   is_active: boolean
   sold_at: string | null
+  pending_since: string | null
+  buyer_id: string | null
   created_at: string
   updated_at: string
   profiles: {
@@ -227,6 +229,9 @@ export function useProductDetail(
         isFavorite: isFavorited,
         viewCount: queryResult.view_count,
         sellerId: queryResult.seller_id,
+        pendingSince: queryResult.pending_since,
+        soldAt: queryResult.sold_at,
+        buyerId: queryResult.buyer_id,
       }
 
       // Validate required data

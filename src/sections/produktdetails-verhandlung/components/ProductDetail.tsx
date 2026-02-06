@@ -56,6 +56,8 @@ export function ProductDetail({
 }: ProductDetailProps & { isAuthenticated?: boolean; initialChatOpen?: boolean }) {
   const [isChatOpen, setIsChatOpen] = useState(initialChatOpen)
   const isSeller = currentUser.id === seller.id
+  // Product is unavailable for buyer actions when pending or sold
+  const isUnavailable = !!(product.pendingSince || product.soldAt)
   // Determine the "other party" for the chat - if seller viewing, show buyer; if buyer, show seller
   const chatOtherParty = isSeller ? (buyer || seller) : seller
 
@@ -126,8 +128,8 @@ export function ProductDetail({
               </div>
             </div>
 
-            {/* Make Offer Button - only show if price is negotiable and user is authenticated */}
-            {isAuthenticated && !isSeller && product.isNegotiable && (
+            {/* Make Offer Button - only show if price is negotiable, user is authenticated, and product is available */}
+            {isAuthenticated && !isSeller && !isUnavailable && product.isNegotiable && (
               <button
                 onClick={onMakeOffer}
                 className="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-colors"
@@ -252,9 +254,18 @@ export function ProductDetail({
               onViewProfile={() => onViewSellerProfile?.(seller.id)}
             />
 
+            {/* Unavailable Banner */}
+            {isUnavailable && !isSeller && (
+              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-5 text-center">
+                <p className="font-semibold text-amber-800 dark:text-amber-300">
+                  {product.soldAt ? 'Dieses Produkt wurde bereits verkauft.' : 'Dieses Produkt ist bereits reserviert.'}
+                </p>
+              </div>
+            )}
+
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-3">
-              {!isSeller && (
+              {!isSeller && !isUnavailable && (
                 <button
                   onClick={onBuyRequest}
                   className="flex-1 px-6 py-4 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-colors shadow-lg shadow-red-500/20"
@@ -265,7 +276,7 @@ export function ProductDetail({
                   Kaufen
                 </button>
               )}
-              {isAuthenticated && (
+              {isAuthenticated && !isUnavailable && (
               <button
                 onClick={() => onToggleFavorite?.(product.id)}
                 className={`px-4 py-4 rounded-xl border transition-colors ${
