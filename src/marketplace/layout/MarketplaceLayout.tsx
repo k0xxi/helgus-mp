@@ -28,15 +28,13 @@ export function MarketplaceLayout() {
   // Refresh profile data when navigating to different pages
   useNavigationRefresh()
 
-  // Set up real-time subscriptions for data sync
-  useProductRealtimeSync()
-  useProfileRealtimeSync()
-
-  // Set up real-time subscription for notifications
-  useNotificationsSubscription(user?.id)
-
-  // Set up real-time subscription for conversations (message badge updates)
-  useConversationsSubscription(user?.id)
+  // DISABLED: Real-time subscriptions causing WebSocket to stay pending
+  // These are optional features - app works fine without them
+  // TODO: Re-enable one by one after investigating Supabase Realtime settings
+  // useProductRealtimeSync()
+  // useProfileRealtimeSync()
+  // useNotificationsSubscription(user?.id)
+  // useConversationsSubscription(user?.id)
 
   // Calculate total unread messages
   const totalUnreadMessages = conversations.reduce((sum, conv) => sum + (conv.unreadCount || 0), 0)
