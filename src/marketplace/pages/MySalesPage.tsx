@@ -35,6 +35,8 @@ export function MySalesPage() {
         alert('Fehler beim Aktualisieren des Status.')
       } else {
         setConfirmSoldId(null)
+        // Refetch sales after successful completion
+        await refetch()
       }
     } finally {
       setCompletingId(null)
