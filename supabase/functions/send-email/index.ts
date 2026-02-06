@@ -26,6 +26,8 @@ interface EmailRequest {
 Deno.serve(async (req): Promise<Response> => {
   let templateMailSent = false;
 
+  console.log('[send-email] Request received:', { method: req.method, headers: Object.fromEntries(req.headers) });
+
   // CORS Preflight
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -35,8 +37,10 @@ Deno.serve(async (req): Promise<Response> => {
   let body: EmailRequest;
   try {
     body = await req.json() as EmailRequest;
+    console.log('[send-email] Body parsed:', { type: body.type, to: body.to });
   } catch (e: unknown) {
     const errorMessage = e instanceof Error ? e.message : 'Unknown error';
+    console.error('[send-email] Body parse error:', errorMessage);
     return new Response(JSON.stringify({ success: false, error: 'Body konnte nicht gelesen werden', details: errorMessage }), { status: 400, headers: corsHeaders });
   }
 
@@ -45,17 +49,22 @@ Deno.serve(async (req): Promise<Response> => {
     const authHeader = req.headers.get('authorization');
     const jwt = authHeader?.split(' ')[1];
     if (!jwt) {
+      console.error('[send-email] No JWT token found');
       return new Response(JSON.stringify({ success: false, error: 'Kein Auth-Token im Header' }), { status: 401, headers: corsHeaders });
     }
+    console.log('[send-email] JWT token found');
   } catch (e: unknown) {
     const errorMessage = e instanceof Error ? e.message : 'Unknown error';
+    console.error('[send-email] JWT check error:', errorMessage);
     return new Response(JSON.stringify({ success: false, error: 'Fehler beim JWT-Check', debug: errorMessage }), { status: 401, headers: corsHeaders });
   }
 
   try {
     if (!RESEND_API_KEY) {
+      console.error('[send-email] RESEND_API_KEY is not configured');
       throw new Error("RESEND_API_KEY nicht konfiguriert");
     }
+    console.log('[send-email] RESEND_API_KEY is configured');
 
     const {
       type,
@@ -171,6 +180,7 @@ Deno.serve(async (req): Promise<Response> => {
 
       case "counter_offer": {
         const templateId = TEMPLATES.counter_offer;
+        console.log('[send-email] counter_offer - templateId:', templateId);
         if (templateId) {
           const templatePayload: any = {
             from: "HELGUS Marktplatz <no-reply@mp.helgus.at>",
@@ -192,6 +202,7 @@ Deno.serve(async (req): Promise<Response> => {
           if (replyTo) {
             templatePayload.reply_to = replyTo;
           }
+          console.log('[send-email] Sending email via Resend (template):', { to, templateId });
           const res = await fetch("https://api.resend.com/emails", {
             method: "POST",
             headers: {
@@ -202,9 +213,11 @@ Deno.serve(async (req): Promise<Response> => {
           });
           if (!res.ok) {
             const error = await res.text();
+            console.error('[send-email] Resend error:', { status: res.status, error });
             throw new Error(`Resend Fehler: ${error}`);
           }
           const data = await res.json();
+          console.log('[send-email] Email sent successfully:', { id: data.id });
           templateMailSent = true;
           return new Response(
             JSON.stringify({ success: true, id: data.id }),
@@ -214,6 +227,7 @@ Deno.serve(async (req): Promise<Response> => {
             }
           );
         }
+        console.log('[send-email] counter_offer - no templateId, using fallback HTML');
         // Fallback HTML
         emailSubject = `Neues Gegenangebot für ${productTitle}`;
         emailHtml = `

@@ -539,42 +539,6 @@ export function useConversation(
           message: content.length > 50 ? content.substring(0, 50) + '...' : content,
           productId,
         })
-
-        // Sende E-Mail an Empfänger (falls aktiviert)
-        try {
-          const { data: recipientProfile, error: profileError } = await supabase
-            .from('profiles')
-            .select('email, name')
-            .eq('id', recipientId)
-            .single()
-
-          if (!profileError && recipientProfile) {
-            const profile = recipientProfile as any
-            if (profile?.email) {
-              const { data: { user } } = await supabase.auth.getUser()
-
-              // Fetch product title for email
-              const { data: productData } = await supabase
-                .from('products')
-                .select('title')
-                .eq('id', productId)
-                .single()
-
-              void sendEmail({
-                type: 'new_message',
-                to: profile.email,
-                productTitle: productData?.title || 'Produkt',
-                productId: productId,
-                buyerName: profile.name || 'Nutzer',
-                sellerName: user?.user_metadata?.name || 'Ein Nutzer',
-                message: content.substring(0, 150),
-              })
-            }
-          }
-        } catch (emailErr) {
-          // Fehler beim Email-Versand ignorieren - Email-System ist optional
-          console.warn('[Messages] Email sending failed:', emailErr)
-        }
       } else {
         console.warn('[Messages] No recipient ID found for notification', {
           hasConversation: !!conversation,

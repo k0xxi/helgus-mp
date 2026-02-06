@@ -31,6 +31,8 @@ export async function sendEmail(params: SendEmailParams): Promise<void> {
       return
     }
 
+    console.log('[Email] Sending email:', { type: params.type, to: params.to })
+
     const response = await fetch(
       `${SUPABASE_URL}/functions/v1/send-email`,
       {
@@ -43,11 +45,20 @@ export async function sendEmail(params: SendEmailParams): Promise<void> {
       }
     )
 
+    console.log('[Email] Response status:', response.status)
+
     if (!response.ok) {
       const error = await response.text()
-      console.error('[Email] Fehler beim Senden:', error)
+      console.error('[Email] Fehler beim Senden:', { status: response.status, error })
+      try {
+        const errorJson = JSON.parse(error)
+        console.error('[Email] Error details:', errorJson)
+      } catch {
+        // Response is not JSON
+      }
     } else {
-      console.log('[Email] Erfolgreich gesendet:', params.type)
+      const result = await response.json()
+      console.log('[Email] Erfolgreich gesendet:', { type: params.type, id: result.id })
     }
   } catch (err) {
     console.error('[Email] Exception:', err)
