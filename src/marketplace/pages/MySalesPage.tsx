@@ -4,6 +4,7 @@ import { ShoppingCart, CheckCircle, Clock, MapPin, RotateCcw } from 'lucide-reac
 import { useAuth } from '@/marketplace/context/AuthContext'
 import { useMySales } from '@/marketplace/hooks/useMySales'
 import { useMyListings } from '@/marketplace/hooks/useProfile'
+import { AlertDialog } from '@/marketplace/components/AlertDialog'
 
 export function MySalesPage() {
   const { user, loading: authLoading } = useAuth()
@@ -14,6 +15,7 @@ export function MySalesPage() {
   const [completingId, setCompletingId] = useState<string | null>(null)
   const [reactivatingId, setReactivatingId] = useState<string | null>(null)
   const [confirmReactivateId, setConfirmReactivateId] = useState<string | null>(null)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -23,16 +25,12 @@ export function MySalesPage() {
   }, [user, authLoading, navigate])
 
   const handleMarkAsSold = async (saleId: string) => {
-    if (!confirm('Möchten Sie diesen Verkauf als abgeschlossen markieren?')) {
-      return
-    }
-
     setCompletingId(saleId)
     try {
       const { error } = await markAsSold(saleId)
       if (error) {
         console.error('Error marking as sold:', error)
-        alert('Fehler beim Aktualisieren des Status.')
+        setErrorMessage('Fehler beim Aktualisieren des Status.')
       } else {
         setConfirmSoldId(null)
         // Refetch sales after successful completion
@@ -49,7 +47,7 @@ export function MySalesPage() {
       const { error } = await reactivateListing(saleId)
       if (error) {
         console.error('Error reactivating listing:', error)
-        alert('Fehler beim Reaktivieren des Produkts.')
+        setErrorMessage('Fehler beim Reaktivieren des Produkts.')
       } else {
         setConfirmReactivateId(null)
         // Refetch sales after successful reactivation
@@ -319,6 +317,15 @@ export function MySalesPage() {
           )}
         </>
       )}
+
+      {/* Error Dialog */}
+      <AlertDialog
+        isOpen={!!errorMessage}
+        title="Fehler"
+        message={errorMessage || ''}
+        onClose={() => setErrorMessage(null)}
+        variant="error"
+      />
     </div>
   )
 }
