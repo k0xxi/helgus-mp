@@ -852,6 +852,7 @@ export function useOffers(
               buyerName: profile.name || 'Käufer',
               offerAmount: offer.amount,
               productPrice: productData?.price ? Number(productData.price) : 0,
+              buyerEmail: profile.email,
             })
           }
         }

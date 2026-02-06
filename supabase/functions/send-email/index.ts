@@ -80,16 +80,14 @@ Deno.serve(async (req): Promise<Response> => {
     // Reply-To validieren
     let replyTo: string | undefined = undefined;
     const emailRegex = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-    const nameEmailRegex = /^.+ <[^@\s]+@[^@\s]+\.[^@\s]+>$/;
-    function isValidReplyTo(val: unknown): val is string {
-      return (
-        typeof val === "string" &&
-        val.trim().length > 0 &&
-        (emailRegex.test(val) || nameEmailRegex.test(val))
-      );
+    function isValidEmail(email: unknown): boolean {
+      return typeof email === "string" && email.trim().length > 0 && emailRegex.test(email.trim());
     }
-    if (isValidReplyTo(buyerEmail)) {
-      replyTo = buyerEmail;
+    if (isValidEmail(buyerEmail)) {
+      replyTo = (buyerEmail as string).trim();
+      console.log('[send-email] reply_to set to:', replyTo);
+    } else if (buyerEmail) {
+      console.warn('[send-email] Invalid reply_to email:', buyerEmail);
     }
 
     // Produktlink
