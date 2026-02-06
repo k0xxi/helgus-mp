@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase'
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
 
 export interface SendEmailParams {
   type: 'new_message' | 'counter_offer' | 'counter_offer_accepted' |
@@ -39,6 +40,7 @@ export async function sendEmail(params: SendEmailParams): Promise<void> {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
         },
         body: JSON.stringify(params),
       }
