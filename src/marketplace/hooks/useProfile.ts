@@ -522,15 +522,16 @@ export function useMyListings(userId: string | undefined): UseMyListingsResult {
 
   const reactivateListing = useCallback(async (listingId: string): Promise<{ error: Error | null }> => {
     try {
-      // Cancel the pending purchase
-      await supabase
+      // Delete the pending purchase
+      const { error: deleteError } = await supabase
         .from('purchases')
-        .update({
-          status: 'cancelled',
-          cancelled_at: new Date().toISOString()
-        })
+        .delete()
         .eq('product_id', listingId)
         .eq('status', 'pending')
+
+      if (deleteError) {
+        throw deleteError
+      }
 
       // Reactivate product
       const { error: updateError } = await supabase
