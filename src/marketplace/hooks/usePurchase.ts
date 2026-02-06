@@ -87,69 +87,55 @@ export function usePurchase(userId: string | undefined): UsePurchaseResult {
 
         // Fetch product and seller/buyer details for email
         try {
-          console.log('[usePurchase] Fetching product and user details for email...')
-
-          const { data: product, error: productErr } = await supabase
+          const { data: product } = await supabase
             .from('products')
             .select('id, title, price')
             .eq('id', productId)
             .single()
 
-          console.log('[usePurchase] Product fetch:', { product, error: productErr })
-
-          const { data: seller, error: sellerErr } = await supabase
+          const { data: seller } = await supabase
             .from('profiles')
-            .select('email, name')
+            .select('name, email')
             .eq('id', sellerId)
             .single()
 
-          console.log('[usePurchase] Seller fetch:', { seller, error: sellerErr })
-
-          const { data: buyer, error: buyerErr } = await supabase
+          const { data: buyer } = await supabase
             .from('profiles')
-            .select('email, name')
+            .select('name, email')
             .eq('id', userId)
             .single()
 
-          console.log('[usePurchase] Buyer fetch:', { buyer, error: buyerErr })
-
-          if (!product) {
-            console.warn('[usePurchase] Product data missing')
-          }
-          if (!seller) {
-            console.warn('[usePurchase] Seller data missing')
-          }
-          if (!buyer) {
-            console.warn('[usePurchase] Buyer data missing')
-          }
-
-          if (product && seller && buyer) {
+          if (product && seller && (seller as any).email && buyer && (buyer as any).email) {
             console.log('[usePurchase] Sending emails...')
 
             // Send email to seller (purchase_seller)
             await sendEmail({
               type: 'purchase_seller',
-              to: seller.email,
+              to: (seller as any).email,
               productTitle: product.title,
               productId: productId,
               productPrice: price,
-              sellerName: seller.name,
-              buyerName: buyer.name,
+              sellerName: seller.name || 'Verkäufer',
+              buyerName: buyer.name || 'Ein Käufer',
             })
 
             // Send email to buyer (purchase_buyer)
             await sendEmail({
               type: 'purchase_buyer',
-              to: buyer.email,
+              to: (buyer as any).email,
               productTitle: product.title,
               productId: productId,
               productPrice: price,
-              buyerName: buyer.name,
+              buyerName: buyer.name || 'Ein Käufer',
             })
 
             console.log('[usePurchase] Emails sent to seller and buyer')
           } else {
-            console.warn('[usePurchase] Cannot send emails - missing data', { product: !!product, seller: !!seller, buyer: !!buyer })
+            console.warn('[usePurchase] Cannot send emails - missing data', {
+              product: !!product,
+              sellerEmail: !!(seller as any)?.email,
+              buyerEmail: !!(buyer as any)?.email,
+            })
           }
         } catch (emailErr) {
           console.error('[usePurchase] Email sending failed (non-blocking):', emailErr)
