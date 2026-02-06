@@ -265,6 +265,7 @@ Deno.serve(async (req): Promise<Response> => {
 
       case "counter_offer_accepted": {
         const templateId = TEMPLATES.counter_offer_accepted;
+        console.log('[send-email] counter_offer_accepted - templateId:', templateId);
         if (templateId) {
           const templatePayload: any = {
             from: "HELGUS Marktplatz <no-reply@mp.helgus.at>",
@@ -284,6 +285,7 @@ Deno.serve(async (req): Promise<Response> => {
           if (replyTo) {
             templatePayload.reply_to = replyTo;
           }
+          console.log('[send-email] Sending email via Resend (template):', { to, templateId });
           const res = await fetch("https://api.resend.com/emails", {
             method: "POST",
             headers: {
@@ -294,9 +296,11 @@ Deno.serve(async (req): Promise<Response> => {
           });
           if (!res.ok) {
             const error = await res.text();
+            console.error('[send-email] Resend error:', { status: res.status, error });
             throw new Error(`Resend Fehler: ${error}`);
           }
           const data = await res.json();
+          console.log('[send-email] Email sent successfully:', { id: data.id });
           templateMailSent = true;
           return new Response(
             JSON.stringify({ success: true, id: data.id }),
@@ -306,6 +310,7 @@ Deno.serve(async (req): Promise<Response> => {
             }
           );
         }
+        console.log('[send-email] counter_offer_accepted - no templateId, using fallback HTML');
         // Fallback HTML
         emailSubject = "Dein Gegenangebot wurde angenommen";
         emailHtml = `
@@ -323,6 +328,7 @@ Deno.serve(async (req): Promise<Response> => {
 
       case "counter_offer_refused": {
         const templateId = TEMPLATES.counter_offer_refused;
+        console.log('[send-email] counter_offer_refused - templateId:', templateId);
         if (templateId) {
           const templatePayload: any = {
             from: "HELGUS Marktplatz <no-reply@mp.helgus.at>",
@@ -341,6 +347,7 @@ Deno.serve(async (req): Promise<Response> => {
           if (replyTo) {
             templatePayload.reply_to = replyTo;
           }
+          console.log('[send-email] Sending email via Resend (template):', { to, templateId });
           const res = await fetch("https://api.resend.com/emails", {
             method: "POST",
             headers: {
@@ -351,9 +358,11 @@ Deno.serve(async (req): Promise<Response> => {
           });
           if (!res.ok) {
             const error = await res.text();
+            console.error('[send-email] Resend error:', { status: res.status, error });
             throw new Error(`Resend Fehler: ${error}`);
           }
           const data = await res.json();
+          console.log('[send-email] Email sent successfully:', { id: data.id });
           templateMailSent = true;
           return new Response(
             JSON.stringify({ success: true, id: data.id }),
@@ -363,6 +372,7 @@ Deno.serve(async (req): Promise<Response> => {
             }
           );
         }
+        console.log('[send-email] counter_offer_refused - no templateId, using fallback HTML');
         // Fallback HTML
         emailSubject = "Dein Gegenangebot wurde abgelehnt";
         emailHtml = `
@@ -379,6 +389,7 @@ Deno.serve(async (req): Promise<Response> => {
 
       case "purchase_buyer": {
         const templateId = TEMPLATES.purchase_buyer;
+        console.log('[send-email] purchase_buyer - templateId:', templateId);
         if (templateId) {
           const templatePayload: any = {
             from: "HELGUS Marktplatz <no-reply@mp.helgus.at>",
@@ -397,6 +408,7 @@ Deno.serve(async (req): Promise<Response> => {
           if (replyTo) {
             templatePayload.reply_to = replyTo;
           }
+          console.log('[send-email] Sending email via Resend (template):', { to, templateId });
           const res = await fetch("https://api.resend.com/emails", {
             method: "POST",
             headers: {
@@ -407,9 +419,11 @@ Deno.serve(async (req): Promise<Response> => {
           });
           if (!res.ok) {
             const error = await res.text();
+            console.error('[send-email] Resend error:', { status: res.status, error });
             throw new Error(`Resend Fehler: ${error}`);
           }
           const data = await res.json();
+          console.log('[send-email] Email sent successfully:', { id: data.id });
           templateMailSent = true;
           return new Response(
             JSON.stringify({ success: true, id: data.id }),
@@ -419,6 +433,7 @@ Deno.serve(async (req): Promise<Response> => {
             }
           );
         }
+        console.log('[send-email] purchase_buyer - no templateId, using fallback HTML');
         // Fallback HTML
         emailSubject = `Bestellung bestätigt: ${productTitle}`;
         emailHtml = `
@@ -467,6 +482,7 @@ Deno.serve(async (req): Promise<Response> => {
 
       case "purchase_seller": {
         const templateId = TEMPLATES.purchase_seller;
+        console.log('[send-email] purchase_seller - templateId:', templateId);
         if (templateId) {
           const templatePayload: any = {
             from: "HELGUS Marktplatz <no-reply@mp.helgus.at>",
@@ -486,6 +502,7 @@ Deno.serve(async (req): Promise<Response> => {
           if (replyTo) {
             templatePayload.reply_to = replyTo;
           }
+          console.log('[send-email] Sending email via Resend (template):', { to, templateId });
           const res = await fetch("https://api.resend.com/emails", {
             method: "POST",
             headers: {
@@ -496,9 +513,11 @@ Deno.serve(async (req): Promise<Response> => {
           });
           if (!res.ok) {
             const error = await res.text();
+            console.error('[send-email] Resend error:', { status: res.status, error });
             throw new Error(`Resend Fehler: ${error}`);
           }
           const data = await res.json();
+          console.log('[send-email] Email sent successfully:', { id: data.id });
           templateMailSent = true;
           return new Response(
             JSON.stringify({ success: true, id: data.id }),
@@ -508,6 +527,7 @@ Deno.serve(async (req): Promise<Response> => {
             }
           );
         }
+        console.log('[send-email] purchase_seller - no templateId, using fallback HTML');
         // Fallback HTML
         emailSubject = `🎉 Verkauf: ${productTitle}`;
         emailHtml = `
