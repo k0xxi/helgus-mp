@@ -39,7 +39,6 @@ export async function sendEmail(params: SendEmailParams): Promise<void> {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
         },
         body: JSON.stringify(params),
       }
