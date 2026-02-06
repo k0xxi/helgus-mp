@@ -143,61 +143,67 @@ export function useConversationsQuery(userId: string | undefined) {
 
       if (fetchError) throw fetchError
 
-      // Fetch latest message and unread count for each conversation
-      const conversationsWithMessages = await Promise.all(
-        (data || []).map(async (conv: SupabaseConversation) => {
-          const { data: messageData } = await (supabase
-            .from('messages')
-            .select('*')
-            .eq('conversation_id', conv.id)
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .single() as any)
+      // OPTIMIZED: Fetch all messages for all conversations in 1 query (instead of 2N queries)
+      const conversationIds = (data || []).map((conv: SupabaseConversation) => conv.id)
 
-          const { count, error: countError } = await supabase
-            .from('messages')
-            .select('id', { count: 'exact', head: true })
-            .eq('conversation_id', conv.id)
-            .eq('is_read', false)
-            .neq('sender_id', userId)
+      let allMessages: any[] = []
+      if (conversationIds.length > 0) {
+        const { data: messagesData, error: messagesError } = await supabase
+          .from('messages')
+          .select('*')
+          .in('conversation_id', conversationIds)
+          .order('created_at', { ascending: false })
 
-          if (countError) {
-            console.error('Error fetching unread count:', countError)
-          }
+        if (messagesError) {
+          console.error('Error fetching messages:', messagesError)
+        } else {
+          allMessages = messagesData || []
+        }
+      }
 
-          return {
-            id: conv.id,
-            productId: conv.product_id,
-            buyerId: conv.buyer_id,
-            sellerId: conv.seller_id,
-            createdAt: new Date(conv.created_at),
-            product: conv.products ? {
-              id: conv.products.id,
-              title: conv.products.title,
-              sellerId: conv.products.seller_id,
-            } : undefined,
-            buyer: conv.profiles_buyer ? {
-              id: conv.profiles_buyer.id,
-              name: conv.profiles_buyer.name,
-              avatarUrl: conv.profiles_buyer.avatar_url,
-            } : undefined,
-            seller: conv.profiles_seller ? {
-              id: conv.profiles_seller.id,
-              name: conv.profiles_seller.name,
-              avatarUrl: conv.profiles_seller.avatar_url,
-            } : undefined,
-            lastMessage: messageData ? {
-              id: messageData.id,
-              conversationId: messageData.conversation_id,
-              senderId: messageData.sender_id,
-              content: messageData.content,
-              isRead: messageData.is_read,
-              createdAt: new Date(messageData.created_at),
-            } : undefined,
-            unreadCount: count || 0,
-          }
-        })
-      )
+      // OPTIMIZED: Process all data in JavaScript (O(n) instead of N queries)
+      const conversationsWithMessages = (data || []).map((conv: SupabaseConversation) => {
+        // Find latest message for this conversation
+        const convMessages = allMessages.filter((m) => m.conversation_id === conv.id)
+        const lastMessage = convMessages.length > 0 ? convMessages[0] : null
+
+        // Count unread messages from the other party
+        const unreadCount = convMessages.filter(
+          (m) => !m.is_read && m.sender_id !== userId
+        ).length
+
+        return {
+          id: conv.id,
+          productId: conv.product_id,
+          buyerId: conv.buyer_id,
+          sellerId: conv.seller_id,
+          createdAt: new Date(conv.created_at),
+          product: conv.products ? {
+            id: conv.products.id,
+            title: conv.products.title,
+            sellerId: conv.products.seller_id,
+          } : undefined,
+          buyer: conv.profiles_buyer ? {
+            id: conv.profiles_buyer.id,
+            name: conv.profiles_buyer.name,
+            avatarUrl: conv.profiles_buyer.avatar_url,
+          } : undefined,
+          seller: conv.profiles_seller ? {
+            id: conv.profiles_seller.id,
+            name: conv.profiles_seller.name,
+            avatarUrl: conv.profiles_seller.avatar_url,
+          } : undefined,
+          lastMessage: lastMessage ? {
+            id: lastMessage.id,
+            conversationId: lastMessage.conversation_id,
+            senderId: lastMessage.sender_id,
+            content: lastMessage.content,
+            isRead: lastMessage.is_read,
+            createdAt: new Date(lastMessage.created_at),
+          } : undefined,
+          unreadCount: unreadCount,
+        }
+      })
 
       return conversationsWithMessages
     },
@@ -421,51 +427,57 @@ export function useProductConversationsListQuery(
 
       if (fetchError) throw fetchError
 
-      // Fetch latest message and unread count for each conversation
-      const conversationsWithMessages = await Promise.all(
-        (data || []).map(async (conv: any) => {
-          const { data: messageData } = await supabase
-            .from('messages')
-            .select('*')
-            .eq('conversation_id', conv.id)
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .single<any>()
+      // OPTIMIZED: Fetch all messages for all conversations in 1 query (instead of 2N queries)
+      const conversationIds = (data || []).map((conv: any) => conv.id)
 
-          const { count, error: countError } = await supabase
-            .from('messages')
-            .select('id', { count: 'exact', head: true })
-            .eq('conversation_id', conv.id)
-            .eq('is_read', false)
-            .neq('sender_id', sellerId)
+      let allMessages: any[] = []
+      if (conversationIds.length > 0) {
+        const { data: messagesData, error: messagesError } = await supabase
+          .from('messages')
+          .select('*')
+          .in('conversation_id', conversationIds)
+          .order('created_at', { ascending: false })
 
-          if (countError) {
-            console.error('Error fetching unread count:', countError)
-          }
+        if (messagesError) {
+          console.error('Error fetching messages:', messagesError)
+        } else {
+          allMessages = messagesData || []
+        }
+      }
 
-          return {
-            id: conv.id,
-            productId: conv.product_id,
-            buyerId: conv.buyer_id,
-            sellerId: conv.seller_id,
-            createdAt: new Date(conv.created_at),
-            buyer: conv.profiles_buyer ? {
-              id: conv.profiles_buyer.id,
-              name: conv.profiles_buyer.name,
-              avatarUrl: conv.profiles_buyer.avatar_url,
-            } : undefined,
-            lastMessage: messageData ? {
-              id: messageData.id,
-              conversationId: messageData.conversation_id,
-              senderId: messageData.sender_id,
-              content: messageData.content,
-              isRead: messageData.is_read,
-              createdAt: new Date(messageData.created_at),
-            } : undefined,
-            unreadCount: count || 0,
-          }
-        })
-      )
+      // OPTIMIZED: Process all data in JavaScript (O(n) instead of N queries)
+      const conversationsWithMessages = (data || []).map((conv: any) => {
+        // Find latest message for this conversation
+        const convMessages = allMessages.filter((m) => m.conversation_id === conv.id)
+        const lastMessage = convMessages.length > 0 ? convMessages[0] : null
+
+        // Count unread messages from the buyer
+        const unreadCount = convMessages.filter(
+          (m) => !m.is_read && m.sender_id !== sellerId
+        ).length
+
+        return {
+          id: conv.id,
+          productId: conv.product_id,
+          buyerId: conv.buyer_id,
+          sellerId: conv.seller_id,
+          createdAt: new Date(conv.created_at),
+          buyer: conv.profiles_buyer ? {
+            id: conv.profiles_buyer.id,
+            name: conv.profiles_buyer.name,
+            avatarUrl: conv.profiles_buyer.avatar_url,
+          } : undefined,
+          lastMessage: lastMessage ? {
+            id: lastMessage.id,
+            conversationId: lastMessage.conversation_id,
+            senderId: lastMessage.sender_id,
+            content: lastMessage.content,
+            isRead: lastMessage.is_read,
+            createdAt: new Date(lastMessage.created_at),
+          } : undefined,
+          unreadCount: unreadCount,
+        }
+      })
 
       return conversationsWithMessages
     },
