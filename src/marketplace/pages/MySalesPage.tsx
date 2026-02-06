@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ShoppingCart, CheckCircle, Clock, MapPin, MessageSquare } from 'lucide-react'
+import { ShoppingCart, CheckCircle, Clock, RotateCcw } from 'lucide-react'
 import { useAuth } from '@/marketplace/context/AuthContext'
 import { useMySales } from '@/marketplace/hooks/useMySales'
 import { useMyListings } from '@/marketplace/hooks/useProfile'
@@ -8,10 +8,12 @@ import { useMyListings } from '@/marketplace/hooks/useProfile'
 export function MySalesPage() {
   const { user, loading: authLoading } = useAuth()
   const navigate = useNavigate()
-  const { sales, loading: salesLoading } = useMySales(user?.id)
-  const { markAsSold } = useMyListings(user?.id)
+  const { sales, loading: salesLoading, refetch } = useMySales(user?.id)
+  const { markAsSold, reactivateListing } = useMyListings(user?.id)
   const [confirmSoldId, setConfirmSoldId] = useState<string | null>(null)
   const [completingId, setCompletingId] = useState<string | null>(null)
+  const [reactivatingId, setReactivatingId] = useState<string | null>(null)
+  const [confirmReactivateId, setConfirmReactivateId] = useState<string | null>(null)
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -39,8 +41,21 @@ export function MySalesPage() {
     }
   }
 
-  const handleContactBuyer = (buyerId: string) => {
-    navigate(`/messages?buyerId=${buyerId}`)
+  const handleReactivateListing = async (saleId: string) => {
+    setReactivatingId(saleId)
+    try {
+      const { error } = await reactivateListing(saleId)
+      if (error) {
+        console.error('Error reactivating listing:', error)
+        alert('Fehler beim Reaktivieren des Produkts.')
+      } else {
+        setConfirmReactivateId(null)
+        // Refetch sales after successful reactivation
+        await refetch()
+      }
+    } finally {
+      setReactivatingId(null)
+    }
   }
 
   const loading = authLoading || salesLoading
@@ -166,11 +181,12 @@ export function MySalesPage() {
                           </span>
                           <div className="flex gap-2">
                             <button
-                              onClick={() => handleContactBuyer(sale.buyerId)}
-                              className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors"
+                              onClick={() => setConfirmReactivateId(sale.id)}
+                              disabled={reactivatingId === sale.id}
+                              className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                              <MessageSquare className="w-4 h-4" />
-                              Kontakt
+                              <RotateCcw className="w-4 h-4" />
+                              Reaktivieren
                             </button>
                             <button
                               onClick={() => setConfirmSoldId(sale.id)}
@@ -183,7 +199,31 @@ export function MySalesPage() {
                           </div>
                         </div>
 
-                        {/* Confirmation Message */}
+                        {/* Confirmation Messages */}
+                        {confirmReactivateId === sale.id && (
+                          <div className="mt-3 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                            <p className="text-sm text-amber-700 dark:text-amber-400 mb-2">
+                              Dieses Produkt wieder online stellen? Die Reservierung wird storniert.
+                            </p>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleReactivateListing(sale.id)}
+                                disabled={reactivatingId === sale.id}
+                                className="px-3 py-1 text-xs font-medium text-white bg-amber-600 hover:bg-amber-700 rounded transition-colors disabled:opacity-50"
+                              >
+                                {reactivatingId === sale.id ? 'Wird reaktiviert...' : 'Ja, reaktivieren'}
+                              </button>
+                              <button
+                                onClick={() => setConfirmReactivateId(null)}
+                                disabled={reactivatingId === sale.id}
+                                className="px-3 py-1 text-xs font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-colors disabled:opacity-50"
+                              >
+                                Abbrechen
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
                         {confirmSoldId === sale.id && (
                           <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
                             <p className="text-sm text-blue-700 dark:text-blue-400 mb-2">
