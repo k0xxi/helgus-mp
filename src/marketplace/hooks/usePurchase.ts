@@ -87,7 +87,7 @@ export function usePurchase(userId: string | undefined): UsePurchaseResult {
 
         // Send purchase emails via RPC function
         try {
-          const { data: emailData, error: rpcError } = await supabase.rpc('send_purchase_emails', {
+          const { data: emailData, error: rpcError } = await (supabase.rpc as any)('send_purchase_emails', {
             p_product_id: productId,
             p_seller_id: sellerId,
             p_buyer_id: userId,
@@ -96,7 +96,7 @@ export function usePurchase(userId: string | undefined): UsePurchaseResult {
           })
 
           if (!rpcError && emailData) {
-            const { seller_email, buyer_email, seller_name, buyer_name } = emailData
+            const { seller_email, buyer_email, seller_name, buyer_name } = emailData as any
 
             // Fetch product title
             const { data: product } = await supabase
