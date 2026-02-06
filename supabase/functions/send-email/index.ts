@@ -44,20 +44,12 @@ Deno.serve(async (req): Promise<Response> => {
     return new Response(JSON.stringify({ success: false, error: 'Body konnte nicht gelesen werden', details: errorMessage }), { status: 400, headers: corsHeaders });
   }
 
-  // Auth-Token erforderlich
-  try {
-    const authHeader = req.headers.get('authorization');
-    const jwt = authHeader?.split(' ')[1];
-    if (!jwt) {
-      console.error('[send-email] No JWT token found');
-      return new Response(JSON.stringify({ success: false, error: 'Kein Auth-Token im Header' }), { status: 401, headers: corsHeaders });
-    }
-    console.log('[send-email] JWT token found');
-  } catch (e: unknown) {
-    const errorMessage = e instanceof Error ? e.message : 'Unknown error';
-    console.error('[send-email] JWT check error:', errorMessage);
-    return new Response(JSON.stringify({ success: false, error: 'Fehler beim JWT-Check', debug: errorMessage }), { status: 401, headers: corsHeaders });
+  // Validiere dass "to" eine gültige Email ist
+  if (!body.to || !body.to.includes('@')) {
+    console.error('[send-email] Invalid recipient email');
+    return new Response(JSON.stringify({ success: false, error: 'Ungültige Empfänger-Email' }), { status: 400, headers: corsHeaders });
   }
+  console.log('[send-email] Request validation passed');
 
   try {
     if (!RESEND_API_KEY) {
