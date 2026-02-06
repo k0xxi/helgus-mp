@@ -522,16 +522,22 @@ export function useMyListings(userId: string | undefined): UseMyListingsResult {
 
   const reactivateListing = useCallback(async (listingId: string): Promise<{ error: Error | null }> => {
     try {
-      // Delete the pending purchase
+      console.log('[reactivateListing] Starting reactivation for product:', listingId)
+
+      // Delete the purchase record (regardless of status)
       const { error: deleteError } = await supabase
         .from('purchases')
         .delete()
         .eq('product_id', listingId)
-        .eq('status', 'pending')
+
+      console.log('[reactivateListing] Delete result:', { deleteError })
 
       if (deleteError) {
+        console.error('[reactivateListing] Delete error:', deleteError)
         throw deleteError
       }
+
+      console.log('[reactivateListing] Purchase record deleted successfully')
 
       // Reactivate product
       const { error: updateError } = await supabase
