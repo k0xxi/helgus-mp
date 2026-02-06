@@ -84,6 +84,59 @@ export function usePurchase(userId: string | undefined): UsePurchaseResult {
           productId: productId
         })
 
+        // Fetch product and seller/buyer details for email
+        try {
+          const { data: product } = await supabase
+            .from('products')
+            .select('id, title, price')
+            .eq('id', productId)
+            .single()
+
+          const { data: seller } = await supabase
+            .from('profiles')
+            .select('email, name')
+            .eq('id', sellerId)
+            .single()
+
+          const { data: buyer } = await supabase
+            .from('profiles')
+            .select('email, name')
+            .eq('id', userId)
+            .single()
+
+          if (product && seller && buyer) {
+            // Send email to seller (purchase_seller)
+            await supabase.functions.invoke('send-email', {
+              body: {
+                type: 'purchase_seller',
+                to: seller.email,
+                productTitle: product.title,
+                productId: productId,
+                productPrice: price,
+                sellerName: seller.name,
+                buyerName: buyer.name,
+              },
+            })
+
+            // Send email to buyer (purchase_buyer)
+            await supabase.functions.invoke('send-email', {
+              body: {
+                type: 'purchase_buyer',
+                to: buyer.email,
+                productTitle: product.title,
+                productId: productId,
+                productPrice: price,
+                buyerName: buyer.name,
+              },
+            })
+
+            console.log('[usePurchase] Emails sent to seller and buyer')
+          }
+        } catch (emailErr) {
+          console.warn('[usePurchase] Email sending failed (non-blocking):', emailErr)
+          // Don't throw - email sending is fire-and-forget
+        }
+
         return { error: null }
       } catch (err) {
         console.error('Error creating direct purchase:', err)
