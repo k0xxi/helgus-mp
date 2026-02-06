@@ -85,62 +85,10 @@ export function usePurchase(userId: string | undefined): UsePurchaseResult {
           productId: productId
         })
 
-        // Fetch product and seller/buyer details for email
-        try {
-          const { data: product } = await supabase
-            .from('products')
-            .select('id, title, price')
-            .eq('id', productId)
-            .single()
-
-          const { data: seller } = await supabase
-            .from('profiles')
-            .select('name, email')
-            .eq('id', sellerId)
-            .single()
-
-          const { data: buyer } = await supabase
-            .from('profiles')
-            .select('name, email')
-            .eq('id', userId)
-            .single()
-
-          if (product && seller && (seller as any).email && buyer && (buyer as any).email) {
-            console.log('[usePurchase] Sending emails...')
-
-            // Send email to seller (purchase_seller)
-            await sendEmail({
-              type: 'purchase_seller',
-              to: (seller as any).email,
-              productTitle: product.title,
-              productId: productId,
-              productPrice: price,
-              sellerName: seller.name || 'Verkäufer',
-              buyerName: buyer.name || 'Ein Käufer',
-            })
-
-            // Send email to buyer (purchase_buyer)
-            await sendEmail({
-              type: 'purchase_buyer',
-              to: (buyer as any).email,
-              productTitle: product.title,
-              productId: productId,
-              productPrice: price,
-              buyerName: buyer.name || 'Ein Käufer',
-            })
-
-            console.log('[usePurchase] Emails sent to seller and buyer')
-          } else {
-            console.warn('[usePurchase] Cannot send emails - missing data', {
-              product: !!product,
-              sellerEmail: !!(seller as any)?.email,
-              buyerEmail: !!(buyer as any)?.email,
-            })
-          }
-        } catch (emailErr) {
-          console.error('[usePurchase] Email sending failed (non-blocking):', emailErr)
-          // Don't throw - email sending is fire-and-forget
-        }
+        // TODO: Send purchase emails via RPC function
+        // Note: Email sending requires a backend RPC function since auth.users.email
+        // is not accessible from frontend. Notifications are sent above instead.
+        console.log('[usePurchase] Purchase completed - notification sent to seller')
 
         return { error: null }
       } catch (err) {
