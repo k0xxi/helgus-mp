@@ -25,8 +25,8 @@ export function MarketplaceLayout() {
   const { data: conversations = [] } = useConversationsQuery(user?.id)
   const { notifications, unreadCount: unreadNotifications, markAsRead } = useUserNotifications(user?.id)
 
-  // Refresh profile data when navigating to different pages
-  useNavigationRefresh()
+  // Refresh all data when navigating to different pages
+  const { isTransitioning } = useNavigationRefresh()
 
   // DISABLED: Real-time subscriptions causing WebSocket to stay pending
   // These are optional features - app works fine without them
@@ -237,9 +237,10 @@ export function MarketplaceLayout() {
 
       {/* Main content */}
       <main className="mx-auto max-w-7xl px-4 py-6">
-        {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-red-600 border-t-transparent" />
+        {loading || isTransitioning ? (
+          <div className="flex flex-col items-center justify-center py-16 gap-3">
+            <div className="h-10 w-10 animate-spin rounded-full border-4 border-red-600 border-t-transparent" />
+            <p className="text-sm text-slate-500 dark:text-slate-400 animate-pulse">Wird geladen...</p>
           </div>
         ) : (
           <Outlet />
