@@ -175,7 +175,7 @@ export function SearchPage() {
             </h2>
             <p className="mt-2 text-sm text-red-600 dark:text-red-300">{productsError.message}</p>
             <button
-              onClick={() => refetch()}
+              onClick={() => window.location.reload()}
               className="mt-4 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
             >
               Erneut versuchen
