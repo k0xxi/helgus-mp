@@ -129,6 +129,13 @@ export function useSellerVerification(userId: string | undefined): UseSellerVeri
     setError(null)
 
     try {
+      // Proactively refresh session to avoid 406 RLS errors
+      const { error: sessionError } = await supabase.auth.refreshSession()
+      if (sessionError) {
+        console.warn('[useSellerVerification] Session refresh failed:', sessionError)
+        // Continue anyway - let the query fail with proper error
+      }
+
       const { data, error: fetchError } = await supabase
         .from('seller_verifications')
         .select('*')
@@ -163,6 +170,12 @@ export function useSellerVerification(userId: string | undefined): UseSellerVeri
     }
 
     try {
+      // Proactively refresh session before INSERT
+      const { error: sessionError } = await supabase.auth.refreshSession()
+      if (sessionError) {
+        console.warn('[useSellerVerification] Session refresh failed before submit:', sessionError)
+      }
+
       const { error: insertError } = await supabase.from('seller_verifications').insert({
         user_id: userId,
         full_name: data.fullName,
