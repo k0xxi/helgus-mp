@@ -30,6 +30,12 @@ export function useFavorites(userId: string | undefined): UseFavoritesResult {
     setLoading(true)
     setError(null)
 
+    // Timeout protection (10 seconds)
+    const timeoutId = setTimeout(() => {
+      setLoading(false)
+      setError(new Error('Request timeout - please refresh the page'))
+    }, 10000)
+
     try {
       const { data, error: fetchError } = await supabase
         .from('favorites')
@@ -47,6 +53,7 @@ export function useFavorites(userId: string | undefined): UseFavoritesResult {
       setError(err as Error)
       setFavoriteIds(new Set())
     } finally {
+      clearTimeout(timeoutId)
       setLoading(false)
     }
   }, [userId])

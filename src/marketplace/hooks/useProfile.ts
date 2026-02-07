@@ -30,6 +30,12 @@ export function usePublicProfile(userId: string | undefined): UsePublicProfileRe
     setLoading(true)
     setError(null)
 
+    // Timeout protection (10 seconds)
+    const timeoutId = setTimeout(() => {
+      setLoading(false)
+      setError(new Error('Request timeout - please refresh the page'))
+    }, 10000)
+
     try {
       // Fetch profile
       const { data: profileData, error: profileError } = await supabase
@@ -71,6 +77,7 @@ export function usePublicProfile(userId: string | undefined): UsePublicProfileRe
       setError(err as Error)
       setProfile(null)
     } finally {
+      clearTimeout(timeoutId)
       setLoading(false)
     }
   }, [userId])
@@ -244,6 +251,12 @@ export function useUserListings(userId: string | undefined): UseUserListingsResu
     setLoading(true)
     setError(null)
 
+    // Timeout protection (10 seconds)
+    const timeoutId = setTimeout(() => {
+      setLoading(false)
+      setError(new Error('Request timeout - please refresh the page'))
+    }, 10000)
+
     try {
       const { data: products, error: productsError } = await supabase
         .from('products')
@@ -307,6 +320,7 @@ export function useUserListings(userId: string | undefined): UseUserListingsResu
       setError(err as Error)
       setListings([])
     } finally {
+      clearTimeout(timeoutId)
       setLoading(false)
     }
   }, [userId])
@@ -367,6 +381,12 @@ export function useMyListings(userId: string | undefined): UseMyListingsResult {
 
     setLoading(true)
     setError(null)
+
+    // Timeout protection (10 seconds)
+    const timeoutId = setTimeout(() => {
+      setLoading(false)
+      setError(new Error('Request timeout - please refresh the page'))
+    }, 10000)
 
     try {
       const { data: products, error: productsError } = await supabase
@@ -446,6 +466,7 @@ export function useMyListings(userId: string | undefined): UseMyListingsResult {
       setError(err as Error)
       setListings([])
     } finally {
+      clearTimeout(timeoutId)
       setLoading(false)
     }
   }, [userId])

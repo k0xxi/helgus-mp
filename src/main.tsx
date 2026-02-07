@@ -4,6 +4,8 @@ import { RouterProvider } from 'react-router-dom'
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
 import './index.css'
 import { router } from '@/lib/router'
+import { AuthProvider } from '@/marketplace/context/AuthContext'
+import { AppPreloader } from '@/components/AppPreloader'
 
 // Create a client for React Query with optimized settings
 const queryClient = new QueryClient({
@@ -14,7 +16,23 @@ const queryClient = new QueryClient({
       // ============================================================================
       staleTime: 0, // Data is ALWAYS stale - refetch immediately
       gcTime: 1000 * 60 * 5, // Keep in cache for 5 minutes (memory management)
-      retry: 1,
+
+      // ============================================================================
+      // RETRY STRATEGY: Smart retries with exponential backoff
+      // ============================================================================
+      retry: (failureCount, error) => {
+        // Don't retry auth errors (401/403)
+        const errorMessage = error?.message || String(error)
+        if (errorMessage.includes('401') || errorMessage.includes('403')) {
+          return false
+        }
+        // Retry up to 2 times for network errors
+        return failureCount < 2
+      },
+      retryDelay: (attemptIndex) => {
+        // Exponential backoff: 1s, 2s, 3s max
+        return Math.min(1000 * 2 ** attemptIndex, 3000)
+      },
 
       // ============================================================================
       // AUTO-REFETCH TRIGGERS: Data updates automatically without user action
@@ -34,7 +52,11 @@ const queryClient = new QueryClient({
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      <AuthProvider>
+        <AppPreloader>
+          <RouterProvider router={router} />
+        </AppPreloader>
+      </AuthProvider>
     </QueryClientProvider>
   </StrictMode>,
 )

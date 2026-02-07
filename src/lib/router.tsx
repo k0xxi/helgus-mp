@@ -10,7 +10,6 @@ import { ExportPage } from '@/components/ExportPage'
 import { RootLayout } from '@/lib/RootLayout'
 
 // Marketplace imports
-import { AuthProvider } from '@/marketplace/context/AuthContext'
 import { MarketplaceLayout } from '@/marketplace/layout/MarketplaceLayout'
 import {
   HomePage as MarketplaceHomePage,
@@ -35,13 +34,9 @@ import {
   NotFoundPage,
 } from '@/marketplace/pages'
 
-// Wrapper to provide AuthContext to marketplace routes
+// Marketplace layout wrapper (AuthProvider is now in main.tsx)
 function MarketplaceWrapper() {
-  return (
-    <AuthProvider>
-      <MarketplaceLayout />
-    </AuthProvider>
-  )
+  return <MarketplaceLayout />
 }
 
 export const router = createBrowserRouter([

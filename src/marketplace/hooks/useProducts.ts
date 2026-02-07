@@ -141,6 +141,12 @@ export function useProducts(
     setLoading(true)
     setError(null)
 
+    // Timeout protection (10 seconds)
+    const timeoutId = setTimeout(() => {
+      setLoading(false)
+      setError(new Error('Request timeout - please refresh the page'))
+    }, 10000)
+
     try {
       let categoryIds: string[] = []
       let searchLocation: { latitude: number; longitude: number } | null = null
@@ -335,6 +341,7 @@ export function useProducts(
       setError(err as Error)
       setProducts([])
     } finally {
+      clearTimeout(timeoutId)
       setLoading(false)
     }
   }, [filters, sortBy, userId])
