@@ -6,6 +6,7 @@ import './index.css'
 import { router } from '@/lib/router'
 import { AuthProvider } from '@/marketplace/context/AuthContext'
 import { AppPreloader } from '@/components/AppPreloader'
+import { supabase } from '@/lib/supabase'
 
 // Create a client for React Query with optimized settings
 const queryClient = new QueryClient({
@@ -42,6 +43,33 @@ const queryClient = new QueryClient({
       refetchOnReconnect: true, // Refetch when internet reconnects
       // NOTE: NO refetchInterval here to avoid hanging from constant polling
       // Individual hooks can override this if needed for specific use cases
+
+      // ============================================================================
+      // GLOBAL ERROR HANDLER: Session expiration fallback
+      // ============================================================================
+      onError: async (error) => {
+        const errorMessage = error?.message || String(error)
+
+        // Check if it's a session expiration error (401/JWT expired)
+        if (
+          errorMessage.includes('JWT') ||
+          errorMessage.includes('expired') ||
+          errorMessage.toLowerCase().includes('401')
+        ) {
+          console.error('[QueryClient] Session error detected, attempting refresh...')
+
+          const { data, error: refreshError } = await supabase.auth.refreshSession()
+
+          if (!refreshError && data.session) {
+            console.log('[QueryClient] Session refreshed via fallback, invalidating queries...')
+            // Invalidate all queries to trigger refetch with new token
+            queryClient.invalidateQueries()
+          } else {
+            console.error('[QueryClient] Session refresh failed, reloading page...')
+            window.location.reload()
+          }
+        }
+      },
     },
     mutations: {
       retry: 1,
