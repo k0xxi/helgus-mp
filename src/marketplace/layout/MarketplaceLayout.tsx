@@ -3,6 +3,7 @@ import { useAuth } from '@/marketplace/context/AuthContext'
 import { useConversationsQuery, useUserNotifications, useNotificationsSubscription, useConversationsSubscription, useProductRealtimeSync, useProfileRealtimeSync } from '@/marketplace/hooks'
 import { NotificationDropdown } from '@/marketplace/components/NotificationDropdown'
 import { useNavigationSessionCheck } from '@/hooks/useNavigationSessionCheck'
+import { useConnectionMonitor } from '@/hooks/useConnectionMonitor'
 import {
   Home,
   Search,
@@ -28,6 +29,9 @@ export function MarketplaceLayout() {
 
   // Check and refresh session on navigation after inactivity
   useNavigationSessionCheck()
+
+  // Globaler Connection-Monitor: auto-reload bei DB-Verbindungsverlust
+  useConnectionMonitor()
 
   // DISABLED: Real-time subscriptions causing WebSocket to stay pending
   // These are optional features - app works fine without them
