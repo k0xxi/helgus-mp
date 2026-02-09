@@ -211,12 +211,11 @@ Deno.serve(async (req): Promise<Response> => {
   try {
     const payload = (await req.json()) as AuthHookPayload;
     const { user, email_data } = payload;
-    const { email_action_type, token_hash, site_url } = email_data;
+    const { email_action_type, token_hash } = email_data;
 
     console.log("[auth-email] Hook empfangen:", {
       type: email_action_type,
       email: user.email,
-      site_url,
     });
 
     if (!RESEND_API_KEY) {
@@ -229,7 +228,8 @@ Deno.serve(async (req): Promise<Response> => {
     }
 
     const userName = user.user_metadata?.name || "Nutzer";
-    const confirmUrl = `${site_url || SITE_URL}/auth/confirm?token_hash=${token_hash}&type=${email_action_type}`;
+    // Immer SITE_URL verwenden - site_url aus dem Payload ist die Supabase-URL, nicht die App-URL
+    const confirmUrl = `${SITE_URL}/auth/confirm?token_hash=${token_hash}&type=${email_action_type}`;
 
     switch (email_action_type) {
       case "signup": {
