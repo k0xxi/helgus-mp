@@ -32,8 +32,12 @@ export function AuthConfirmPage() {
         // Weiterleitung basierend auf Typ
         if (type === 'recovery') {
           navigate('/auth/reset-password?mode=reset', { replace: true })
+        } else if (type === 'signup') {
+          // Nach Signup-Bestätigung ausloggen und zur Login-Seite mit Erfolgsmeldung
+          await supabase.auth.signOut()
+          navigate('/auth?confirmed=true', { replace: true })
         } else {
-          // signup, email_change, magiclink - User ist jetzt eingeloggt
+          // email_change, magiclink - User ist jetzt eingeloggt
           navigate('/', { replace: true })
         }
       } catch (err) {

@@ -116,16 +116,31 @@ export function AuthPage() {
   }
 
   const initialMode = searchParams.get('mode') === 'register' ? 'register' : 'login'
+  const isConfirmed = searchParams.get('confirmed') === 'true'
 
   return (
-    <DesignOSAuthPage
-      initialMode={initialMode}
-      onLogin={handleLogin}
-      onRegister={handleRegister}
-      onSocialLogin={handleSocialLogin}
-      onForgotPassword={handleForgotPassword}
-      error={error}
-      isLoading={loading}
-    />
+    <div>
+      {isConfirmed && (
+        <div className="max-w-md mx-auto mt-6 mb-4 px-4">
+          <div className="flex items-center gap-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl px-4 py-3">
+            <svg className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            <p className="text-sm text-green-800 dark:text-green-300">
+              Deine E-Mail wurde erfolgreich bestätigt. Du kannst dich jetzt anmelden.
+            </p>
+          </div>
+        </div>
+      )}
+      <DesignOSAuthPage
+        initialMode={initialMode}
+        onLogin={handleLogin}
+        onRegister={handleRegister}
+        onSocialLogin={handleSocialLogin}
+        onForgotPassword={handleForgotPassword}
+        error={error}
+        isLoading={loading}
+      />
+    </div>
   )
 }
