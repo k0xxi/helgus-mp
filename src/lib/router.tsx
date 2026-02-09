@@ -16,6 +16,7 @@ import {
   SearchPage,
   AuthPage,
   AuthCallbackPage,
+  AuthConfirmPage,
   PasswordResetPage,
   FavoritesPage,
   MessagesPage,
@@ -59,6 +60,10 @@ export const router = createBrowserRouter([
       {
         path: 'auth/callback',
         element: <AuthCallbackPage />,
+      },
+      {
+        path: 'auth/confirm',
+        element: <AuthConfirmPage />,
       },
       {
         path: 'auth/reset-password',

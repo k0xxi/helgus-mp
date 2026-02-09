@@ -151,6 +151,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           data: {
             name, // Pass name to user metadata - the database trigger will use this
           },
+          emailRedirectTo: `${window.location.origin}/auth/confirm`,
         },
       })
 
@@ -209,7 +210,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const resetPassword = async (email: string): Promise<{ error: Error | null }> => {
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/marketplace/auth/reset-password?mode=reset`,
+        redirectTo: `${window.location.origin}/auth/confirm`,
       })
       if (error) {
         return { error }

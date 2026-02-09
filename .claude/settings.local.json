@@ -27,7 +27,9 @@
       "Bash(git commit:*)",
       "Bash(npx supabase functions list:*)",
       "Bash(npx supabase:*)",
-      "Bash(npx vite build:*)"
+      "Bash(npx vite build:*)",
+      "Bash(dir:*)",
+      "Bash(findstr:*)"
     ]
   }
 }
